@@ -3,7 +3,6 @@ import TextLink from '@/components/text-link';
 import { Button } from '@/components/ui/button';
 import { Spinner } from '@/components/ui/spinner';
 import { logout } from '@/routes';
-import { send } from '@/routes/verification';
 
 export default function VerifyEmail({ status }: { status?: string }) {
     return (
@@ -23,26 +22,11 @@ export default function VerifyEmail({ status }: { status?: string }) {
                 baru saja kami kirimkan ke email Anda?
             </div>
 
-            <Form {...send.form()} className="space-y-6">
-                {({ processing }) => (
-                    <>
-                        <Button
-                            type="submit"
-                            disabled={processing}
-                            className="w-full h-12 bg-[#2264c0] hover:bg-[#1a4f9a] text-white font-medium"
-                        >
-                            {processing && <Spinner />}
-                            Kirim Ulang Email Verifikasi
-                        </Button>
-
-                        <div className="text-center text-sm text-muted-foreground">
-                            <TextLink href={logout()}>
-                                Keluar
-                            </TextLink>
-                        </div>
-                    </>
-                )}
-            </Form>
+            <div className="text-center text-sm text-muted-foreground">
+                <TextLink href={logout()}>
+                    Keluar
+                </TextLink>
+            </div>
         </>
     );
 }
