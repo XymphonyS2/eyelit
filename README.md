@@ -1,6 +1,6 @@
 # Eyelit
 
-A Laravel 13 + React 19 starter kit with Inertia.js, featuring a modern UI component library and AI integration.
+A Laravel 13 + React 19 e-commerce platform for eyewear (kacamata), featuring complete shopping flows, lens prescription system, and admin dashboard.
 
 ## Color Palette
 
@@ -20,7 +20,7 @@ Website EyeLit menggunakan tiga warna utama:
 - Laravel 13
 - Inertia.js
 - Laravel Fortify (authentication)
-- Laravel Wayfinder (navigation)
+- MySQL
 
 **Frontend**
 - React 19
@@ -29,8 +29,22 @@ Website EyeLit menggunakan tiga warna utama:
 - Radix UI components
 - Vite
 
-**AI & Integrations**
-- Anthropic SDK (Claude AI)
+## Seeder Data
+
+Setelah migrate dan seed, akan tersedia data awal:
+
+### Akun Default
+
+| Peran  | Email              | Password    |
+|--------|--------------------|-------------|
+| Admin  | admin@eyelit.com   | admin123    |
+| Pengguna | pengguna@eyelit.com | pengguna123 |
+
+### Data Lainnya
+- **Provinsi**: 38 provinsi di Indonesia
+- **Ongkir**: Ongkos kirim & estimasi per provinsi
+- **Ekspedisi**: JNE, J&T Express, SiCepat Express
+- **Lensa**: Harga Minus, Plus, dan Silinder per mata
 
 ## Prerequisites
 
@@ -51,9 +65,10 @@ npm install
 # 3. Set up environment file
 cp .env.example .env
 
-# 4. Generate application key and run migrations
+# 4. Generate application key and run migrations with seed data
 php artisan key:generate
 php artisan migrate --force
+php artisan db:seed --force
 
 # 5. Build frontend assets
 npm run build
@@ -128,26 +143,21 @@ resources/js/
 The project uses Laravel Fortify for authentication with the following features:
 
 - Email & password authentication
-- Two-factor authentication (2FA)
 - Password reset
-- Email verification
+
+## User Roles
+
+- **Admin**: Full access to admin dashboard (Kelola Produk, Pesanan, Pengguna, Laporan)
+- **Pengguna**: Registered users who can browse products, make purchases, and manage their profile
 
 ## UI Components
 
-A collection of reusable UI components built on Radix UI:
+Reusable UI components built on Radix UI:
 
 - `Button`, `Input`, `Label`, `Checkbox`, `Select`
 - `Dialog`, `DropdownMenu`, `Sheet`
 - `Avatar`, `Badge`, `Card`, `Separator`
-- `Collapsible`, `NavigationMenu`, `Toggle`
 - `Tooltip`, `Sonner` (toast notifications)
-- `Skeleton`, `Spinner`, `Alert`
-
-All components support the application's theming system (light/dark mode).
-
-## Theming
-
-The application supports light and dark modes. Use the appearance settings page or the `use-appearance` hook to manage the theme.
 
 ## License
 

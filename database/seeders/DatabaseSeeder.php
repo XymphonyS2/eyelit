@@ -13,6 +13,7 @@ class DatabaseSeeder extends Seeder
             OngkirSeeder::class,
             EkspedisiSeeder::class,
             LensaSeeder::class,
+            UserSeeder::class,
         ]);
     }
 }
