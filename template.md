@@ -1,12 +1,10 @@
-# Template Gambar EyeLit - Halaman Auth
+# Template Gambar & Logo EyeLit - Halaman Auth
 
-Dokumen ini menjelaskan di mana meletakkan gambar-gambar untuk halaman autentikasi EyeLit (Login, Register, dll).
+Dokumen ini menjelaskan spesifikasi gambar, logo, dan struktur folder untuk halaman autentikasi EyeLit (Login, Register, dll).
 
 ---
 
 ## Struktur Folder Gambar
-
-Buat folder berikut di dalam project:
 
 ```
 public/
@@ -18,7 +16,7 @@ public/
 
 ---
 
-## Detail Setiap Gambar
+## Detail Background Image
 
 ### 1. `login-background.png`
 **Lokasi file:** `public/images/auth/login-background.png`
@@ -75,9 +73,37 @@ public/
 
 ---
 
-## Cara Menyalin Gambar
+## Logo EyeLit (File Gambar)
 
-Ikuti langkah-langkah berikut:
+Logo EyeLit menggunakan **file gambar PNG** yang disimpan di folder `public/images/logo/`.
+
+### Lokasi File
+**File:** `public/images/logo/Auth.png`
+
+File ini digunakan di halaman auth (login & register) melalui komponen `<img>` di `auth-split-layout.tsx`.
+
+### Ukuran Logo
+
+Ukuran diatur melalui class Tailwind CSS:
+
+| Konteks | Class Size | Dimensi |
+|---------|-----------|---------|
+| Header desktop (kolom kiri auth) | `size-8` | 32×32 px |
+| Header mobile (kolom kanan auth) | `h-10` | 40×40 px |
+
+**Mengubah ukuran logo:**
+
+Edit file `resources/js/layouts/auth/auth-split-layout.tsx` - ubah class `size-8` atau `h-10`:
+```tsx
+className="mr-2 size-6 object-contain"   // 24×24 px
+className="mr-2 size-8 object-contain"   // 32×32 px (default)
+className="mr-2 size-10 object-contain"  // 40×40 px
+className="mr-2 size-12 object-contain"  // 48×48 px
+```
+
+---
+
+## Cara Menyalin Gambar
 
 ### Langkah 1: Buat folder
 ```bash
@@ -133,9 +159,7 @@ Berdasarkan template yang diberikan, warna yang digunakan:
 
 ## Struktur Kode yang Terkait
 
-File yang perlu diedit untuk mengubah gambar:
-- `resources/js/layouts/auth/auth-split-layout.tsx` - untuk tampilan layout split
+File yang perlu diedit untuk mengubah gambar/logo:
+- `resources/js/layouts/auth/auth-split-layout.tsx` - layout auth (login & register), di sin logo dan background diatur
 - `resources/js/pages/auth/login.tsx` - halaman login
 - `resources/js/pages/auth/register.tsx` - halaman register
-
-Jika ingin menggunakan gambar berbeda untuk login dan register, Anda bisa membuat dua layout terpisah atau menggunakan prop untuk membedakan sumber gambar.

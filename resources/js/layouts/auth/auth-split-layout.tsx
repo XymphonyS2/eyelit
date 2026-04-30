@@ -1,6 +1,3 @@
-import { Link, usePage } from '@inertiajs/react';
-import AppLogoIcon from '@/components/app-logo-icon';
-import { home } from '@/routes';
 import type { AuthLayoutProps } from '@/types';
 
 export default function AuthSplitLayout({
@@ -8,7 +5,6 @@ export default function AuthSplitLayout({
     title,
     description,
 }: AuthLayoutProps) {
-    const { name } = usePage().props;
 
     return (
         <div className="relative grid min-h-dvh flex-col items-center justify-center px-8 sm:px-0 lg:max-w-none lg:grid-cols-2 lg:px-0">
@@ -23,13 +19,13 @@ export default function AuthSplitLayout({
                     {/* Overlay gradient */}
                     <div className="absolute inset-0 bg-gradient-to-r from-black/60 to-black/20" />
                 </div>
-                <Link
-                    href={home()}
-                    className="relative z-20 flex items-center text-lg font-medium text-white"
-                >
-                    <AppLogoIcon className="mr-2 size-8 fill-current text-white" />
-                    {name}
-                </Link>
+                <a href="/" className="z-20 block size-12">
+                    <img
+                        src="/images/logo/Auth.svg"
+                        alt="EyeLit Logo"
+                        className="size-full object-contain"
+                    />
+                </a>
                 {/* Teks overlay di bawah logo */}
                 <div className="relative z-20 mt-auto">
                     <h2 className="text-3xl font-bold text-white">Selamat Datang di EyeLit</h2>
@@ -40,13 +36,14 @@ export default function AuthSplitLayout({
             {/* Kolom Kanan - Form */}
             <div className="w-full lg:p-8">
                 <div className="mx-auto flex w-full flex-col justify-center space-y-6 sm:w-[400px]">
-                    <Link
-                        href={home()}
-                        className="relative z-20 flex items-center justify-center lg:hidden"
-                    >
-                        <AppLogoIcon className="h-10 fill-current text-black sm:h-12" />
-                    </Link>
-                    <div className="flex flex-col items-start gap-2 text-left sm:items-center sm:text-center">
+                    <a href="/" className="max-lg:block hidden z-20 mx-auto size-14">
+                    <img
+                        src="/images/logo/AuthMobile.svg"
+                        alt="EyeLit Logo"
+                        className="size-full object-contain"
+                    />
+                    </a>
+                    <div className="flex flex-col items-center gap-2 text-center">
                         <h1 className="text-2xl font-semibold">{title}</h1>
                         <p className="text-sm text-balance text-muted-foreground">
                             {description}
