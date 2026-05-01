@@ -471,17 +471,46 @@
 }
 
 /* Grid Box Template */
-.grid-container {
-    display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    width: 100%;
+@keyframes slide-left {
+    0%, 41.66% { transform: translateX(0); }
+    50%, 91.66% { transform: translateX(-100%); }
+    100% { transform: translateX(0); }
+}
+
+@keyframes slide-left-row {
+    0%, 41.66% { transform: translateX(0); }
+    50%, 91.66% { transform: translateX(-100%); }
+    100% { transform: translateX(0); }
+}
+
+.animate-row {
+    animation: slide-left 12s infinite;
+}
+
+.animate-row-delay-2 {
+    animation: slide-left-row 12s infinite;
+    animation-delay: 2s;
+}
+
+.animate-row-delay-4 {
+    animation: slide-left 12s infinite;
+    animation-delay: 4s;
 }
 
 .grid-box {
     position: relative;
     width: 100%;
-    padding-bottom: 100%;
-    /* 1:1 aspect ratio (square) */
+    aspect-ratio: 1 / 1;
+    background-color: #ffffff;
+    border: 1px solid #1b1b18;
+    overflow: hidden;
+    cursor: pointer;
+}
+
+.grid-box {
+    position: relative;
+    width: 100%;
+    aspect-ratio: 1 / 1;
     background-color: #ffffff;
     border: 1px solid #1b1b18;
     overflow: hidden;

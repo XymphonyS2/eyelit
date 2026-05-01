@@ -239,28 +239,68 @@ export default function Welcome() {
                 </nav>
 
                 {/* Grid Box Section */}
-                <section className="pb-8">
-                    <div className="grid-container">
-                        {produk && produk.map((item: any) => (
-                            <Link key={item.id} href={`/produk/${item.id}`} className="grid-box">
-                                <div className="grid-box-content">
-                                    <img
-                                        className="grid-box-image"
-                                        src={`/images/produk/${item.gambar}`}
-                                        alt={item.nama_produk}
-                                        onError={(e) => { (e.target as HTMLImageElement).src = '/images/placeholder.png'; }}
-                                    />
-                                    <div className="grid-box-overlay">
-                                        <div className="grid-box-overlay-bottom">
-                                            <div className="grid-box-left">
-                                                <div className="grid-box-merek">{item.merek}</div>
-                                                <div className="grid-box-tipe">{item.tipe_produk}</div>
+                <section className="overflow-hidden">
+                    {/* Row 1: Produk 1-5, shift to 2-5 */}
+                    <div className="flex w-full overflow-hidden">
+                        {[0,1,2,3,4,1,2,3].map((idx: number) => (
+                            <div key={`r1-${idx}`} className="w-1/4 shrink-0">
+                                <Link href={`/produk/${produk?.[idx]?.id}`} className="grid-box block animate-row">
+                                    <div className="grid-box-content">
+                                        <img className="grid-box-image" src={`/images/produk/${produk?.[idx]?.gambar}`} alt={produk?.[idx]?.nama_produk} onError={(e) => { (e.target as HTMLImageElement).src = '/images/placeholder.png'; }} />
+                                        <div className="grid-box-overlay">
+                                            <div className="grid-box-overlay-bottom">
+                                                <div className="grid-box-left">
+                                                    <div className="grid-box-merek">{produk?.[idx]?.merek}</div>
+                                                    <div className="grid-box-tipe">{produk?.[idx]?.tipe_produk}</div>
+                                                </div>
+                                                <span className="grid-box-harga">Rp {(Number(produk?.[idx]?.harga_produk) || 0).toLocaleString('id-ID')}</span>
                                             </div>
-                                            <span className="grid-box-harga">Rp {(Number(item.harga_produk) || 0).toLocaleString('id-ID')}</span>
                                         </div>
                                     </div>
-                                </div>
-                            </Link>
+                                </Link>
+                            </div>
+                        ))}
+                    </div>
+                    {/* Row 2: Produk 6-10, shift to 7-10 */}
+                    <div className="flex w-full overflow-hidden">
+                        {[6,7,8,9,7,8,9,10].map((idx: number) => (
+                            <div key={`r2-${idx}`} className="w-1/4 shrink-0">
+                                <Link href={`/produk/${produk?.[idx]?.id}`} className="grid-box block animate-row-delay-2" style={{animationName: 'slide-left-row'}}>
+                                    <div className="grid-box-content">
+                                        <img className="grid-box-image" src={`/images/produk/${produk?.[idx]?.gambar}`} alt={produk?.[idx]?.nama_produk} onError={(e) => { (e.target as HTMLImageElement).src = '/images/placeholder.png'; }} />
+                                        <div className="grid-box-overlay">
+                                            <div className="grid-box-overlay-bottom">
+                                                <div className="grid-box-left">
+                                                    <div className="grid-box-merek">{produk?.[idx]?.merek}</div>
+                                                    <div className="grid-box-tipe">{produk?.[idx]?.tipe_produk}</div>
+                                                </div>
+                                                <span className="grid-box-harga">Rp {(Number(produk?.[idx]?.harga_produk) || 0).toLocaleString('id-ID')}</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </Link>
+                            </div>
+                        ))}
+                    </div>
+                    {/* Row 3: Produk 11-15, shift to 12-15 */}
+                    <div className="flex w-full overflow-hidden">
+                        {[10,11,12,13,14,11,12,13].map((idx: number) => (
+                            <div key={`r3-${idx}`} className="w-1/4 shrink-0">
+                                <Link href={`/produk/${produk?.[idx]?.id}`} className="grid-box block animate-row-delay-4">
+                                    <div className="grid-box-content">
+                                        <img className="grid-box-image" src={`/images/produk/${produk?.[idx]?.gambar}`} alt={produk?.[idx]?.nama_produk} onError={(e) => { (e.target as HTMLImageElement).src = '/images/placeholder.png'; }} />
+                                        <div className="grid-box-overlay">
+                                            <div className="grid-box-overlay-bottom">
+                                                <div className="grid-box-left">
+                                                    <div className="grid-box-merek">{produk?.[idx]?.merek}</div>
+                                                    <div className="grid-box-tipe">{produk?.[idx]?.tipe_produk}</div>
+                                                </div>
+                                                <span className="grid-box-harga">Rp {(Number(produk?.[idx]?.harga_produk) || 0).toLocaleString('id-ID')}</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </Link>
+                            </div>
                         ))}
                     </div>
                 </section>

@@ -18,7 +18,7 @@ return new class extends Migration
             $table->enum('jenis_kelamin', ['Pria', 'Wanita', 'Unisex']);
             $table->enum('warna', ['Hitam', 'Putih', 'Transparan', 'Rose Gold', 'Hijau', 'Biru', 'Merah', 'Ungu', 'Tortoise', 'Gold', 'Pink', 'Kuning', 'Black']);
             $table->enum('material', ['Metal', 'Plastic', 'Titanium', 'Rubber', 'Wood']);
-            $table->enum('bentuk', ['Aviator', 'Browline', 'Oval', 'Square', 'Round', 'Flat Top', 'Geometric', 'Cat Eye']);
+            $table->enum('bentuk', ['Aviator', 'Browline', 'Oval', 'Square', 'Round', 'Flat Top', 'Geometric', 'Cat Eye', 'Rectangle']);
             $table->string('bridge', 50)->nullable();
             $table->string('diagonal', 50)->nullable();
             $table->string('ukuran', 50)->nullable();
