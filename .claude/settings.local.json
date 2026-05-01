@@ -15,7 +15,8 @@
       "Bash(grep -v '^$')",
       "Bash(php artisan *)",
       "Bash(php \"D:\\\\project\\\\eyelit\\\\artisan\" route:list --path=username)",
-      "Bash(php \"D:\\\\project\\\\eyelit\\\\artisan\" route:list --name=login)"
+      "Bash(php \"D:\\\\project\\\\eyelit\\\\artisan\" route:list --name=login)",
+      "mcp__ide__getDiagnostics"
     ]
   }
 }
