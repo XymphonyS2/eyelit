@@ -17,7 +17,9 @@
       "Bash(php \"D:\\\\project\\\\eyelit\\\\artisan\" route:list --path=username)",
       "Bash(php \"D:\\\\project\\\\eyelit\\\\artisan\" route:list --name=login)",
       "mcp__ide__getDiagnostics",
-      "Bash(powershell *)"
+      "Bash(powershell *)",
+      "Bash(npx tsc *)",
+      "Bash(npx vite *)"
     ]
   }
 }

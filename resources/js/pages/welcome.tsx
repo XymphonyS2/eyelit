@@ -1,6 +1,6 @@
 import { Head, Link, usePage } from '@inertiajs/react';
-import { Bell, BookOpen, LogOut, MapPin, Phone, Mail, Search, Settings, ShoppingBag, ShoppingCart, User } from 'lucide-react';
-import { useState, useRef } from 'react';
+import { Bell, BookOpen, LogOut, Mail, MapPin, Phone, Search, Settings, ShoppingBag, ShoppingCart, User } from 'lucide-react';
+import { useRef, useState } from 'react';
 
 export default function Welcome() {
     const { auth, produk } = usePage().props as any;
@@ -52,6 +52,7 @@ export default function Welcome() {
                             </button>
 
                             {/* Notification Dropdown */}
+                            {auth.user && (
                             <div className="relative h-full flex items-center">
                                 <div
                                     onMouseEnter={() => {
@@ -112,8 +113,10 @@ export default function Welcome() {
                                     )}
                                 </div>
                             </div>
+                            )}
 
                             {/* Cart Dropdown */}
+                            {auth.user && (
                             <div className="relative h-full flex items-center">
                                 <div
                                     onMouseEnter={() => {
@@ -176,6 +179,7 @@ export default function Welcome() {
                                     )}
                                 </div>
                             </div>
+                            )}
 
                             {/* User Dropdown */}
                             {auth.user && (
@@ -232,6 +236,18 @@ export default function Welcome() {
                                             </div>
                                         )}
                                     </div>
+                                </div>
+                            )}
+
+                            {/* Login/Register - hanya jika belum login */}
+                            {!auth.user && (
+                                <div className="flex items-center gap-2">
+                                    <Link href="/login" className="px-4 py-2 text-sm font-medium text-[#1b1b18] hover:text-[#2264c0] transition-colors">
+                                        Masuk
+                                    </Link>
+                                    <Link href="/register" className="px-4 py-2 text-sm font-medium bg-[#2264c0] text-white rounded-full hover:bg-[#1a4f9a] transition-colors">
+                                        Daftar
+                                    </Link>
                                 </div>
                             )}
                         </div>
@@ -306,15 +322,20 @@ export default function Welcome() {
                 </section>
 
                 {/* CTA Section */}
-                <section className="bg-[#2264c0] py-12">
-                    <div className="mx-auto max-w-7xl px-4 flex flex-col md:flex-row items-center justify-between gap-6">
+                <section className="bg-[#2264c0] py-16 overflow-hidden relative group cursor-pointer">
+                    <div className="mx-auto max-w-7xl px-4 flex items-center justify-between gap-8 relative z-10">
                         <div>
                             <h2 className="text-2xl md:text-3xl font-bold text-white mb-2">Cari Lebih Banyak Gayamu</h2>
                             <p className="text-white/80">Temukan kacamata yang sempurna untuk gaya hidupmu.</p>
                         </div>
-                        <Link href="/katalog" className="shrink-0 px-8 py-3 bg-white text-[#2264c0] font-semibold rounded-full hover:bg-[#FDFDFC] transition-colors">
-                            Lihat Katalog
-                        </Link>
+                    </div>
+                    {/* White Block - slides to left 100% on hover */}
+                    <div className="absolute top-0 right-0 w-0 h-full bg-white overflow-hidden group-hover:w-full transition-all duration-500 ease-out flex items-center justify-center z-20">
+                        <div className="text-center">
+                            <span className="cta-text block text-3xl md:text-5xl font-black text-[#2264c0]">
+                                Koleksi Terlengkap<br/>untuk Gaya Hidupmu
+                            </span>
+                        </div>
                     </div>
                 </section>
 
