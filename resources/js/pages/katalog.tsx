@@ -28,20 +28,6 @@ export default function Katalog() {
                             <span className="text-2xl font-bold text-[#2264c0]">EyeLit</span>
                         </Link>
 
-                        {/* Search Bar - Center (hide on mobile <440px) */}
-                        <div className="flex-1 max-w-lg ml-[90px] max-[439px]:hidden">
-                            <div className="relative">
-                                <input
-                                    type="text"
-                                    autoComplete="off"
-                                    spellCheck={false}
-                                    placeholder="Cari produk kacamata..."
-                                    className="w-full h-9 pl-4 pr-12 rounded-full border border-[#19140035] bg-white text-sm placeholder:text-[#9CA3AF] disabled:bg-transparent appearance-none focus:outline-none focus:border-[#2264c0] focus:border-[3px] focus:ring-2 focus:ring-[#2264c0] focus:ring-offset-0"
-                                />
-                                <Search className="absolute right-4 top-1/2 -translate-y-1/2 size-5 text-[#706f6c]" />
-                            </div>
-                        </div>
-
                         {/* Right Icons */}
                         <div className="flex items-center gap-2 flex-shrink-0">
                             <Link href="/katalog" className="icon-btn icon-catalog p-2 rounded-full hover:bg-gray-100">
@@ -250,6 +236,29 @@ export default function Katalog() {
                         </div>
                     </div>
                 </nav>
+
+                {/* Search Section */}
+                <section className="bg-white border-b border-[#19140035]">
+                    <div className="mx-auto max-w-7xl px-4 py-6">
+                        <div className="flex flex-col gap-4">
+                            <h2 className="text-2xl font-bold text-[#1b1b18] text-center">Temukan Kacamata Impianmu</h2>
+                            <p className="text-center text-[#5f6368] text-sm">Jelajahi berbagai koleksi kacamata terbaru dari berbagai merek ternama</p>
+                            {/* Main Search Bar */}
+                            <div className="w-full max-w-2xl mx-auto">
+                                <div className="relative">
+                                    <input
+                                        type="text"
+                                        autoComplete="off"
+                                        spellCheck={false}
+                                        placeholder="Cari nama produk, merek, atau tipe kacamata..."
+                                        className="w-full h-9 pl-4 pr-12 rounded-full border border-[#19140035] bg-white text-sm placeholder:text-[#9CA3AF] disabled:bg-transparent appearance-none focus:outline-none focus:border-[#2264c0] focus:border-[3px] focus:ring-2 focus:ring-[#2264c0] focus:ring-offset-0"
+                                    />
+                                    <Search className="absolute right-4 top-1/2 -translate-y-1/2 size-5 text-[#706f6c]" />
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
             </div>
         </>
     );
