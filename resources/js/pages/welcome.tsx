@@ -118,9 +118,9 @@ export default function Welcome() {
 
                         {/* Right Icons */}
                         <div className="flex items-center gap-2 flex-shrink-0">
-                            <button className="icon-btn icon-catalog p-2 rounded-full hover:bg-gray-100">
+                            <Link href="/katalog" className="icon-btn icon-catalog p-2 rounded-full hover:bg-gray-100">
                                 <BookOpen className="size-5 text-[#1b1b18]" />
-                            </button>
+                            </Link>
 
                             {/* Notification Dropdown */}
                             {auth.user && (

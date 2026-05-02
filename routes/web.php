@@ -16,6 +16,13 @@ Route::get('/', function () {
     ]);
 })->name('home');
 
+Route::get('/katalog', function () {
+    $produk = Produk::where('status_produk', 'Aktif')->get();
+    return inertia('katalog', [
+        'produk' => $produk,
+    ]);
+})->name('katalog');
+
 Route::get('/username-check', UsernameCheckController::class)->name('username.check');
 Route::get('/email-check', EmailCheckController::class)->name('email.check');
 
