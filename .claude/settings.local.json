@@ -48,7 +48,13 @@
       "Bash(taskkill /f /pid 14052 /pid 17564)",
       "Bash(curl -s http://127.0.0.1:5173/@vite/client)",
       "Bash(curl -s http://127.0.0.1:5175/resources/css/app.css)",
-      "Bash(curl -s http://127.0.0.1:5175/resources/js/pages/katalog.tsx)"
+      "Bash(curl -s http://127.0.0.1:5175/resources/js/pages/katalog.tsx)",
+      "PowerShell(powershell -Command \"$word = New-Object -ComObject Word.Application; $doc = $word.Documents.Open\\('c:\\\\Users\\\\LaLa\\\\Downloads\\\\KEBUTUHAN SISTEM EYELIT.docx'\\); $doc.Content.Text; $doc.Close\\(\\); $word.Quit\\(\\)\")",
+      "PowerShell(powershell -Command \"New-Object -ComObject Word.Application | ForEach-Object { $word = $_; $doc = $word.Documents.Open\\('c:\\\\Users\\\\LaLa\\\\Downloads\\\\KEBUTUHAN SISTEM EYELIT.docx'\\); $doc.Content.Text; $doc.Close\\(\\); $word.Quit\\(\\) }\")",
+      "PowerShell(powershell -ExecutionPolicy Bypass -File \"C:\\\\Users\\\\LaLa\\\\Downloads\\\\read_doc.ps1\")",
+      "PowerShell(pip show *)",
+      "PowerShell(& \"D:\\\\coding\\\\py\\\\python.exe\" -m pip install python-docx -q)",
+      "PowerShell(& \"D:\\\\coding\\\\py\\\\python.exe\" \"C:\\\\Users\\\\LaLa\\\\Downloads\\\\read_doc.py\")"
     ]
   }
 }
