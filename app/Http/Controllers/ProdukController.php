@@ -20,8 +20,6 @@ class ProdukController extends Controller
 
     public function show(Produk $produk)
     {
-        $produk->load(['gambar_produk']);
-        
         return Inertia::render('produk-detail', [
             'produk' => $produk,
         ]);
