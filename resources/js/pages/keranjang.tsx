@@ -75,7 +75,7 @@ export default function Keranjang() {
     return (
         <>
             <Head title="Keranjang - EyeLit" />
-            <div className="min-h-screen bg-[#FDFDFC]">
+            <div className="min-h-screen bg-white">
                 {/* Navbar */}
                 <nav className="relative z-50 border-b border-[#19140035] bg-white">
                     <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 gap-4">

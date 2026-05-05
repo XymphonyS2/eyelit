@@ -83,7 +83,23 @@ composer run dev
 # Or run individually
 php artisan serve              # Laravel server
 php artisan queue:listen       # Queue worker
+php artisan schedule:work      # Scheduler (auto-expire pesanan 24 jam)
 npm run dev                    # Vite dev server
+```
+
+### Scheduler (Pembayaran 24 Jam)
+
+Pesanan yang tidak dibayar dalam 24 jam akan otomatis dibatalkan. Scheduler ini wajib berjalan:
+
+**Linux / Server Production (cPanel):**
+```bash
+# Tambahkan cron berikut:
+* * * * * cd /path-to-project && php artisan schedule:run >> /dev/null 2>&1
+```
+
+**Windows (Laravel Sail / Valet):**
+```bash
+php artisan schedule:work
 ```
 
 ## Available Scripts
