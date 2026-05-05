@@ -226,7 +226,7 @@ export default function Checkout() {
                                                     </div>
                                                 </div>
                                                 <div className="dropdown-body">
-                                                    <Link href="/pesanan" className="dropdown-item"><ShoppingBag className="size-5" />Pembelian</Link>
+                                                    <Link href="/pesanan" className="dropdown-item"><ShoppingBag className="size-5" />Pesanan</Link>
                                                     <Link href="/user/profile" className="dropdown-item"><Settings className="size-5" />Pengaturan</Link>
                                                     <form method="POST" action="/logout">
                                                         <input type="hidden" name="_token" value={auth.csrf} />

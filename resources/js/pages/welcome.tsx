@@ -293,9 +293,9 @@ export default function Welcome() {
                                                     </div>
                                                 </div>
                                                 <div className="dropdown-body">
-                                                    <Link href="#" className="dropdown-item">
+                                                    <Link href="/pesanan" className="dropdown-item">
                                                         <ShoppingBag className="size-5" />
-                                                        Pembelian
+                                                        Pesanan
                                                     </Link>
                                                     <Link href="/user/profile" className="dropdown-item">
                                                         <Settings className="size-5" />

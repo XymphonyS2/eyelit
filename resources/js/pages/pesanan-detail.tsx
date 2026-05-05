@@ -119,7 +119,7 @@ export default function PesananDetail() {
                                                     </div>
                                                 </div>
                                                 <div className="dropdown-body">
-                                                    <Link href="/pesanan" className="dropdown-item"><ShoppingBag className="size-5" />Pembelian</Link>
+                                                    <Link href="/pesanan" className="dropdown-item"><ShoppingBag className="size-5" />Pesanan</Link>
                                                     <Link href="/user/profile" className="dropdown-item"><Settings className="size-5" />Pengaturan</Link>
                                                     <form method="POST" action="/logout">
                                                         <input type="hidden" name="_token" value={auth.csrf} />
@@ -225,8 +225,8 @@ export default function PesananDetail() {
                                                     <div className="text-xs text-[#5f6368] mt-1 space-y-0.5">
                                                         {d.jenis_lensa_od && <p>OD: {safe(d.jenis_lensa_od)} {safe(d.nilai_lensa_od)}{d.silinder_od ? ` / Sil ${safe(d.silinder_od)}` : ''}</p>}
                                                         {d.jenis_lensa_os && <p>OS: {safe(d.jenis_lensa_os)} {safe(d.nilai_lensa_os)}{d.silinder_os ? ` / Sil ${safe(d.silinder_os)}` : ''}</p>}
-                                                        {d.anti_radiasi && <p>+ Anti Radiasi</p>}
-                                                        {d.photochromic && <p>+ Photochromic</p>}
+                                                        {d.anti_radiasi ? <p>+ Anti Radiasi</p> : null}
+                                                        {d.photochromic ? <p>+ Photochromic</p> : null}
                                                     </div>
                                                 )}
                                             </div>

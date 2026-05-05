@@ -37,6 +37,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::post('/checkout', [CheckoutController::class, 'proses'])->name('checkout.proses');
     Route::post('/checkout/alamat', [CheckoutController::class, 'tambahAlamat'])->name('checkout.alamat');
     Route::post('/checkout/ongkir', [OngkirController::class, 'hitung'])->name('checkout.ongkir');
+    Route::get('/pesanan', [PesananController::class, 'index'])->name('pesanan');
     Route::get('/pesanan/{id}', [PesananController::class, 'show'])->name('pesanan.show');
     Route::inertia('dashboard', 'dashboard')->name('dashboard')->middleware('admin');
 });
