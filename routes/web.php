@@ -13,6 +13,8 @@ Route::get('/', WelcomeController::class)->name('home');
 
 Route::get('/katalog', [ProdukController::class, 'index'])->name('katalog');
 
+Route::get('/produk/{id}', [ProdukController::class, 'show'])->name('produk.show');
+
 Route::inertia('/welcome', 'welcome')->name('welcome');
 
 Route::get('/username-check', UsernameCheckController::class)->name('username.check');
@@ -24,7 +26,6 @@ Route::middleware('guest')->group(function () {
 });
 
 Route::middleware(['auth', 'verified'])->group(function () {
-    Route::get('/produk/{id}', [ProdukController::class, 'show'])->name('produk.show');
     Route::get('/keranjang', [KeranjangController::class, 'index'])->name('keranjang');
     Route::post('/keranjang/tambah', [KeranjangController::class, 'tambah'])->name('keranjang.tambah');
     Route::patch('/keranjang/{id}', [KeranjangController::class, 'update'])->name('keranjang.update');
