@@ -74,16 +74,16 @@ export default function ProdukDetail() {
     const odPrice = calculateLensPrice(nilaiOd, silinderOd, jenisLensa === 'Silinder');
     const osPrice = calculateLensPrice(nilaiOs, silinderOs, jenisLensa === 'Silinder');
 
-    const hargaAntiRadiasi = antiRadiasi ? (lensa?.[0]?.harga_anti_radiasi || 150000) : 0;
-    const hargaPhotochromic = photochromic ? (lensa?.[0]?.harga_photochromic || 200000) : 0;
+    const hargaAntiRadiasi = antiRadiasi ? (lensa?.[0]?.harga_anti_radiasi ?? 150000) : 0;
+    const hargaPhotochromic = photochromic ? (lensa?.[0]?.harga_photochromic ?? 200000) : 0;
 
     const totalHarga = useMemo(() => {
         if (tipePembelian === 'Frame Saja') {
             return hargaFrame;
         }
-        const lensOd = (odPrice.base + odPrice.silinderBase) * 2;
-        const lensOs = (osPrice.base + osPrice.silinderBase) * 2;
-        return hargaFrame + lensOd + lensOs + (hargaAntiRadiasi * 2) + (hargaPhotochromic * 2);
+        const lensOd = odPrice.base + odPrice.silinderBase;
+        const lensOs = osPrice.base + osPrice.silinderBase;
+        return hargaFrame + lensOd + lensOs + hargaAntiRadiasi + hargaPhotochromic;
     }, [tipePembelian, hargaFrame, odPrice, osPrice, hargaAntiRadiasi, hargaPhotochromic]);
 
     function openOverlay(type: 'beli' | 'keranjang') {
@@ -366,7 +366,7 @@ export default function ProdukDetail() {
                                                         <p className="text-xs text-[#5f6368]">Melindungi mata dari radiasi layar</p>
                                                     </div>
                                                     <p className="text-sm font-semibold text-[#2264c0]">
-                                                        + Rp {(lensa?.[0]?.harga_anti_radiasi || 150000).toLocaleString('id-ID')}/mata
+                                                        + Rp {(lensa?.[0]?.harga_anti_radiasi || 150000).toLocaleString('id-ID')}
                                                     </p>
                                                 </label>
                                                 <label className="flex items-center gap-3 p-3 rounded-lg border border-[#19140035] cursor-pointer hover:bg-gray-50 transition-colors">
@@ -381,7 +381,7 @@ export default function ProdukDetail() {
                                                         <p className="text-xs text-[#5f6368]">Lensa yang bisa berubah warna saat sinar matahari</p>
                                                     </div>
                                                     <p className="text-sm font-semibold text-[#2264c0]">
-                                                        + Rp {(lensa?.[0]?.harga_photochromic || 200000).toLocaleString('id-ID')}/mata
+                                                        + Rp {(lensa?.[0]?.harga_photochromic || 200000).toLocaleString('id-ID')}
                                                     </p>
                                                 </label>
                                             </div>
@@ -399,7 +399,7 @@ export default function ProdukDetail() {
                                     </div>
                                     {tipePembelian === 'Dengan Lensa' && (
                                         <p className="text-xs text-[#5f6368] mt-1">
-                                            Frame + ({jenisLensa} + Silinder) x 2 mata + tambahan
+                                            Frame + {jenisLensa} + Silinder + tambahan
                                         </p>
                                     )}
                                 </div>

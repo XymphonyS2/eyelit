@@ -36,13 +36,6 @@ interface Provinsi {
     ongkir?: { harga: number; estimasi_hari_min: string; estimasi_hari_max: string };
 }
 
-interface Kota {
-    id: number;
-    nama_kota: string;
-    kode_kota: string;
-    provinsi_id: number;
-}
-
 interface Ekspedisi {
     id: number;
     nama_ekspedisi: string;
@@ -77,36 +70,8 @@ export default function Checkout() {
     );
     const [metodePembayaran, setMetodePembayaran] = useState<string>('QRIS');
 
-    // Kota states
-    const [kotaList, setKotaList] = useState<Kota[]>([]);
-    const [loadingKota, setLoadingKota] = useState<boolean>(false);
-    const [selectedKota, setSelectedKota] = useState<Kota | null>(null);
+    // Kota states (plain text — no master kota table in DB)
     const [kotaError, setKotaError] = useState<string | null>(null);
-
-    const fetchKota = async (provinsiId: string) => {
-        if (!provinsiId) {
-            setKotaList([]);
-            setSelectedKota(null);
-            setKotaError(null);
-            return;
-        }
-        setLoadingKota(true);
-        setKotaError(null);
-        try {
-            const response = await fetch(`/api/kota/${provinsiId}`);
-            if (!response.ok) throw new Error('Gagal memuat daftar kota');
-            const data: Kota[] = await response.json();
-            setKotaList(data);
-            setSelectedKota(data[0] || null);
-        } catch (error) {
-            console.error('Error fetching kota:', error);
-            setKotaError('Gagal memuat daftar kota. Coba lagi.');
-            setKotaList([]);
-            setSelectedKota(null);
-        } finally {
-            setLoadingKota(false);
-        }
-    };
 
     const [ongkirMap, setOngkirMap] = useState<Record<number, { harga: number; estimasi_hari_min: string; estimasi_hari_max: string }>>({});
     const [loadingOngkir, setLoadingOngkir] = useState(false);
@@ -504,8 +469,6 @@ export default function Checkout() {
                                         alamatForm.setData('provinsi_id', e.target.value);
                                         alamatForm.setData('kode_kota', '');
                                         alamatForm.setData('nama_kota', '');
-                                        setSelectedKota(null);
-                                        fetchKota(e.target.value);
                                     }}
                                     className="h-9 px-3 rounded-lg border border-[#19140035] text-sm focus:outline-none focus:border-[#2264c0] bg-white"
                                 >
@@ -520,30 +483,18 @@ export default function Checkout() {
 
                             <div className="flex flex-col gap-1">
                                 <label className="text-xs font-medium text-[#5f6368]">Kota / Kabupaten</label>
-                                {loadingKota ? (
-                                    <div className="h-9 px-3 rounded-lg border border-[#19140035] text-sm flex items-center text-[#9ca3af]">Memuat kota...</div>
-                                ) : (
-                                    <select
-                                        value={alamatForm.data.kode_kota}
-                                        onChange={(e) => {
-                                            const kota = kotaList.find((k) => String(k.kode_kota) === e.target.value);
-                                            alamatForm.setData('kode_kota', e.target.value);
-                                            alamatForm.setData('nama_kota', kota?.nama_kota || '');
-                                            alamatForm.setData('kota_kabupaten', kota?.nama_kota || '');
-                                            setSelectedKota(kota || null);
-                                        }}
-                                        disabled={kotaList.length === 0}
-                                        className="h-9 px-3 rounded-lg border border-[#19140035] text-sm focus:outline-none focus:border-[#2264c0] bg-white disabled:bg-gray-50 disabled:text-[#9ca3af]"
-                                    >
-                                        <option value="">{kotaList.length === 0 ? 'Pilih provinsi dulu' : 'Pilih Kota'}</option>
-                                        {kotaList.map((k) => (
-                                            <option key={k.id} value={k.kode_kota}>{safe(k.nama_kota)}</option>
-                                        ))}
-                                    </select>
-                                )}
-                                {kotaError && <p className="text-xs text-red-500">{kotaError}</p>}
-                                {alamatForm.errors.kode_kota && <p className="text-xs text-red-500">{alamatForm.errors.kode_kota}</p>}
-                                {alamatForm.errors.nama_kota && <p className="text-xs text-red-500">{alamatForm.errors.nama_kota}</p>}
+                                <input
+                                    type="text"
+                                    value={alamatForm.data.kota_kabupaten}
+                                    onChange={(e) => {
+                                        alamatForm.setData('kota_kabupaten', e.target.value);
+                                        alamatForm.setData('nama_kota', e.target.value);
+                                        alamatForm.setData('kode_kota', '');
+                                    }}
+                                    className="h-9 px-3 rounded-lg border border-[#19140035] text-sm focus:outline-none focus:border-[#2264c0]"
+                                    placeholder="Contoh: Kota Jakarta Selatan"
+                                />
+                                {alamatForm.errors.kota_kabupaten && <p className="text-xs text-red-500">{alamatForm.errors.kota_kabupaten}</p>}
                             </div>
 
                             <div className="grid grid-cols-2 gap-4">

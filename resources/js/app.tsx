@@ -17,6 +17,7 @@ createInertiaApp({
             case name === 'katalog':
             case name === 'keranjang':
             case name === 'produk-detail':
+            case name === 'checkout':
             case name === 'dashboard':
                 return null;
             case name.startsWith('auth/'):
