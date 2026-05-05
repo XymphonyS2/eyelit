@@ -127,6 +127,8 @@ export default function ProdukDetail() {
             payload.photochromic = photochromic;
         }
 
+        console.log('Payload sent:', payload);
+
         if (actionType === 'keranjang') {
             router.post('/keranjang/tambah', payload, {
                 preserveScroll: true,

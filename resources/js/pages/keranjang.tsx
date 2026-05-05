@@ -273,11 +273,35 @@ export default function Keranjang() {
                                                 </div>
 
                                                 {item.tipe_pembelian === 'Frame + Lensa' && (
-                                                    <div className="text-xs text-[#5f6368] bg-gray-50 rounded-lg px-3 py-2 space-y-0.5">
-                                                        {item.jenis_lensa_od && <p>OD: {item.jenis_lensa_od} {item.nilai_lensa_od}{item.silinder_od ? ` / Sil ${item.silinder_od}` : ''}</p>}
-                                                        {item.jenis_lensa_os && <p>OS: {item.jenis_lensa_os} {item.nilai_lensa_os}{item.silinder_os ? ` / Sil ${item.silinder_os}` : ''}</p>}
-                                                        {item.anti_radiasi && <p>+ Anti Radiasi</p>}
-                                                        {item.photochromic && <p>+ Photochromic</p>}
+                                                    <div className="bg-blue-50 rounded-lg px-3 py-2.5 space-y-1.5">
+                                                        <div className="flex items-center gap-3">
+                                                            <div className="flex-1">
+                                                                <p className="text-xs font-semibold text-[#2264c0] mb-0.5">Mata Kanan (OD)</p>
+                                                                <div className="text-xs text-[#1b1b18] space-y-0.5">
+                                                                    <p className="font-medium">
+                                                                        {item.jenis_lensa_od ? `${item.jenis_lensa_od} ${item.nilai_lensa_od}` : '-'}
+                                                                        {item.silinder_od ? <span className="font-medium text-[#5f6368]"> / Silinder {item.silinder_od}</span> : ''}
+                                                                    </p>
+                                                                </div>
+                                                            </div>
+                                                            <div className="flex-1">
+                                                                <p className="text-xs font-semibold text-[#2264c0] mb-0.5">Mata Kiri (OS)</p>
+                                                                <div className="text-xs text-[#1b1b18] space-y-0.5">
+                                                                    <p className="font-medium">
+                                                                        {item.jenis_lensa_os ? `${item.jenis_lensa_os} ${item.nilai_lensa_os}` : '-'}
+                                                                        {item.silinder_os ? <span className="font-medium text-[#1b1b18]"> / Silinder {item.silinder_os}</span> : ''}
+                                                                    </p>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                        {(item.anti_radiasi || item.photochromic) && (
+                                                            <div className="pt-1.5 border-t border-[#2264c0]/20">
+                                                                <div className="text-xs text-[#5f6368] space-y-0.5">
+                                                                    {item.anti_radiasi && <p>+ Anti Radiasi</p>}
+                                                                    {item.photochromic && <p>+ Photochromic</p>}
+                                                                </div>
+                                                            </div>
+                                                        )}
                                                     </div>
                                                 )}
 

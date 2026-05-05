@@ -52,11 +52,32 @@ class KeranjangController extends Controller
 
     public function tambah(Request $request)
     {
+        file_put_contents(base_path('keranjang_debug.txt'), json_encode([
+            'timestamp' => date('Y-m-d H:i:s'),
+            'all' => $request->all(),
+            'post' => $request->post(),
+            'input' => $request->input(),
+            'query' => $request->query(),
+            'method' => $request->method(),
+            'headers' => $request->header(),
+        ]));
+
         $validated = $request->validate([
             'produk_id' => 'required|exists:produk,id',
             'jumlah' => 'required|integer|min:1',
             'tipe_pembelian' => 'required|in:Frame Saja,Frame + Lensa',
+            'jenis_lensa_od' => 'nullable|string',
+            'nilai_lensa_od' => 'nullable|string',
+            'silinder_od' => 'nullable|string',
+            'jenis_lensa_os' => 'nullable|string',
+            'nilai_lensa_os' => 'nullable|string',
+            'silinder_os' => 'nullable|string',
         ]);
+
+        file_put_contents(base_path('keranjang_debug.txt'), json_encode([
+            'after_validation' => true,
+            'validated' => $validated,
+        ]), FILE_APPEND);
 
         $produk = Produk::findOrFail($validated['produk_id']);
 
@@ -69,10 +90,15 @@ class KeranjangController extends Controller
             ->where('tipe_pembelian', $validated['tipe_pembelian'])
             ->first();
 
+        file_put_contents(base_path('keranjang_debug.txt'), json_encode([
+            'existing_check' => $existing ? ['id' => $existing->id, 'tipe' => $existing->tipe_pembelian] : null,
+            'branch' => ($existing && $validated['tipe_pembelian'] === 'Frame Saja') ? 'increment' : 'create',
+        ]), FILE_APPEND);
+
         if ($existing && $validated['tipe_pembelian'] === 'Frame Saja') {
             $existing->increment('jumlah', $validated['jumlah']);
         } else {
-            Keranjang::create([
+            $data = [
                 'pengguna_id' => auth()->id(),
                 'produk_id' => $validated['produk_id'],
                 'jumlah' => $validated['jumlah'],
@@ -85,7 +111,11 @@ class KeranjangController extends Controller
                 'silinder_os' => $validated['silinder_os'] ?? null,
                 'anti_radiasi' => $request->boolean('anti_radiasi'),
                 'photochromic' => $request->boolean('photochromic'),
-            ]);
+            ];
+            file_put_contents(base_path('keranjang_debug.txt'), json_encode([
+                'before_create' => $data,
+            ]), FILE_APPEND);
+            Keranjang::create($data);
         }
 
         return redirect()->back()->with('success', 'Produk berhasil ditambahkan ke keranjang.');
