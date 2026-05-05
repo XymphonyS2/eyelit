@@ -4,6 +4,7 @@ import { useRef, useState } from 'react';
 
 export default function ProdukDetail() {
     const { auth, produk } = usePage().props as any;
+    console.log('PRODUK DATA:', produk);
     const keranjangCount: number = auth.keranjang_count || 0;
     const [showUserDropdown, setShowUserDropdown] = useState(false);
     const [showNotifDropdown, setShowNotifDropdown] = useState(false);
@@ -40,7 +41,7 @@ export default function ProdukDetail() {
 
     return (
         <>
-            <Head title={`${produk.nama_produk} - EyeLit`} />
+            <Head title={`${produk.nama_produk ?? 'Produk'} - EyeLit`} />
             <div className="min-h-screen bg-[#FDFDFC]">
                 {/* Navbar */}
                 <nav className="relative z-50 border-b border-[#19140035] bg-white">
@@ -145,7 +146,7 @@ export default function ProdukDetail() {
                         <span>/</span>
                         <Link href="/katalog" className="hover:text-[#2264c0] transition-colors">Katalog</Link>
                         <span>/</span>
-                        <span className="text-[#1b1b18] font-medium truncate max-w-xs">{produk.nama_produk}</span>
+                        <span className="text-[#1b1b18] font-medium truncate max-w-xs">{produk.nama_produk ?? 'Produk'}</span>
                     </div>
                 </div>
 
@@ -159,21 +160,22 @@ export default function ProdukDetail() {
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
                         {/* Gambar Produk */}
                         <div className="flex items-center justify-center bg-white rounded-2xl border border-[#19140035] p-8">
+                            {/* ✅ DIPERBAIKI: Fallback gambar jika produk.gambar null/undefined */}
                             <img
-                                src={`/images/produk/${produk.gambar}`}
-                                alt={produk.nama_produk}
+                                src={produk.gambar ? `/images/produk/${encodeURIComponent(produk.gambar)}` : '/images/placeholder.png'}
+                                alt={produk.nama_produk ?? 'Produk'}
                                 className="max-h-80 w-full object-contain"
-                                onError={(e) => { (e.target as HTMLImageElement).src = '/images/placeholder.png'; }}
+                                onError={(e) => { (e.currentTarget.src = '/images/placeholder.png'); }}
                             />
                         </div>
 
                         {/* Info Produk */}
                         <div className="flex flex-col gap-5">
                             <div>
-                                <p className="text-sm font-medium text-[#2264c0] uppercase tracking-wide">{produk.merek}</p>
-                                <h1 className="text-2xl font-bold text-[#1b1b18] mt-1">{produk.nama_produk}</h1>
+                                <p className="text-sm font-medium text-[#2264c0] uppercase tracking-wide">{produk.merek ?? '-'}</p>
+                                <h1 className="text-2xl font-bold text-[#1b1b18] mt-1">{produk.nama_produk ?? 'Nama tidak tersedia'}</h1>
                                 <p className="text-3xl font-bold text-[#2264c0] mt-3">
-                                    Rp {(Number(produk.harga_produk) || 0).toLocaleString('id-ID')}
+                                    Rp {(Number(produk.harga_produk ?? 0) || 0).toLocaleString('id-ID')}
                                 </p>
                             </div>
 

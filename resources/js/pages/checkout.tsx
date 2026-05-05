@@ -53,22 +53,22 @@ export default function Checkout() {
     const { auth, items, total, alamat, provinsi, ekspedisi } = usePage().props as any;
     const keranjangCount: number = auth.keranjang_count || 0;
 
-    // 🔥 PERBAIKAN: guard array props agar tidak crash saat undefined
-    const alamatList: Alamat[]   = Array.isArray(alamat)    ? alamat    : [];
+    // 🔥 guard array props agar tidak crash saat undefined
+    const alamatList: Alamat[]       = Array.isArray(alamat)    ? alamat    : [];
     const ekspedisiList: Ekspedisi[] = Array.isArray(ekspedisi) ? ekspedisi : [];
-    const itemList: Item[]       = Array.isArray(items)     ? items     : [];
-    const provinsiList: Provinsi[] = Array.isArray(provinsi) ? provinsi : [];
-    const totalHarga: number     = Number(total ?? 0);
+    const itemList: Item[]           = Array.isArray(items)     ? items     : [];
+    const provinsiList: Provinsi[]   = Array.isArray(provinsi)  ? provinsi  : [];
+    const totalHarga: number         = Number(total ?? 0);
 
-    const [showUserDropdown, setShowUserDropdown] = useState(false);
+    const [showUserDropdown, setShowUserDropdown]   = useState(false);
     const [showNotifDropdown, setShowNotifDropdown] = useState(false);
-    const [showTambahAlamat, setShowTambahAlamat] = useState(false);
+    const [showTambahAlamat, setShowTambahAlamat]   = useState(false);
 
-    const userDropdownTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+    const userDropdownTimer  = useRef<ReturnType<typeof setTimeout> | null>(null);
     const notifDropdownTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
     const notifications: any[] = auth.user?.notifications || [];
 
-    // 🔥 PERBAIKAN: guard find/[0] dengan fallback null
+    // guard find/[0] dengan fallback null
     const [selectedAlamat, setSelectedAlamat] = useState<Alamat | null>(
         alamatList.find((a) => a.alamat_utama) || alamatList[0] || null
     );
@@ -78,11 +78,12 @@ export default function Checkout() {
     const [metodePembayaran, setMetodePembayaran] = useState<string>('QRIS');
 
     // Kota states
-    const [kotaList, setKotaList] = useState<Kota[]>([]);
+    const [kotaList, setKotaList]       = useState<Kota[]>([]);
     const [loadingKota, setLoadingKota] = useState<boolean>(false);
     const [selectedKota, setSelectedKota] = useState<Kota | null>(null);
-    const [kotaError, setKotaError] = useState<string | null>(null);
+    const [kotaError, setKotaError]     = useState<string | null>(null);
 
+    // ✅ FIX UTAMA: mapping fleksibel agar cocok dengan semua kemungkinan field dari backend
     const fetchKota = async (provinsiId: string) => {
         if (!provinsiId) {
             setKotaList([]);
@@ -95,9 +96,20 @@ export default function Checkout() {
         try {
             const response = await fetch(`/api/kota/${provinsiId}`);
             if (!response.ok) throw new Error('Gagal memuat daftar kota');
-            const data: Kota[] = await response.json();
-            setKotaList(data);
-            setSelectedKota(data[0] || null);
+            const raw: any[] = await response.json();
+
+            // 🔥 FIX: mapping fleksibel — support semua kemungkinan field dari backend
+            // Prioritas: nama_kota → nama → name → fallback string(id)
+            // Prioritas kode: kode_kota → kode → fallback string(id)
+            const mapped: Kota[] = raw.map((item: any) => ({
+                id:          item.id,
+                nama_kota:   item.nama_kota   ?? item.nama   ?? item.name ?? String(item.id),
+                kode_kota:   item.kode_kota   ?? item.kode   ?? String(item.id),
+                provinsi_id: item.provinsi_id ?? Number(provinsiId),
+            }));
+
+            setKotaList(mapped);
+            setSelectedKota(mapped[0] || null);
         } catch (error) {
             console.error('Error fetching kota:', error);
             setKotaError('Gagal memuat daftar kota. Coba lagi.');
@@ -108,11 +120,11 @@ export default function Checkout() {
         }
     };
 
-    const [ongkirMap, setOngkirMap] = useState<Record<number, { harga: number; estimasi_hari_min: string; estimasi_hari_max: string }>>({});
+    const [ongkirMap, setOngkirMap]       = useState<Record<number, { harga: number; estimasi_hari_min: string; estimasi_hari_max: string }>>({});
     const [loadingOngkir, setLoadingOngkir] = useState(false);
     const ongkirInfo = selectedEkspedisi ? (ongkirMap[selectedEkspedisi.id] ?? null) : null;
-    const ongkir = Number(ongkirInfo?.harga ?? 0);
-    const estimasi = ongkirInfo
+    const ongkir     = Number(ongkirInfo?.harga ?? 0);
+    const estimasi   = ongkirInfo
         ? `${ongkirInfo.estimasi_hari_min}–${ongkirInfo.estimasi_hari_max} hari`
         : '-';
     const grandTotal = totalHarga + ongkir;
@@ -128,14 +140,16 @@ export default function Checkout() {
         Promise.all(
             ekspedisiList.map((e) =>
                 fetch('/checkout/ongkir', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'X-CSRF-TOKEN': csrfToken,
-                        'Accept': 'application/json',
-                    },
-                    body: JSON.stringify({ alamat_id: selectedAlamat.id, ekspedisi_id: e.id }),
-                })
+  method: 'POST',
+  headers: {
+    'Content-Type': 'application/json',
+    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '',
+  },
+  body: JSON.stringify({
+    kode_kota: selectedKota, // 🔥 ini penting
+  }),
+})
+                    
                 .then(res => { if (!res.ok) throw new Error(`HTTP ${res.status}`); return res.json(); })
                 .then(data => ({ id: e.id, data }))
                 .catch(() => ({ id: e.id, data: { harga: 0, estimasi_hari_min: '1', estimasi_hari_max: '3' } }))
@@ -173,8 +187,8 @@ export default function Checkout() {
     function submitCheckout() {
         if (!selectedAlamat || !selectedEkspedisi) return;
         router.post('/checkout', {
-            alamat_id: selectedAlamat.id,
-            ekspedisi_id: selectedEkspedisi.id,
+            alamat_id:         selectedAlamat.id,
+            ekspedisi_id:      selectedEkspedisi.id,
             metode_pembayaran: metodePembayaran,
         });
     }
@@ -317,14 +331,12 @@ export default function Checkout() {
                                                 />
                                                 <div className="flex-1 text-sm">
                                                     <div className="flex items-center gap-2">
-                                                        {/* 🔥 PERBAIKAN: safe() untuk nama & no hp penerima */}
                                                         <span className="font-semibold text-[#1b1b18]">{safe(a.nama_penerima)}</span>
                                                         <span className="text-[#5f6368]">{safe(a.no_hp_penerima)}</span>
                                                         {a.alamat_utama && (
                                                             <span className="px-2 py-0.5 bg-blue-50 text-[#2264c0] text-xs rounded-full font-medium">Utama</span>
                                                         )}
                                                     </div>
-                                                    {/* 🔥 PERBAIKAN: safe() untuk semua field alamat */}
                                                     <p className="text-[#5f6368] mt-0.5">
                                                         {safe(a.alamat_lengkap)}, {safe(a.kecamatan)}, {safe(a.kota_kabupaten)}, {safe(a.provinsi?.nama_provinsi)}, {safe(a.kode_pos)}
                                                     </p>
@@ -361,7 +373,6 @@ export default function Checkout() {
                                                     className="accent-[#2264c0]"
                                                 />
                                                 <div className="flex-1 flex items-center justify-between text-sm">
-                                                    {/* 🔥 PERBAIKAN: safe() untuk nama ekspedisi */}
                                                     <span className="font-medium text-[#1b1b18]">{safe(e.nama_ekspedisi)}</span>
                                                     <div className="text-right">
                                                         {!selectedAlamat ? (
@@ -414,7 +425,6 @@ export default function Checkout() {
                                 <div className="flex flex-col gap-2 text-sm mb-4">
                                     {itemList.map((item) => (
                                         <div key={item.id} className="flex gap-3 items-center">
-                                            {/* 🔥 PERBAIKAN: fallback gambar + safe() untuk nama */}
                                             <img
                                                 src={item.gambar ? `/images/produk/${item.gambar}` : '/images/placeholder.png'}
                                                 alt={safe(item.nama_produk)}
@@ -422,11 +432,9 @@ export default function Checkout() {
                                                 onError={(e) => { (e.target as HTMLImageElement).src = '/images/placeholder.png'; }}
                                             />
                                             <div className="flex-1 min-w-0">
-                                                {/* 🔥 PERBAIKAN: safe() untuk nama_produk & tipe_pembelian */}
                                                 <p className="truncate font-medium text-[#1b1b18]">{safe(item.nama_produk)}</p>
                                                 <p className="text-[#5f6368] text-xs">×{item.jumlah ?? 0} · {safe(item.tipe_pembelian)}</p>
                                             </div>
-                                            {/* 🔥 PERBAIKAN: ?? 0 untuk subtotal */}
                                             <span className="text-[#1b1b18] font-medium flex-shrink-0">Rp {Number(item.subtotal ?? 0).toLocaleString('id-ID')}</span>
                                         </div>
                                     ))}
@@ -510,7 +518,6 @@ export default function Checkout() {
                                     className="h-9 px-3 rounded-lg border border-[#19140035] text-sm focus:outline-none focus:border-[#2264c0] bg-white"
                                 >
                                     <option value="">Pilih Provinsi</option>
-                                    {/* 🔥 PERBAIKAN: provinsiList sudah di-guard atas */}
                                     {provinsiList.map((p) => (
                                         <option key={p.id} value={p.id}>{safe(p.nama_provinsi)}</option>
                                     ))}
@@ -526,6 +533,7 @@ export default function Checkout() {
                                     <select
                                         value={alamatForm.data.kode_kota}
                                         onChange={(e) => {
+                                            // 🔥 FIX: cari berdasarkan kode_kota (sudah di-mapping, pasti ada)
                                             const kota = kotaList.find((k) => String(k.kode_kota) === e.target.value);
                                             alamatForm.setData('kode_kota', e.target.value);
                                             alamatForm.setData('nama_kota', kota?.nama_kota || '');
@@ -537,6 +545,7 @@ export default function Checkout() {
                                     >
                                         <option value="">{kotaList.length === 0 ? 'Pilih provinsi dulu' : 'Pilih Kota'}</option>
                                         {kotaList.map((k) => (
+                                            // 🔥 FIX: pakai nama_kota & kode_kota hasil mapping — selalu ada
                                             <option key={k.id} value={k.kode_kota}>{safe(k.nama_kota)}</option>
                                         ))}
                                     </select>

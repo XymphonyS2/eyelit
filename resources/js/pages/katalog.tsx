@@ -12,6 +12,9 @@ export default function Katalog() {
     const [backdropClosing, setBackdropClosing] = useState(false);
     const [searchMerek, setSearchMerek] = useState('');
 
+    // ✅ TAMBAHAN: Search query state
+    const [searchQuery, setSearchQuery] = useState('');
+
     // Filter states
     const [selectedMerek, setSelectedMerek] = useState<string[]>([]);
     const [selectedJenisKelamin, setSelectedJenisKelamin] = useState<string[]>([]);
@@ -83,21 +86,37 @@ export default function Katalog() {
         return formatted.replace(/\D/g, '');
     };
 
-    // Filtered products
+    // ✅ DIPERBAIKI: Filtered products — sekarang termasuk filter pencarian teks
     const filteredProduk = useMemo(() => {
-        if (!hasActiveFilters) return produk;
-        return produk.filter((item: any) => {
-            if (selectedMerek.length > 0 && !selectedMerek.includes(item.merek)) return false;
-            if (selectedJenisKelamin.length > 0 && !selectedJenisKelamin.includes(item.jenis_kelamin)) return false;
-            if (selectedWarna.length > 0 && !selectedWarna.includes(item.warna)) return false;
-            if (selectedMaterial.length > 0 && !selectedMaterial.includes(item.material)) return false;
-            if (selectedBentuk.length > 0 && !selectedBentuk.includes(item.bentuk)) return false;
-            const harga = Number(item.harga_produk);
-            if (minHarga !== '' && harga < Number(minHarga)) return false;
-            if (maxHarga !== '' && harga > Number(maxHarga)) return false;
-            return true;
-        });
-    }, [produk, selectedMerek, selectedJenisKelamin, selectedWarna, selectedMaterial, selectedBentuk, minHarga, maxHarga, hasActiveFilters]);
+        let result = produk || [];
+
+        // ✅ Filter berdasarkan search query (nama produk, merek, tipe)
+        if (searchQuery.trim()) {
+            const q = searchQuery.toLowerCase();
+            result = result.filter((item: any) =>
+                item.nama_produk?.toLowerCase().includes(q) ||
+                item.merek?.toLowerCase().includes(q) ||
+                item.tipe_produk?.toLowerCase().includes(q)
+            );
+        }
+
+        // Filter berdasarkan pilihan filter panel
+        if (hasActiveFilters) {
+            result = result.filter((item: any) => {
+                if (selectedMerek.length > 0 && !selectedMerek.includes(item.merek)) return false;
+                if (selectedJenisKelamin.length > 0 && !selectedJenisKelamin.includes(item.jenis_kelamin)) return false;
+                if (selectedWarna.length > 0 && !selectedWarna.includes(item.warna)) return false;
+                if (selectedMaterial.length > 0 && !selectedMaterial.includes(item.material)) return false;
+                if (selectedBentuk.length > 0 && !selectedBentuk.includes(item.bentuk)) return false;
+                const harga = Number(item.harga_produk);
+                if (minHarga !== '' && harga < Number(minHarga)) return false;
+                if (maxHarga !== '' && harga > Number(maxHarga)) return false;
+                return true;
+            });
+        }
+
+        return result;
+    }, [produk, searchQuery, selectedMerek, selectedJenisKelamin, selectedWarna, selectedMaterial, selectedBentuk, minHarga, maxHarga, hasActiveFilters]);
 
     return (
         <>
@@ -330,14 +349,27 @@ export default function Katalog() {
                             {/* Main Search Bar */}
                             <div className="w-full max-w-2xl mx-auto">
                                 <div className="relative">
+                                    {/* ✅ DIPERBAIKI: Search bar sekarang terhubung ke state */}
                                     <input
                                         type="text"
                                         autoComplete="off"
                                         spellCheck={false}
                                         placeholder="Cari nama produk, merek, atau tipe kacamata..."
+                                        value={searchQuery}
+                                        onChange={(e) => setSearchQuery(e.target.value)}
                                         className="w-full h-9 pl-4 pr-12 rounded-full border border-[#19140035] bg-white text-sm placeholder:text-[#9CA3AF] disabled:bg-transparent appearance-none focus:outline-none focus:border-[#2264c0] focus:border-[3px] focus:ring-2 focus:ring-[#2264c0] focus:ring-offset-0"
                                     />
-                                    <Search className="absolute right-4 top-1/2 -translate-y-1/2 size-5 text-[#706f6c]" />
+                                    {/* ✅ TAMBAHAN: Tombol clear search */}
+                                    {searchQuery ? (
+                                        <button
+                                            onClick={() => setSearchQuery('')}
+                                            className="absolute right-4 top-1/2 -translate-y-1/2"
+                                        >
+                                            <X className="size-4 text-[#706f6c] hover:text-[#1b1b18]" />
+                                        </button>
+                                    ) : (
+                                        <Search className="absolute right-4 top-1/2 -translate-y-1/2 size-5 text-[#706f6c]" />
+                                    )}
                                 </div>
                             </div>
                         </div>
@@ -581,30 +613,39 @@ export default function Katalog() {
 
                 {/* Product Grid Section */}
                 <section>
-                    <div className="flex flex-wrap">
-                        {filteredProduk?.map((item: any, index: number) => (
-                            <div key={index} className="w-1/4 shrink-0 grid-row-item">
-                                <div className="grid-box">
-                                    <div className="grid-box-content">
-                                        <img
-                                            className="grid-box-image"
-                                            src={`/images/produk/${item.gambar}`}
-                                            alt={item.nama_produk}
-                                            onError={(e) => { (e.target as HTMLImageElement).src = '/images/placeholder.png'; }}
-                                        />
-                                        <div className="grid-box-overlay">
-                                            <div className="grid-box-overlay-bottom">
-                                                <div className="grid-box-left">
-                                                    <div className="grid-box-merek">{item.merek}</div>
-                                                    <div className="grid-box-tipe">{item.tipe_produk}</div>
-                                                </div>
-                                                <span className="grid-box-harga">Rp {(Number(item.harga_produk) || 0).toLocaleString('id-ID')}</span>
-                                            </div>
-                                        </div>
+                    <div className="grid grid-cols-2 md:grid-cols-4 gap-6 p-4">
+                        {filteredProduk?.map((item: any) => (
+                            <Link key={item.id} href={`/produk/${item.id}`}>
+                                <div className="grid-box cursor-pointer hover:scale-[1.02] transition-transform duration-200">
+                                    <img
+                                        className="grid-box-image"
+                                       src={item.gambar ? `/images/produk/${encodeURIComponent(item.gambar)}` : '/images/placeholder.png'}
+                                        alt={item.nama_produk ?? 'Produk'}
+                                        onError={(e) => { (e.currentTarget.src = '/images/placeholder.png'); }}
+                                    />
+                                    <div className="p-3">
+                                        <h3 className="text-sm font-semibold">
+                                            {item.nama_produk ?? 'Nama tidak tersedia'}
+                                        </h3>
+                                        <p className="text-gray-500 text-xs">
+                                            {item.merek ?? '-'}
+                                        </p>
+                                        <p className="text-primary font-bold mt-1">
+                                            Rp {(Number(item.harga_produk ?? 0) || 0).toLocaleString('id-ID')}
+                                        </p>
                                     </div>
                                 </div>
-                            </div>
+                            </Link>
                         ))}
+
+                        {/* Empty state jika tidak ada produk ditemukan */}
+                        {filteredProduk?.length === 0 && (
+                            <div className="col-span-2 md:col-span-4 flex flex-col items-center justify-center py-24 gap-3">
+                                <Search className="size-12 text-[#9CA3AF]" />
+                                <p className="text-[#5f6368] font-medium">Produk tidak ditemukan</p>
+                                <p className="text-sm text-[#9CA3AF]">Coba kata kunci lain atau hapus filter yang aktif</p>
+                            </div>
+                        )}
                     </div>
                 </section>
             </div>

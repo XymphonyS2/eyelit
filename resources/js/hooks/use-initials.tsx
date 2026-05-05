@@ -4,6 +4,8 @@ export type GetInitialsFn = (fullName: string) => string;
 
 export function useInitials(): GetInitialsFn {
     return useCallback((fullName: string): string => {
+        if (!fullName) return ''; // ✅ TAMBAHAN: guard kalau undefined/null/kosong
+
         const names = fullName.trim().split(' ');
 
         if (names.length === 0) {

@@ -18,19 +18,16 @@ class OngkirController extends Controller
     public function hitung(Request $request)
     {
         try {
-            // 🔥 VALIDASI
             $request->validate([
                 'kode_kota' => 'required|integer',
             ]);
 
             $kodeKota = (int) $request->kode_kota;
 
-            // 🔥 PANGGIL SERVICE
             $result = $this->rajaOngkir->hitungSemuaEkspedisi($kodeKota);
 
             Log::info('ONGKIR RESULT:', $result);
 
-            // 🔥 AMBIL HARGA TERMURAH (opsional tapi bagus)
             $harga = 0;
 
             if (isset($result['rajaongkir']['results'])) {
@@ -45,15 +42,14 @@ class OngkirController extends Controller
                 }
 
                 if (!empty($allCosts)) {
-                    $harga = min($allCosts); // 🔥 ambil yang paling murah
+                    $harga = min($allCosts);
                 }
             }
 
-            // 🔥 RESPONSE BERSIH KE FRONTEND
             return response()->json([
                 'success' => true,
                 'harga'   => $harga,
-                'data'    => $result, // optional (buat debug)
+                'data'    => $result,
             ]);
 
         } catch (\Throwable $e) {
@@ -65,5 +61,15 @@ class OngkirController extends Controller
                 'error'   => 'Gagal mengambil ongkir',
             ], 500);
         }
+    }
+
+    // 🔥 TAMBAHKAN DI SINI
+    public function getKota($provinsiId)
+    {
+        return response()->json([
+            ['id' => 1, 'nama' => 'Bandar Lampung'],
+            ['id' => 2, 'nama' => 'Jakarta'],
+            ['id' => 3, 'nama' => 'Bandung'],
+        ]);
     }
 }
