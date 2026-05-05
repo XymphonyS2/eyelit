@@ -1,5 +1,5 @@
 import { Head, Link, router, usePage } from '@inertiajs/react';
-import { ArrowLeft, Bell, BookOpen, LogOut, Minus, Plus, Settings, ShoppingBag, ShoppingCart, Trash2, User } from 'lucide-react';
+import { ArrowLeft, Bell, BookOpen, Check, LogOut, Minus, Plus, Settings, ShoppingBag, ShoppingCart, Trash2, User } from 'lucide-react';
 import { useRef, useState } from 'react';
 
 interface KeranjangItem {
@@ -30,10 +30,32 @@ export default function Keranjang() {
 
     const [showUserDropdown, setShowUserDropdown] = useState(false);
     const [showNotifDropdown, setShowNotifDropdown] = useState(false);
+    const [selectedItems, setSelectedItems] = useState<number[]>([]);
+
     const userDropdownTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
     const notifDropdownTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
     const notifications: any[] = auth.user?.notifications || [];
+
+    const toggleItem = (id: number) => {
+        setSelectedItems((prev) =>
+            prev.includes(id) ? prev.filter((itemId) => itemId !== id) : [...prev, id]
+        );
+    };
+
+    const toggleAll = () => {
+        if (selectedItems.length === items.length) {
+            setSelectedItems([]);
+        } else {
+            setSelectedItems(items.map((item: KeranjangItem) => item.id));
+        }
+    };
+
+    const selectedTotal = items
+        .filter((item: KeranjangItem) => selectedItems.includes(item.id))
+        .reduce((sum: number, item: KeranjangItem) => sum + item.subtotal, 0);
+
+    const selectedCount = selectedItems.length;
 
     function updateJumlah(id: number, jumlah: number) {
         if (jumlah < 1) return;
@@ -42,6 +64,12 @@ export default function Keranjang() {
 
     function hapusItem(id: number) {
         router.delete(`/keranjang/${id}`, { preserveScroll: true });
+    }
+
+    function checkoutSelected() {
+        if (selectedItems.length === 0) return;
+        // For now, redirect to checkout page
+        router.visit('/checkout');
     }
 
     return (
@@ -170,89 +198,162 @@ export default function Keranjang() {
                         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                             {/* Daftar Item */}
                             <div className="lg:col-span-2 flex flex-col gap-4">
-                                {items.map((item) => (
-                                    <div key={item.id} className="bg-white rounded-xl border border-[#19140035] p-4 flex gap-4">
-                                        <Link href={`/produk/${item.produk_id}`} className="flex-shrink-0">
-                                            <img
-                                                src={`/images/produk/${item.gambar}`}
-                                                alt={item.nama_produk}
-                                                className="w-24 h-24 object-contain rounded-lg bg-gray-50"
-                                                onError={(e) => { (e.target as HTMLImageElement).src = '/images/placeholder.png'; }}
-                                            />
-                                        </Link>
+                                {/* Select All Header */}
+                                <div className="bg-white rounded-xl border border-[#19140035] p-4 flex items-center justify-between">
+                                    <label className="flex items-center gap-3 cursor-pointer">
+                                        <div
+                                            onClick={toggleAll}
+                                            className={`w-6 h-6 rounded-md border-2 flex items-center justify-center transition-all ${
+                                                selectedItems.length === items.length
+                                                    ? 'bg-[#2264c0] border-[#2264c0]'
+                                                    : 'border-[#19140035] hover:border-[#2264c0]'
+                                            }`}
+                                        >
+                                            {selectedItems.length === items.length && items.length > 0 && (
+                                                <Check className="size-4 text-white" />
+                                            )}
+                                        </div>
+                                        <span className="text-sm font-medium text-[#1b1b18]">Pilih Semua</span>
+                                    </label>
+                                    <span className="text-sm text-[#5f6368]">{selectedCount} item dipilih</span>
+                                </div>
 
-                                        <div className="flex-1 flex flex-col gap-2">
-                                            <div className="flex items-start justify-between gap-2">
-                                                <div>
-                                                    <p className="text-xs text-[#2264c0] font-medium">{item.merek}</p>
-                                                    <Link href={`/produk/${item.produk_id}`} className="text-sm font-semibold text-[#1b1b18] hover:text-[#2264c0] transition-colors">
-                                                        {item.nama_produk}
-                                                    </Link>
-                                                    <p className="text-xs text-[#5f6368] mt-0.5">{item.tipe_pembelian}</p>
-                                                </div>
-                                                <button
-                                                    onClick={() => hapusItem(item.id)}
-                                                    className="p-1.5 rounded-full hover:bg-red-50 text-[#5f6368] hover:text-red-500 transition-colors flex-shrink-0"
+                                {/* Item Cards */}
+                                {items.map((item: KeranjangItem) => {
+                                    const isSelected = selectedItems.includes(item.id);
+                                    return (
+                                        <div
+                                            key={item.id}
+                                            className={`bg-white rounded-xl border-2 p-4 flex gap-4 transition-all ${
+                                                isSelected
+                                                    ? 'border-[#2264c0] shadow-md'
+                                                    : 'border-[#19140035]'
+                                            }`}
+                                        >
+                                            {/* Checkbox */}
+                                            <div className="flex items-start pt-1">
+                                                <div
+                                                    onClick={() => toggleItem(item.id)}
+                                                    className={`w-6 h-6 rounded-md border-2 flex items-center justify-center cursor-pointer transition-all ${
+                                                        isSelected
+                                                            ? 'bg-[#2264c0] border-[#2264c0]'
+                                                            : 'border-[#19140035] hover:border-[#2264c0]'
+                                                    }`}
                                                 >
-                                                    <Trash2 className="size-4" />
-                                                </button>
+                                                    {isSelected && (
+                                                        <Check className="size-4 text-white" />
+                                                    )}
+                                                </div>
                                             </div>
 
-                                            {item.tipe_pembelian === 'Frame + Lensa' && (
-                                                <div className="text-xs text-[#5f6368] bg-gray-50 rounded-lg px-3 py-2 space-y-0.5">
-                                                    {item.jenis_lensa_od && <p>OD: {item.jenis_lensa_od} {item.nilai_lensa_od}{item.silinder_od ? ` / Sil ${item.silinder_od}` : ''}</p>}
-                                                    {item.jenis_lensa_os && <p>OS: {item.jenis_lensa_os} {item.nilai_lensa_os}{item.silinder_os ? ` / Sil ${item.silinder_os}` : ''}</p>}
-                                                    {item.anti_radiasi && <p>+ Anti Radiasi</p>}
-                                                    {item.photochromic && <p>+ Photochromic</p>}
-                                                </div>
-                                            )}
+                                            <Link href={`/produk/${item.produk_id}`} className="flex-shrink-0">
+                                                <img
+                                                    src={`/images/produk/${item.gambar}`}
+                                                    alt={item.nama_produk}
+                                                    className="w-24 h-24 object-contain rounded-lg bg-gray-50"
+                                                    onError={(e) => { (e.target as HTMLImageElement).src = '/images/placeholder.png'; }}
+                                                />
+                                            </Link>
 
-                                            <div className="flex items-center justify-between mt-auto">
-                                                <div className="flex items-center gap-2">
+                                            <div className="flex-1 flex flex-col gap-2">
+                                                <div className="flex items-start justify-between gap-2">
+                                                    <div>
+                                                        <p className="text-xs text-[#2264c0] font-medium">{item.merek}</p>
+                                                        <Link href={`/produk/${item.produk_id}`} className="text-sm font-semibold text-[#1b1b18] hover:text-[#2264c0] transition-colors">
+                                                            {item.nama_produk}
+                                                        </Link>
+                                                        <p className="text-xs text-[#5f6368] mt-0.5">{item.tipe_pembelian}</p>
+                                                    </div>
                                                     <button
-                                                        onClick={() => updateJumlah(item.id, item.jumlah - 1)}
-                                                        disabled={item.jumlah <= 1}
-                                                        className="w-7 h-7 rounded-full border border-[#19140035] flex items-center justify-center hover:bg-gray-100 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+                                                        onClick={() => hapusItem(item.id)}
+                                                        className="p-1.5 rounded-full hover:bg-red-50 text-[#5f6368] hover:text-red-500 transition-colors flex-shrink-0"
                                                     >
-                                                        <Minus className="size-3" />
-                                                    </button>
-                                                    <span className="w-8 text-center text-sm font-semibold">{item.jumlah}</span>
-                                                    <button
-                                                        onClick={() => updateJumlah(item.id, item.jumlah + 1)}
-                                                        disabled={item.jumlah >= item.stok}
-                                                        className="w-7 h-7 rounded-full border border-[#19140035] flex items-center justify-center hover:bg-gray-100 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
-                                                    >
-                                                        <Plus className="size-3" />
+                                                        <Trash2 className="size-4" />
                                                     </button>
                                                 </div>
-                                                <p className="text-sm font-bold text-[#2264c0]">
-                                                    Rp {item.subtotal.toLocaleString('id-ID')}
-                                                </p>
+
+                                                {item.tipe_pembelian === 'Frame + Lensa' && (
+                                                    <div className="text-xs text-[#5f6368] bg-gray-50 rounded-lg px-3 py-2 space-y-0.5">
+                                                        {item.jenis_lensa_od && <p>OD: {item.jenis_lensa_od} {item.nilai_lensa_od}{item.silinder_od ? ` / Sil ${item.silinder_od}` : ''}</p>}
+                                                        {item.jenis_lensa_os && <p>OS: {item.jenis_lensa_os} {item.nilai_lensa_os}{item.silinder_os ? ` / Sil ${item.silinder_os}` : ''}</p>}
+                                                        {item.anti_radiasi && <p>+ Anti Radiasi</p>}
+                                                        {item.photochromic && <p>+ Photochromic</p>}
+                                                    </div>
+                                                )}
+
+                                                <div className="flex items-center justify-between mt-auto">
+                                                    <div className="flex items-center gap-2">
+                                                        <button
+                                                            onClick={() => updateJumlah(item.id, item.jumlah - 1)}
+                                                            disabled={item.jumlah <= 1}
+                                                            className="w-7 h-7 rounded-full border border-[#19140035] flex items-center justify-center hover:bg-gray-100 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+                                                        >
+                                                            <Minus className="size-3" />
+                                                        </button>
+                                                        <span className="w-8 text-center text-sm font-semibold">{item.jumlah}</span>
+                                                        <button
+                                                            onClick={() => updateJumlah(item.id, item.jumlah + 1)}
+                                                            disabled={item.jumlah >= item.stok}
+                                                            className="w-7 h-7 rounded-full border border-[#19140035] flex items-center justify-center hover:bg-gray-100 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+                                                        >
+                                                            <Plus className="size-3" />
+                                                        </button>
+                                                    </div>
+                                                    <p className={`text-sm font-bold ${isSelected ? 'text-[#2264c0]' : 'text-[#5f6368]'}`}>
+                                                        Rp {item.subtotal.toLocaleString('id-ID')}
+                                                    </p>
+                                                </div>
                                             </div>
                                         </div>
-                                    </div>
-                                ))}
+                                    );
+                                })}
                             </div>
 
                             {/* Ringkasan */}
                             <div className="lg:col-span-1">
                                 <div className="bg-white rounded-xl border border-[#19140035] p-5 sticky top-6">
                                     <h2 className="text-base font-semibold text-[#1b1b18] mb-4">Ringkasan Belanja</h2>
-                                    <div className="flex flex-col gap-3 text-sm">
-                                        {items.map((item) => (
-                                            <div key={item.id} className="flex justify-between text-[#5f6368]">
-                                                <span className="truncate max-w-[160px]">{item.nama_produk} ×{item.jumlah}</span>
-                                                <span>Rp {item.subtotal.toLocaleString('id-ID')}</span>
+
+                                    {selectedCount > 0 ? (
+                                        <>
+                                            <div className="flex flex-col gap-3 text-sm max-h-60 overflow-y-auto">
+                                                {items
+                                                    .filter((item: KeranjangItem) => selectedItems.includes(item.id))
+                                                    .map((item: KeranjangItem) => (
+                                                        <div key={item.id} className="flex justify-between text-[#5f6368]">
+                                                            <span className="truncate max-w-[160px]">{item.nama_produk} x{item.jumlah}</span>
+                                                            <span>Rp {item.subtotal.toLocaleString('id-ID')}</span>
+                                                        </div>
+                                                    ))}
                                             </div>
-                                        ))}
-                                        <div className="border-t border-[#19140035] pt-3 flex justify-between font-bold text-[#1b1b18]">
-                                            <span>Total</span>
-                                            <span className="text-[#2264c0]">Rp {(total as number).toLocaleString('id-ID')}</span>
-                                        </div>
-                                    </div>
-                                    <button onClick={() => router.visit('/checkout')} className="mt-5 w-full py-3 bg-[#2264c0] text-white rounded-full font-semibold text-sm hover:bg-[#1a4f9a] transition-colors">
-                                        Lanjut ke Checkout
-                                    </button>
+                                            <div className="border-t border-[#19140035] mt-3 pt-3 flex justify-between font-bold text-[#1b1b18]">
+                                                <span>Total ({selectedCount} item)</span>
+                                                <span className="text-[#2264c0]">Rp {selectedTotal.toLocaleString('id-ID')}</span>
+                                            </div>
+                                            <button
+                                                onClick={checkoutSelected}
+                                                className="mt-5 w-full py-3 bg-[#2264c0] text-white rounded-full font-semibold text-sm hover:bg-[#1a4f9a] transition-colors"
+                                            >
+                                                Checkout ({selectedCount} item)
+                                            </button>
+                                        </>
+                                    ) : (
+                                        <>
+                                            <div className="flex flex-col gap-3 text-sm text-[#5f6368] mb-3">
+                                                <p className="text-center py-4">Pilih item yang ingin checkout</p>
+                                            </div>
+                                            <div className="border-t border-[#19140035] pt-3 flex justify-between font-bold text-[#1b1b18]">
+                                                <span>Total</span>
+                                                <span className="text-[#5f6368]">Rp 0</span>
+                                            </div>
+                                            <button
+                                                disabled
+                                                className="mt-5 w-full py-3 bg-gray-200 text-gray-400 rounded-full font-semibold text-sm cursor-not-allowed"
+                                            >
+                                                Pilih item terlebih dahulu
+                                            </button>
+                                        </>
+                                    )}
                                 </div>
                             </div>
                         </div>

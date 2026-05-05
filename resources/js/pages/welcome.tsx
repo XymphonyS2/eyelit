@@ -230,7 +230,7 @@ export default function Welcome() {
                                                     {cartItems.map((item: any, index: number) => (
                                                         <div key={index} className="dropdown-cart-item">
                                                             <div className="dropdown-cart-image">
-                                                                <img src={item.gambar || '/images/placeholder.png'} alt={item.nama} />
+                                                                <img src={`/images/produk/${item.gambar}`} alt={item.nama} onError={(e) => { (e.target as HTMLImageElement).src = '/images/placeholder.png'; }} />
                                                             </div>
                                                             <div className="dropdown-cart-info">
                                                                 <p className="dropdown-cart-name">{item.nama}</p>
@@ -243,7 +243,7 @@ export default function Welcome() {
                                             )}
                                             {cartItems.length > 0 && (
                                                 <div className="dropdown-cart-footer">
-                                                    <Link href="/cart">Lihat Keranjang</Link>
+                                                    <Link href="/keranjang">Lihat Keranjang</Link>
                                                 </div>
                                             )}
                                         </div>

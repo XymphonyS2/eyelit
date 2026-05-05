@@ -145,7 +145,7 @@ export default function Dashboard() {
                                         )}
                                         {cartItems.length > 0 && (
                                             <div className="dropdown-cart-footer">
-                                                <Link href="/cart">Lihat Keranjang</Link>
+                                                <Link href="/keranjang">Lihat Keranjang</Link>
                                             </div>
                                         )}
                                     </div>

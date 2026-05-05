@@ -15,6 +15,7 @@ createInertiaApp({
         switch (true) {
             case name === 'welcome':
             case name === 'katalog':
+            case name === 'keranjang':
             case name === 'produk-detail':
             case name === 'dashboard':
                 return null;
