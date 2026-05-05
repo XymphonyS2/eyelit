@@ -2,68 +2,39 @@
 
 namespace App\Http\Controllers;
 
-use App\Services\RajaOngkirService;
+use App\Models\Alamat;
+use App\Models\Ongkir;
+use App\Models\Ekspedisi;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Log;
 
 class OngkirController extends Controller
 {
-    protected $rajaOngkir;
-
-    public function __construct(RajaOngkirService $rajaOngkir)
-    {
-        $this->rajaOngkir = $rajaOngkir;
-    }
-
     public function hitung(Request $request)
     {
-        try {
-            // 🔥 VALIDASI
-            $request->validate([
-                'kode_kota' => 'required|integer',
-            ]);
+        $request->validate([
+            'alamat_id'    => 'required|exists:alamat,id',
+            'ekspedisi_id' => 'required|exists:ekspedisi_master,id',
+        ]);
 
-            $kodeKota = (int) $request->kode_kota;
+        $alamat = Alamat::findOrFail($request->alamat_id);
 
-            // 🔥 PANGGIL SERVICE
-            $result = $this->rajaOngkir->hitungSemuaEkspedisi($kodeKota);
+        // Gunakan ongkir_master langsung berdasarkan provinsi_id
+        $ongkir = Ongkir::where('provinsi_id', $alamat->provinsi_id)
+            ->where('ekspedisi_id', $request->ekspedisi_id)
+            ->first();
 
-            Log::info('ONGKIR RESULT:', $result);
-
-            // 🔥 AMBIL HARGA TERMURAH (opsional tapi bagus)
-            $harga = 0;
-
-            if (isset($result['rajaongkir']['results'])) {
-                $allCosts = [];
-
-                foreach ($result['rajaongkir']['results'] as $ekspedisi) {
-                    foreach ($ekspedisi['costs'] as $layanan) {
-                        if (isset($layanan['cost'][0]['value'])) {
-                            $allCosts[] = $layanan['cost'][0]['value'];
-                        }
-                    }
-                }
-
-                if (!empty($allCosts)) {
-                    $harga = min($allCosts); // 🔥 ambil yang paling murah
-                }
-            }
-
-            // 🔥 RESPONSE BERSIH KE FRONTEND
+        if ($ongkir) {
             return response()->json([
-                'success' => true,
-                'harga'   => $harga,
-                'data'    => $result, // optional (buat debug)
+                'harga'             => (int) $ongkir->harga,
+                'estimasi_hari_min' => (string) $ongkir->estimasi_hari_min,
+                'estimasi_hari_max' => (string) $ongkir->estimasi_hari_max,
             ]);
-
-        } catch (\Throwable $e) {
-            Log::error('ONGKIR ERROR: ' . $e->getMessage());
-
-            return response()->json([
-                'success' => false,
-                'harga'   => 0,
-                'error'   => 'Gagal mengambil ongkir',
-            ], 500);
         }
+
+        return response()->json([
+            'harga'             => 0,
+            'estimasi_hari_min' => '1',
+            'estimasi_hari_max' => '3',
+        ]);
     }
 }

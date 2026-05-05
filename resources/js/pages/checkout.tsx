@@ -1,4 +1,5 @@
 import { Head, Link, router, useForm, usePage } from '@inertiajs/react';
+import { toast } from 'sonner';
 import { ArrowLeft, Bell, BookOpen, LogOut, MapPin, Plus, Settings, ShoppingBag, ShoppingCart, User, X } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
 
@@ -45,6 +46,18 @@ interface Ekspedisi {
 export default function Checkout() {
     const { auth, items, total, alamat, provinsi, ekspedisi } = usePage().props as any;
     const keranjangCount: number = auth.keranjang_count || 0;
+
+    const page = usePage();
+    const flash = (page.props as any).flash;
+    const prevFlash = useRef<string | null>(null);
+    useEffect(() => {
+        const msg = flash?.success || flash?.error;
+        if (msg && msg !== prevFlash.current) {
+            prevFlash.current = msg;
+            if (flash.success) toast.success(flash.success);
+            else if (flash.error) toast.error(flash.error);
+        }
+    }, [flash]);
 
     // 🔥 PERBAIKAN: guard array props agar tidak crash saat undefined
     const alamatList: Alamat[]   = Array.isArray(alamat)    ? alamat    : [];
@@ -137,10 +150,12 @@ export default function Checkout() {
 
     function submitCheckout() {
         if (!selectedAlamat || !selectedEkspedisi) return;
+        const itemIds = itemList.map((item: Item) => item.id).join(',');
         router.post('/checkout', {
             alamat_id: selectedAlamat.id,
             ekspedisi_id: selectedEkspedisi.id,
             metode_pembayaran: metodePembayaran,
+            items: itemIds,
         });
     }
 
@@ -355,7 +370,7 @@ export default function Checkout() {
                                     <h2 className="text-sm font-semibold text-[#1b1b18]">Metode Pembayaran</h2>
                                 </div>
                                 <div className="divide-y divide-[#19140035]">
-                                    {['QRIS', 'Virtual Account BCA'].map((m) => (
+                                    {['QRIS'].map((m) => (
                                         <label key={m} className="flex items-center gap-3 px-5 py-4 cursor-pointer hover:bg-gray-50 transition-colors">
                                             <input
                                                 type="radio"

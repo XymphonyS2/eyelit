@@ -20,14 +20,22 @@ class CheckoutController extends Controller
 {
     public function __construct(private RajaOngkirService $rajaOngkir) {}
 
-    public function index()
+    public function index(Request $request)
     {
-        $keranjang = Keranjang::with('produk')
-            ->where('pengguna_id', auth()->id())
-            ->get();
+        $selectedIds = $request->query('items');
+
+        $query = Keranjang::with('produk')
+            ->where('pengguna_id', auth()->id());
+
+        if ($selectedIds) {
+            $ids = array_filter(array_map('intval', explode(',', $selectedIds)));
+            $query->whereIn('id', $ids);
+        }
+
+        $keranjang = $query->get();
 
         if ($keranjang->isEmpty()) {
-            return redirect()->route('keranjang')->with('error', 'Keranjang kosong.');
+            return redirect()->route('keranjang')->with('error', 'Pilih produk yang ingin checkout.');
         }
 
         $lensaData = Lensa::where('status_lensa', true)->get();
@@ -35,7 +43,7 @@ class CheckoutController extends Controller
         $items = $keranjang->map(function ($item) use ($lensaData) {
             $produk = $item->produk;
             $hargaLensa = $this->hitungHargaLensa($item, $lensaData);
-            
+
             return [
                 'id'             => $item->id,
                 'produk_id'      => $item->produk_id,
@@ -111,15 +119,26 @@ class CheckoutController extends Controller
         $pesanan = null;
 
         DB::transaction(function () use ($request, &$pesanan) {
-            $request->validate([
+            $validated = $request->validate([
                 'alamat_id'         => 'required|exists:alamat,id',
-                'ekspedisi_id'      => 'required|exists:ekspedisi,id',
-                'metode_pembayaran' => 'required|in:QRIS,Virtual Account BCA',
+                'ekspedisi_id'      => 'required|exists:ekspedisi_master,id',
+                'metode_pembayaran' => 'required|in:QRIS',
             ]);
 
-            $keranjang = Keranjang::with('produk')
-                ->where('pengguna_id', auth()->id())
-                ->get();
+            $itemIds = $request->validate([
+                'items' => 'nullable|string',
+            ])['items'] ?? '';
+
+            $ids = $itemIds ? array_filter(array_map('intval', explode(',', $itemIds))) : [];
+
+            $query = Keranjang::with('produk')
+                ->where('pengguna_id', auth()->id());
+
+            if (!empty($ids)) {
+                $query->whereIn('id', $ids);
+            }
+
+            $keranjang = $query->get();
 
             if ($keranjang->isEmpty()) {
                 throw new \Exception('Keranjang kosong.');
@@ -127,6 +146,9 @@ class CheckoutController extends Controller
 
             $alamat     = Alamat::findOrFail($request->alamat_id);
             $beratTotal = max(250, $keranjang->sum(fn($item) => $item->jumlah * 200));
+
+            // Simpan item IDs yang di-checkout untuk dihapus nanti
+            $checkoutItemIds = $keranjang->pluck('id')->toArray();
 
             // Hitung ongkir: pakai kode_kota jika ada, fallback ke provinsi
             if (!empty($alamat->kode_kota)) {
@@ -184,7 +206,7 @@ class CheckoutController extends Controller
 
             $pesanan->update(['total_harga' => $totalProduk + $ongkosKirim]);
 
-            Keranjang::where('pengguna_id', auth()->id())->delete();
+            Keranjang::whereIn('id', $checkoutItemIds)->delete();
         });
 
         return redirect()->route('pesanan.show', $pesanan->id)
@@ -193,35 +215,35 @@ class CheckoutController extends Controller
 
     public function tambahAlamat(Request $request)
     {
-        $request->validate([
-            'nama_penerima'  => 'required|string|max:100',
-            'no_hp_penerima' => 'required|string|max:20',
-            'provinsi_id'    => 'required|exists:provinsi,id',
-            'kode_kota'      => 'required|integer',
-            'nama_kota'      => 'required|string|max:100',
-            'kota_kabupaten' => 'required|string|max:100',
-            'kecamatan'      => 'required|string|max:100',
-            'kode_pos'       => 'required|string|max:10',
-            'alamat_lengkap' => 'required|string',
+        $validated = $request->validate([
+            'nama_penerima'   => 'required|string|max:100',
+            'no_hp_penerima'  => 'required|string|max:20',
+            'provinsi_id'     => 'required|exists:provinsi,id',
+            'kode_kota'       => 'nullable|integer',
+            'nama_kota'       => 'nullable|string|max:100',
+            'kota_kabupaten'  => 'required|string|max:100',
+            'kecamatan'       => 'required|string|max:100',
+            'kode_pos'        => 'required|string|max:10',
+            'alamat_lengkap'  => 'required|string',
         ]);
 
         $isFirst = !Alamat::where('pengguna_id', auth()->id())->exists();
 
         Alamat::create([
             'pengguna_id'    => auth()->id(),
-            'nama_penerima'  => $request->nama_penerima,
-            'no_hp_penerima' => $request->no_hp_penerima,
-            'provinsi_id'    => $request->provinsi_id,
-            'kode_kota'      => $request->kode_kota,
-            'nama_kota'      => $request->nama_kota,
-            'kota_kabupaten' => $request->kota_kabupaten,
-            'kecamatan'      => $request->kecamatan,
-            'kode_pos'       => $request->kode_pos,
-            'alamat_lengkap' => $request->alamat_lengkap,
-            'alamat_utama'   => $isFirst,
+            'nama_penerima'  => $validated['nama_penerima'],
+            'no_hp_penerima' => $validated['no_hp_penerima'],
+            'provinsi_id'    => $validated['provinsi_id'],
+            'kode_kota'      => $validated['kode_kota'] ?? null,
+            'nama_kota'      => $validated['nama_kota'] ?? null,
+            'kota_kabupaten' => $validated['kota_kabupaten'],
+            'kecamatan'      => $validated['kecamatan'],
+            'kode_pos'       => $validated['kode_pos'],
+            'alamat_lengkap'  => $validated['alamat_lengkap'],
+            'alamat_utama'  => $isFirst,
         ]);
 
-        return back()->with('success', 'Alamat berhasil ditambahkan.');
+        return back()->with('success', 'Alamat berhasil disimpan.');
     }
 
     private function hitungHargaLensa($item, $lensaData = null): int

@@ -68,8 +68,8 @@ export default function Keranjang() {
 
     function checkoutSelected() {
         if (selectedItems.length === 0) return;
-        // For now, redirect to checkout page
-        router.visit('/checkout');
+        const ids = selectedItems.join(',');
+        router.visit(`/checkout?items=${ids}`);
     }
 
     return (
