@@ -4,13 +4,16 @@ use App\Http\Controllers\Auth\RegisterController;
 use App\Http\Controllers\EmailCheckController;
 use App\Http\Controllers\ProdukController;
 use App\Http\Controllers\UsernameCheckController;
+use App\Http\Controllers\WelcomeController;
 use App\Models\Produk;
 use Illuminate\Support\Facades\Route;
 use Laravel\Fortify\Features;
 
-Route::get('/', [ProdukController::class, 'index'])->name('home');
+Route::get('/', WelcomeController::class)->name('home');
 
 Route::get('/katalog', [ProdukController::class, 'index'])->name('katalog');
+
+Route::inertia('/welcome', 'welcome')->name('welcome');
 
 Route::get('/username-check', UsernameCheckController::class)->name('username.check');
 Route::get('/email-check', EmailCheckController::class)->name('email.check');
