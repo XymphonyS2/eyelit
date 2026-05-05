@@ -1,13 +1,25 @@
 import { Head, Link, router, usePage } from '@inertiajs/react';
-import { ArrowLeft, Bell, BookOpen, LogOut, Mail, MapPin, Phone, Search, Settings, ShoppingBag, ShoppingCart, User } from 'lucide-react';
-import { useRef, useState } from 'react';
+import { ArrowLeft, Bell, BookOpen, Check, Glasses, LogOut, Mail, MapPin, Minus as MinusIcon, Phone, Plus, Search, Settings, ShoppingBag, ShoppingCart, User, X } from 'lucide-react';
+import { useRef, useState, useMemo } from 'react';
 
 export default function ProdukDetail() {
-    const { auth, produk } = usePage().props as any;
+    const { auth, produk, lensa } = usePage().props as any;
     const keranjangCount: number = auth.keranjang_count || 0;
     const [showUserDropdown, setShowUserDropdown] = useState(false);
     const [showCartDropdown, setShowCartDropdown] = useState(false);
     const [showNotifDropdown, setShowNotifDropdown] = useState(false);
+    const [showOverlay, setShowOverlay] = useState(false);
+    const [tipePembelian, setTipePembelian] = useState<'Frame Saja' | 'Dengan Lensa'>('Frame Saja');
+    const [actionType, setActionType] = useState<'beli' | 'keranjang'>('keranjang');
+
+    // Lensa states
+    const [jenisLensa, setJenisLensa] = useState<'Minus' | 'Plus' | 'Silinder'>('Minus');
+    const [nilaiOd, setNilaiOd] = useState('');
+    const [nilaiOs, setNilaiOs] = useState('');
+    const [silinderOd, setSilinderOd] = useState('');
+    const [silinderOs, setSilinderOs] = useState('');
+    const [antiRadiasi, setAntiRadiasi] = useState(false);
+    const [photochromic, setPhotochromic] = useState(false);
 
     const userDropdownTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
     const cartDropdownTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -16,16 +28,100 @@ export default function ProdukDetail() {
     const cartItems: any[] = auth.user?.cartItems || [];
     const notifications: any[] = auth.user?.notifications || [];
 
-    function tambahKeKeranjang() {
+    // Calculate lens price
+    const calculateLensPrice = (nilai: string, silinder: string, isSilinder: boolean) => {
+        if (!nilai) return { base: 0, silinderBase: 0 };
+
+        const numNilai = parseFloat(nilai);
+        const numSilinder = parseFloat(silinder) || 0;
+
+        const matchingLensa = lensa?.find((l: any) =>
+            l.jenis_lensa === (isSilinder ? 'Silinder' : jenisLensa) &&
+            numNilai >= l.minus_plus_batas_bawah &&
+            numNilai <= l.minus_plus_batas_atas
+        );
+
+        const silinderLensa = isSilinder ? null : lensa?.find((l: any) =>
+            l.jenis_lensa === 'Silinder' &&
+            numSilinder >= l.minus_plus_batas_bawah &&
+            numSilinder <= l.minus_plus_batas_atas
+        );
+
+        return {
+            base: matchingLensa?.harga_per_mata || 0,
+            silinderBase: silinderLensa?.harga_per_mata || 0,
+        };
+    };
+
+    const hargaFrame = Number(produk.harga_produk) || 0;
+    const odPrice = calculateLensPrice(nilaiOd, silinderOd, jenisLensa === 'Silinder');
+    const osPrice = calculateLensPrice(nilaiOs, silinderOs, jenisLensa === 'Silinder');
+
+    const hargaAntiRadiasi = antiRadiasi ? (lensa?.[0]?.harga_anti_radiasi || 150000) : 0;
+    const hargaPhotochromic = photochromic ? (lensa?.[0]?.harga_photochromic || 200000) : 0;
+
+    const totalHarga = useMemo(() => {
+        if (tipePembelian === 'Frame Saja') {
+            return hargaFrame;
+        }
+        const lensOd = (odPrice.base + odPrice.silinderBase) * 2;
+        const lensOs = (osPrice.base + osPrice.silinderBase) * 2;
+        return hargaFrame + lensOd + lensOs + (hargaAntiRadiasi * 2) + (hargaPhotochromic * 2);
+    }, [tipePembelian, hargaFrame, odPrice, osPrice, hargaAntiRadiasi, hargaPhotochromic]);
+
+    function openOverlay(type: 'beli' | 'keranjang') {
         if (!auth.user) {
             router.visit('/login');
             return;
         }
-        router.post('/keranjang/tambah', {
+        setActionType(type);
+        setTipePembelian('Frame Saja');
+        setNilaiOd('');
+        setNilaiOs('');
+        setSilinderOd('');
+        setSilinderOs('');
+        setAntiRadiasi(false);
+        setPhotochromic(false);
+        setShowOverlay(true);
+    }
+
+    function konfirmasi() {
+        if (tipePembelian === 'Dengan Lensa' && (!nilaiOd || !nilaiOs)) {
+            alert('Mohon isi nilai lensa untuk mata kanan (OD) dan mata kiri (OS)');
+            return;
+        }
+
+        const payload: any = {
             produk_id: produk.id,
             jumlah: 1,
-            tipe_pembelian: 'Frame Saja',
-        }, { preserveScroll: true });
+            tipe_pembelian: tipePembelian === 'Frame Saja' ? 'Frame Saja' : 'Frame + Lensa',
+        };
+
+        if (tipePembelian === 'Dengan Lensa') {
+            payload.jenis_lensa_od = jenisLensa;
+            payload.nilai_lensa_od = nilaiOd;
+            payload.silinder_od = silinderOd;
+            payload.jenis_lensa_os = jenisLensa;
+            payload.nilai_lensa_os = nilaiOs;
+            payload.silinder_os = silinderOs;
+            payload.anti_radiasi = antiRadiasi;
+            payload.photochromic = photochromic;
+        }
+
+        if (actionType === 'keranjang') {
+            router.post('/keranjang/tambah', payload, {
+                preserveScroll: true,
+                onSuccess: () => setShowOverlay(false),
+            });
+        } else {
+            router.post('/keranjang/tambah', payload, {
+                preserveScroll: true,
+                onSuccess: () => {
+                    setShowOverlay(false);
+                    router.visit('/checkout');
+                },
+            });
+        }
     }
 
     const details = [
@@ -44,6 +140,274 @@ export default function ProdukDetail() {
         <>
             <Head title={`${produk.nama_produk} - EyeLit`} />
             <div className="min-h-screen bg-white">
+                {/* Overlay Modal */}
+                {showOverlay && (
+                    <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
+                        {/* Backdrop */}
+                        <div
+                            className="absolute inset-0 bg-black/50 backdrop-blur-sm"
+                            onClick={() => setShowOverlay(false)}
+                        />
+
+                        {/* Modal */}
+                        <div className="relative bg-white rounded-2xl shadow-2xl w-full max-w-lg overflow-hidden animate-in fade-in zoom-in-95 duration-200 max-h-[90vh] overflow-y-auto">
+                            {/* Header */}
+                            <div className="flex items-center justify-between px-6 py-4 border-b border-[#19140035] sticky top-0 bg-white z-10">
+                                <h2 className="text-lg font-bold text-[#1b1b18]">Pilih Tipe Pembelian</h2>
+                                <button
+                                    onClick={() => setShowOverlay(false)}
+                                    className="p-2 rounded-full hover:bg-gray-100 transition-colors"
+                                >
+                                    <X className="size-5 text-[#5f6368]" />
+                                </button>
+                            </div>
+
+                            {/* Body */}
+                            <div className="px-6 py-5">
+                                <p className="text-sm text-[#5f6368] mb-4">Pilih tipe pembelian untuk {produk.nama_produk}:</p>
+
+                                {/* Option: Frame Saja */}
+                                <button
+                                    onClick={() => setTipePembelian('Frame Saja')}
+                                    className={`w-full flex items-center gap-4 p-4 rounded-xl border-2 mb-3 transition-all ${
+                                        tipePembelian === 'Frame Saja'
+                                            ? 'border-[#2264c0] bg-[#2264c0]/5'
+                                            : 'border-[#19140035] hover:border-[#2264c0]/50'
+                                    }`}
+                                >
+                                    <div className={`w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0 ${
+                                        tipePembelian === 'Frame Saja' ? 'bg-[#2264c0]' : 'bg-gray-100'
+                                    }`}>
+                                        <Glasses className={`size-5 ${tipePembelian === 'Frame Saja' ? 'text-white' : 'text-[#5f6368]'}`} />
+                                    </div>
+                                    <div className="flex-1 text-left">
+                                        <p className="text-sm font-semibold text-[#1b1b18]">Frame Saja</p>
+                                        <p className="text-xs text-[#5f6368]">Hanya membeli frame kacamata</p>
+                                    </div>
+                                    <div className="text-right">
+                                        <p className="text-sm font-bold text-[#2264c0]">Rp {(Number(produk.harga_produk) || 0).toLocaleString('id-ID')}</p>
+                                        {tipePembelian === 'Frame Saja' && (
+                                            <div className="w-6 h-6 rounded-full bg-[#2264c0] flex items-center justify-center mt-1">
+                                                <Check className="size-4 text-white" />
+                                            </div>
+                                        )}
+                                    </div>
+                                </button>
+
+                                {/* Option: Dengan Lensa */}
+                                <button
+                                    onClick={() => setTipePembelian('Dengan Lensa')}
+                                    className={`w-full flex items-center gap-4 p-4 rounded-xl border-2 mb-3 transition-all ${
+                                        tipePembelian === 'Dengan Lensa'
+                                            ? 'border-[#2264c0] bg-[#2264c0]/5'
+                                            : 'border-[#19140035] hover:border-[#2264c0]/50'
+                                    }`}
+                                >
+                                    <div className={`w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0 ${
+                                        tipePembelian === 'Dengan Lensa' ? 'bg-[#2264c0]' : 'bg-gray-100'
+                                    }`}>
+                                        <Glasses className={`size-5 ${tipePembelian === 'Dengan Lensa' ? 'text-white' : 'text-[#5f6368]'}`} />
+                                    </div>
+                                    <div className="flex-1 text-left">
+                                        <p className="text-sm font-semibold text-[#1b1b18]">Dengan Lensa</p>
+                                        <p className="text-xs text-[#5f6368]">Frame + lensa dengan resep dokter (opsional)</p>
+                                    </div>
+                                    {tipePembelian === 'Dengan Lensa' && (
+                                        <div className="w-6 h-6 rounded-full bg-[#2264c0] flex items-center justify-center">
+                                            <Check className="size-4 text-white" />
+                                        </div>
+                                    )}
+                                </button>
+
+                                {/* Lensa Options - shown when "Dengan Lensa" selected */}
+                                {tipePembelian === 'Dengan Lensa' && (
+                                    <div className="mt-4 space-y-4">
+                                        {/* Jenis Lensa */}
+                                        <div>
+                                            <p className="text-sm font-semibold text-[#1b1b18] mb-2">Jenis Lensa</p>
+                                            <div className="flex gap-2">
+                                                {(['Minus', 'Plus', 'Silinder'] as const).map((jenis) => (
+                                                    <button
+                                                        key={jenis}
+                                                        onClick={() => {
+                                                            setJenisLensa(jenis);
+                                                            setNilaiOd('');
+                                                            setNilaiOs('');
+                                                            setSilinderOd('');
+                                                            setSilinderOs('');
+                                                        }}
+                                                        className={`flex-1 py-2 px-3 rounded-lg text-sm font-medium border-2 transition-all ${
+                                                            jenisLensa === jenis
+                                                                ? 'border-[#2264c0] bg-[#2264c0]/5 text-[#2264c0]'
+                                                                : 'border-[#19140035] text-[#5f6368] hover:border-[#2264c0]/50'
+                                                        }`}
+                                                    >
+                                                        {jenis}
+                                                    </button>
+                                                ))}
+                                            </div>
+                                        </div>
+
+                                        {/* Input Lensa OD (Mata Kanan) */}
+                                        <div className="bg-gray-50 rounded-xl p-4 border border-[#19140035]">
+                                            <p className="text-sm font-semibold text-[#1b1b18] mb-3">Mata Kanan (OD)</p>
+                                            <div className="grid grid-cols-2 gap-3">
+                                                <div>
+                                                    <label className="text-xs text-[#5f6368] mb-1 block">
+                                                        {jenisLensa === 'Silinder' ? 'Silinder (CYL)' : 'Sphere'}
+                                                    </label>
+                                                    <input
+                                                        type="number"
+                                                        step="0.25"
+                                                        min="0"
+                                                        max="10"
+                                                        value={jenisLensa === 'Silinder' ? silinderOd : nilaiOd}
+                                                        onChange={(e) => {
+                                                            if (jenisLensa === 'Silinder') {
+                                                                setSilinderOd(e.target.value);
+                                                            } else {
+                                                                setNilaiOd(e.target.value);
+                                                            }
+                                                        }}
+                                                        placeholder={jenisLensa === 'Silinder' ? '0.00' : '0.00'}
+                                                        className="w-full h-10 px-3 rounded-lg border border-[#19140035] text-sm focus:outline-none focus:border-[#2264c0]"
+                                                    />
+                                                </div>
+                                                {jenisLensa !== 'Silinder' && (
+                                                    <div>
+                                                        <label className="text-xs text-[#5f6368] mb-1 block">Silinder (CYL)</label>
+                                                        <input
+                                                            type="number"
+                                                            step="0.25"
+                                                            min="0"
+                                                            max="4"
+                                                            value={silinderOd}
+                                                            onChange={(e) => setSilinderOd(e.target.value)}
+                                                            placeholder="0.00"
+                                                            className="w-full h-10 px-3 rounded-lg border border-[#19140035] text-sm focus:outline-none focus:border-[#2264c0]"
+                                                        />
+                                                    </div>
+                                                )}
+                                            </div>
+                                        </div>
+
+                                        {/* Input Lensa OS (Mata Kiri) */}
+                                        <div className="bg-gray-50 rounded-xl p-4 border border-[#19140035]">
+                                            <p className="text-sm font-semibold text-[#1b1b18] mb-3">Mata Kiri (OS)</p>
+                                            <div className="grid grid-cols-2 gap-3">
+                                                <div>
+                                                    <label className="text-xs text-[#5f6368] mb-1 block">
+                                                        {jenisLensa === 'Silinder' ? 'Silinder (CYL)' : 'Sphere'}
+                                                    </label>
+                                                    <input
+                                                        type="number"
+                                                        step="0.25"
+                                                        min="0"
+                                                        max="10"
+                                                        value={jenisLensa === 'Silinder' ? silinderOs : nilaiOs}
+                                                        onChange={(e) => {
+                                                            if (jenisLensa === 'Silinder') {
+                                                                setSilinderOs(e.target.value);
+                                                            } else {
+                                                                setNilaiOs(e.target.value);
+                                                            }
+                                                        }}
+                                                        placeholder={jenisLensa === 'Silinder' ? '0.00' : '0.00'}
+                                                        className="w-full h-10 px-3 rounded-lg border border-[#19140035] text-sm focus:outline-none focus:border-[#2264c0]"
+                                                    />
+                                                </div>
+                                                {jenisLensa !== 'Silinder' && (
+                                                    <div>
+                                                        <label className="text-xs text-[#5f6368] mb-1 block">Silinder (CYL)</label>
+                                                        <input
+                                                            type="number"
+                                                            step="0.25"
+                                                            min="0"
+                                                            max="4"
+                                                            value={silinderOs}
+                                                            onChange={(e) => setSilinderOs(e.target.value)}
+                                                            placeholder="0.00"
+                                                            className="w-full h-10 px-3 rounded-lg border border-[#19140035] text-sm focus:outline-none focus:border-[#2264c0]"
+                                                        />
+                                                    </div>
+                                                )}
+                                            </div>
+                                        </div>
+
+                                        {/* Pilihan Tambahan */}
+                                        <div>
+                                            <p className="text-sm font-semibold text-[#1b1b18] mb-2">Pilihan Tambahan</p>
+                                            <div className="space-y-2">
+                                                <label className="flex items-center gap-3 p-3 rounded-lg border border-[#19140035] cursor-pointer hover:bg-gray-50 transition-colors">
+                                                    <input
+                                                        type="checkbox"
+                                                        checked={antiRadiasi}
+                                                        onChange={(e) => setAntiRadiasi(e.target.checked)}
+                                                        className="w-5 h-5 rounded accent-[#2264c0]"
+                                                    />
+                                                    <div className="flex-1">
+                                                        <p className="text-sm font-medium text-[#1b1b18]">Anti Radiasi</p>
+                                                        <p className="text-xs text-[#5f6368]">Melindungi mata dari radiasi layar</p>
+                                                    </div>
+                                                    <p className="text-sm font-semibold text-[#2264c0]">
+                                                        + Rp {(lensa?.[0]?.harga_anti_radiasi || 150000).toLocaleString('id-ID')}/mata
+                                                    </p>
+                                                </label>
+                                                <label className="flex items-center gap-3 p-3 rounded-lg border border-[#19140035] cursor-pointer hover:bg-gray-50 transition-colors">
+                                                    <input
+                                                        type="checkbox"
+                                                        checked={photochromic}
+                                                        onChange={(e) => setPhotochromic(e.target.checked)}
+                                                        className="w-5 h-5 rounded accent-[#2264c0]"
+                                                    />
+                                                    <div className="flex-1">
+                                                        <p className="text-sm font-medium text-[#1b1b18]">Photochromic</p>
+                                                        <p className="text-xs text-[#5f6368]">Lensa yang bisa berubah warna saat sinar matahari</p>
+                                                    </div>
+                                                    <p className="text-sm font-semibold text-[#2264c0]">
+                                                        + Rp {(lensa?.[0]?.harga_photochromic || 200000).toLocaleString('id-ID')}/mata
+                                                    </p>
+                                                </label>
+                                            </div>
+                                        </div>
+                                    </div>
+                                )}
+
+                                {/* Harga Summary */}
+                                <div className="mt-5 p-4 bg-[#2264c0]/5 rounded-xl border border-[#2264c0]/20">
+                                    <div className="flex justify-between items-center">
+                                        <p className="text-sm font-semibold text-[#1b1b18]">Total Harga</p>
+                                        <p className="text-2xl font-bold text-[#2264c0]">
+                                            Rp {totalHarga.toLocaleString('id-ID')}
+                                        </p>
+                                    </div>
+                                    {tipePembelian === 'Dengan Lensa' && (
+                                        <p className="text-xs text-[#5f6368] mt-1">
+                                            Frame + ({jenisLensa} + Silinder) x 2 mata + tambahan
+                                        </p>
+                                    )}
+                                </div>
+                            </div>
+
+                            {/* Footer */}
+                            <div className="px-6 pb-6 flex gap-3">
+                                <button
+                                    onClick={() => setShowOverlay(false)}
+                                    className="flex-1 py-3 rounded-full border border-[#19140035] text-[#1b1b18] font-semibold text-sm hover:bg-gray-50 transition-colors"
+                                >
+                                    Batal
+                                </button>
+                                <button
+                                    onClick={konfirmasi}
+                                    className="flex-1 py-3 rounded-full bg-[#2264c0] text-white font-semibold text-sm hover:bg-[#1a4f9a] transition-colors"
+                                >
+                                    {actionType === 'keranjang' ? 'Tambah ke Keranjang' : 'Beli Sekarang'}
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                )}
+
                 {/* Navbar */}
                 <nav className="relative z-50 border-b border-[#19140035] bg-white">
                     <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 gap-4">
@@ -256,17 +620,18 @@ export default function ProdukDetail() {
                                 </div>
                             </div>
 
-                            {/* Tombol Aksi */}
+                            {/* Tombol aksi */}
                             <div className="flex gap-4">
                                 <button
                                     disabled={produk.stok === 0}
+                                    onClick={() => openOverlay('beli')}
                                     className="flex-1 py-4 rounded-full bg-[#2264c0] text-white font-semibold text-base hover:bg-[#1a4f9a] transition-colors disabled:opacity-50 disabled:cursor-not-allowed shadow-lg shadow-[#2264c0]/20"
                                 >
                                     Beli Sekarang
                                 </button>
                                 <button
                                     disabled={produk.stok === 0}
-                                    onClick={tambahKeKeranjang}
+                                    onClick={() => openOverlay('keranjang')}
                                     className="flex-1 py-4 rounded-full border-2 border-[#2264c0] text-[#2264c0] font-semibold text-base hover:bg-blue-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                                 >
                                     + Keranjang

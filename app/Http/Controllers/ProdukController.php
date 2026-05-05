@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Produk;
+use App\Models\Lensa;
 use Inertia\Inertia;
 
 class ProdukController extends Controller
@@ -21,9 +22,11 @@ class ProdukController extends Controller
     public function show($id)
     {
         $produk = Produk::findOrFail($id);
+        $lensa = Lensa::where('status_lensa', true)->get();
 
         return Inertia::render('produk-detail', [
             'produk' => $produk,
+            'lensa' => $lensa,
         ]);
     }
 }
