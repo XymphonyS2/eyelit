@@ -1,6 +1,7 @@
 import { Head, Link, router, usePage } from '@inertiajs/react';
 import { ArrowLeft, Bell, BookOpen, Check, Glasses, LogOut, Mail, MapPin, Minus as MinusIcon, Phone, Plus, Search, Settings, ShoppingBag, ShoppingCart, User, X } from 'lucide-react';
-import { useRef, useState, useMemo } from 'react';
+import { useEffect, useRef, useState, useMemo } from 'react';
+import { toast } from 'sonner';
 
 export default function ProdukDetail() {
     const { auth, produk, lensa } = usePage().props as any;
@@ -25,8 +26,24 @@ export default function ProdukDetail() {
     const cartDropdownTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
     const notifDropdownTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-    const cartItems: any[] = auth.user?.cartItems || [];
+    const cartItems: any[] = auth.cartItems || [];
     const notifications: any[] = auth.user?.notifications || [];
+
+    // Flash notification handler
+    const page = usePage();
+    const flash = (page.props as any).flash;
+    const prevFlash = useRef<string | null>(null);
+    useEffect(() => {
+        const msg = flash?.success || flash?.error;
+        if (msg && msg !== prevFlash.current) {
+            prevFlash.current = msg;
+            if (flash.success) {
+                toast.success(flash.success);
+            } else if (flash.error) {
+                toast.error(flash.error);
+            }
+        }
+    }, [flash]);
 
     // Calculate lens price
     const calculateLensPrice = (nilai: string, silinder: string, isSilinder: boolean) => {
@@ -87,9 +104,11 @@ export default function ProdukDetail() {
 
     function konfirmasi() {
         if (tipePembelian === 'Dengan Lensa' && (!nilaiOd || !nilaiOs)) {
-            alert('Mohon isi nilai lensa untuk mata kanan (OD) dan mata kiri (OS)');
+            toast.error('Mohon isi nilai lensa untuk mata kanan (OD) dan mata kiri (OS)');
             return;
         }
+
+        setShowOverlay(false);
 
         const payload: any = {
             produk_id: produk.id,
@@ -111,13 +130,11 @@ export default function ProdukDetail() {
         if (actionType === 'keranjang') {
             router.post('/keranjang/tambah', payload, {
                 preserveScroll: true,
-                onSuccess: () => setShowOverlay(false),
             });
         } else {
             router.post('/keranjang/tambah', payload, {
                 preserveScroll: true,
                 onSuccess: () => {
-                    setShowOverlay(false);
                     router.visit('/checkout');
                 },
             });
@@ -184,14 +201,11 @@ export default function ProdukDetail() {
                                         <p className="text-sm font-semibold text-[#1b1b18]">Frame Saja</p>
                                         <p className="text-xs text-[#5f6368]">Hanya membeli frame kacamata</p>
                                     </div>
-                                    <div className="text-right">
-                                        <p className="text-sm font-bold text-[#2264c0]">Rp {(Number(produk.harga_produk) || 0).toLocaleString('id-ID')}</p>
-                                        {tipePembelian === 'Frame Saja' && (
-                                            <div className="w-6 h-6 rounded-full bg-[#2264c0] flex items-center justify-center mt-1">
-                                                <Check className="size-4 text-white" />
-                                            </div>
-                                        )}
-                                    </div>
+                                    {tipePembelian === 'Frame Saja' && (
+                                        <div className="w-6 h-6 rounded-full bg-[#2264c0] flex items-center justify-center">
+                                            <Check className="size-4 text-white" />
+                                        </div>
+                                    )}
                                 </button>
 
                                 {/* Option: Dengan Lensa */}
@@ -485,11 +499,15 @@ export default function ProdukDetail() {
                                                 {cartItems.length === 0 ? (
                                                     <div className="dropdown-cart-empty"><ShoppingCart className="size-10" /><p>Kamu belum memasukkan barang ke keranjang</p></div>
                                                 ) : (
-                                                    <div className="max-h-80 overflow-y-auto">
+                                                    <div style={{ maxHeight: '320px', overflowY: 'auto' }}>
                                                         {cartItems.map((item: any, index: number) => (
                                                             <div key={index} className="dropdown-cart-item">
                                                                 <div className="dropdown-cart-image">
-                                                                    <img src={item.gambar || '/images/placeholder.png'} alt={item.nama} />
+                                                                    <img
+                                                                        src={`/images/produk/${item.gambar}`}
+                                                                        alt={item.nama}
+                                                                        onError={(e) => { (e.target as HTMLImageElement).src = '/images/placeholder.png'; }}
+                                                                    />
                                                                 </div>
                                                                 <div className="dropdown-cart-info">
                                                                     <p className="dropdown-cart-name">{item.nama}</p>
@@ -499,9 +517,7 @@ export default function ProdukDetail() {
                                                         ))}
                                                     </div>
                                                 )}
-                                                {cartItems.length > 0 && (
-                                                    <div className="dropdown-cart-footer"><Link href="/keranjang">Lihat Keranjang</Link></div>
-                                                )}
+                                                <div className="dropdown-cart-footer"><Link href="/keranjang">Lihat Keranjang</Link></div>
                                             </div>
                                         )}
                                     </div>

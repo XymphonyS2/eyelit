@@ -52,43 +52,43 @@ class KeranjangController extends Controller
 
     public function tambah(Request $request)
     {
-        $request->validate([
+        $validated = $request->validate([
             'produk_id' => 'required|exists:produk,id',
             'jumlah' => 'required|integer|min:1',
             'tipe_pembelian' => 'required|in:Frame Saja,Frame + Lensa',
         ]);
 
-        $produk = Produk::findOrFail($request->produk_id);
+        $produk = Produk::findOrFail($validated['produk_id']);
 
-        if ($produk->stok < $request->jumlah) {
-            return back()->withErrors(['jumlah' => 'Stok tidak mencukupi.']);
+        if ($produk->stok < $validated['jumlah']) {
+            return redirect()->back()->with('error', 'Stok tidak mencukupi.');
         }
 
         $existing = Keranjang::where('pengguna_id', auth()->id())
-            ->where('produk_id', $request->produk_id)
-            ->where('tipe_pembelian', $request->tipe_pembelian)
+            ->where('produk_id', $validated['produk_id'])
+            ->where('tipe_pembelian', $validated['tipe_pembelian'])
             ->first();
 
-        if ($existing && $request->tipe_pembelian === 'Frame Saja') {
-            $existing->increment('jumlah', $request->jumlah);
+        if ($existing && $validated['tipe_pembelian'] === 'Frame Saja') {
+            $existing->increment('jumlah', $validated['jumlah']);
         } else {
             Keranjang::create([
                 'pengguna_id' => auth()->id(),
-                'produk_id' => $request->produk_id,
-                'jumlah' => $request->jumlah,
-                'tipe_pembelian' => $request->tipe_pembelian,
-                'jenis_lensa_od' => $request->jenis_lensa_od,
-                'nilai_lensa_od' => $request->nilai_lensa_od,
-                'silinder_od' => $request->silinder_od,
-                'jenis_lensa_os' => $request->jenis_lensa_os,
-                'nilai_lensa_os' => $request->nilai_lensa_os,
-                'silinder_os' => $request->silinder_os,
+                'produk_id' => $validated['produk_id'],
+                'jumlah' => $validated['jumlah'],
+                'tipe_pembelian' => $validated['tipe_pembelian'],
+                'jenis_lensa_od' => $validated['jenis_lensa_od'] ?? null,
+                'nilai_lensa_od' => $validated['nilai_lensa_od'] ?? null,
+                'silinder_od' => $validated['silinder_od'] ?? null,
+                'jenis_lensa_os' => $validated['jenis_lensa_os'] ?? null,
+                'nilai_lensa_os' => $validated['nilai_lensa_os'] ?? null,
+                'silinder_os' => $validated['silinder_os'] ?? null,
                 'anti_radiasi' => $request->boolean('anti_radiasi'),
                 'photochromic' => $request->boolean('photochromic'),
             ]);
         }
 
-        return back()->with('success', 'Produk berhasil ditambahkan ke keranjang.');
+        return redirect()->back()->with('success', 'Produk berhasil ditambahkan ke keranjang.');
     }
 
     public function update(Request $request, $id)

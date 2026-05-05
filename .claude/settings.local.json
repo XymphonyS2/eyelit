@@ -55,7 +55,8 @@
       "PowerShell(pip show *)",
       "PowerShell(& \"D:\\\\coding\\\\py\\\\python.exe\" -m pip install python-docx -q)",
       "PowerShell(& \"D:\\\\coding\\\\py\\\\python.exe\" \"C:\\\\Users\\\\LaLa\\\\Downloads\\\\read_doc.py\")",
-      "Bash(xargs grep *)"
+      "Bash(xargs grep *)",
+      "Bash(php *)"
     ]
   }
 }

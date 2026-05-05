@@ -1,7 +1,11 @@
 <?php
 
 use App\Http\Controllers\Auth\RegisterController;
+use App\Http\Controllers\CheckoutController;
 use App\Http\Controllers\EmailCheckController;
+use App\Http\Controllers\KeranjangController;
+use App\Http\Controllers\OngkirController;
+use App\Http\Controllers\PesananController;
 use App\Http\Controllers\ProdukController;
 use App\Http\Controllers\UsernameCheckController;
 use App\Http\Controllers\WelcomeController;

@@ -26,7 +26,7 @@ class RajaOngkirService
 
     public function __construct()
     {
-        $this->apiKey = config('services.rajaongkir.key');
+        $this->apiKey = config('services.rajaongkir.key') ?? '';
     }
 
     public function hitungSemuaEkspedisi(int $destinasiKota, int $beratGram = 1000): array

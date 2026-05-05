@@ -14,7 +14,7 @@ export default function Welcome() {
     const notifDropdownTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
     // Mock cart items - replace with actual data from backend
-    const cartItems: any[] = auth.user?.cartItems || [];
+    const cartItems: any[] = auth.cartItems || [];
     // Mock notifications - replace with actual data from backend
     const notifications: any[] = auth.user?.notifications || [];
 

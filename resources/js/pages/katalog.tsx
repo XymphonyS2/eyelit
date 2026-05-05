@@ -28,7 +28,7 @@ export default function Katalog() {
     const cartDropdownTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
     const notifDropdownTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-    const cartItems: any[] = auth.user?.cartItems || [];
+    const cartItems: any[] = auth.cartItems || [];
     const notifications: any[] = auth.user?.notifications || [];
 
     // Filter options from actual produk data (unique values)

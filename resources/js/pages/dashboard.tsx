@@ -13,9 +13,9 @@ export default function Dashboard() {
     const cartDropdownTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
     const notifDropdownTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-    // Mock cart items - replace with actual data from backend
-    const cartItems: any[] = auth.user?.cartItems || [];
-    // Mock notifications - replace with actual data from backend
+    // Cart items
+    const cartItems: any[] = auth.cartItems || [];
+    // Mock notifications
     const notifications: any[] = auth.user?.notifications || [];
 
     return (
