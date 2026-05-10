@@ -2,6 +2,8 @@
 
 use App\Http\Controllers\Auth\RegisterController;
 use App\Http\Controllers\CheckoutController;
+use App\Http\Controllers\DaftarPenggunaController;
+use App\Http\Controllers\DaftarPesananController;
 use App\Http\Controllers\DaftarProdukController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\EmailCheckController;
@@ -43,6 +45,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/pesanan/{id}', [PesananController::class, 'show'])->name('pesanan.show');
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard')->middleware('admin');
     Route::get('/produk', [DaftarProdukController::class, 'index'])->name('produk')->middleware('admin');
+    Route::get('/pengguna', [DaftarPenggunaController::class, 'index'])->name('pengguna')->middleware('admin');
+    Route::get('/daftar-pesanan', [DaftarPesananController::class, 'index'])->name('daftar-pesanan')->middleware('admin');
 });
 
 require __DIR__.'/settings.php';

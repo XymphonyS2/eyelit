@@ -227,15 +227,15 @@ export default function Dashboard() {
                                 Produk
                             </Link>
                             <Link
-                                href="#"
-                                className="flex items-center gap-2 py-2 text-sm font-medium text-[#706f6c] hover:text-[#1b1b18] transition-colors whitespace-nowrap"
+                                href="/daftar-pesanan"
+                                className="flex items-center gap-2 py-2 text-sm font-medium text-[#706f6c] hover:text-[#2264c0] transition-colors whitespace-nowrap"
                             >
                                 <ShoppingBag className="size-4" />
                                 Pesanan
                             </Link>
                             <Link
-                                href="#"
-                                className="flex items-center gap-2 py-2 text-sm font-medium text-[#706f6c] hover:text-[#1b1b18] transition-colors whitespace-nowrap"
+                                href="/pengguna"
+                                className="flex items-center gap-2 py-2 text-sm font-medium text-[#706f6c] hover:text-[#2264c0] transition-colors whitespace-nowrap"
                             >
                                 <Users className="size-4" />
                                 Pengguna

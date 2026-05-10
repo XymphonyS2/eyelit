@@ -1,9 +1,9 @@
 import { Head, Link, usePage } from '@inertiajs/react';
-import { Bell, BookOpen, LayoutGrid, LogOut, Package, Search, Settings, ShoppingBag, ShoppingCart, User, Users } from 'lucide-react';
+import { Bell, BookOpen, Clock, LayoutGrid, LogOut, Package, Search, Settings, ShoppingBag, ShoppingCart, User, Users } from 'lucide-react';
 import { useRef, useState } from 'react';
 
-export default function DaftarProduk() {
-    const { auth, produk } = usePage().props as any;
+export default function DaftarPesanan() {
+    const { auth, pesanan } = usePage().props as any;
     const [showUserDropdown, setShowUserDropdown] = useState(false);
     const [showCartDropdown, setShowCartDropdown] = useState(false);
     const [showNotifDropdown, setShowNotifDropdown] = useState(false);
@@ -15,9 +15,20 @@ export default function DaftarProduk() {
     const cartItems: any[] = auth.cartItems || [];
     const notifications: any[] = auth.user?.notifications || [];
 
+    const getStatusColor = (status: string) => {
+        const statusColors: Record<string, string> = {
+            'Menunggu Pembayaran': 'bg-yellow-100 text-yellow-800',
+            'Diproses': 'bg-blue-100 text-blue-800',
+            'Dikirim': 'bg-indigo-100 text-indigo-800',
+            'Selesai': 'bg-green-100 text-green-800',
+            'Dibatalkan': 'bg-red-100 text-red-800',
+        };
+        return statusColors[status] || 'bg-gray-100 text-gray-800';
+    };
+
     return (
         <>
-            <Head title="Daftar Produk - EyeLit" />
+            <Head title="Daftar Pesanan - EyeLit" />
 
             {/* Navbar */}
             <nav className="sticky top-0 z-50 border-b border-gray-200 bg-white/95 backdrop-blur-sm">
@@ -218,14 +229,14 @@ export default function DaftarProduk() {
                             </Link>
                             <Link
                                 href="/produk"
-                                className="flex items-center gap-2 py-2 text-sm font-medium text-[#2264c0] whitespace-nowrap"
+                                className="flex items-center gap-2 py-2 text-sm font-medium text-[#706f6c] hover:text-[#2264c0] transition-colors whitespace-nowrap"
                             >
                                 <Package className="size-4" />
                                 Produk
                             </Link>
                             <Link
                                 href="/daftar-pesanan"
-                                className="flex items-center gap-2 py-2 text-sm font-medium text-[#706f6c] hover:text-[#2264c0] transition-colors whitespace-nowrap"
+                                className="flex items-center gap-2 py-2 text-sm font-medium text-[#2264c0] whitespace-nowrap"
                             >
                                 <ShoppingBag className="size-4" />
                                 Pesanan
@@ -245,63 +256,70 @@ export default function DaftarProduk() {
             {/* Page Content */}
             <main className="mx-auto max-w-7xl px-4 py-8">
                 <div className="mb-8">
-                    <h1 className="text-3xl font-bold text-[#1b1b18]">Daftar Produk</h1>
-                    <p className="text-[#706f6c] mt-2">Kelola semua produk EyeLit</p>
+                    <h1 className="text-3xl font-bold text-[#1b1b18]">Daftar Pesanan</h1>
+                    <p className="text-[#706f6c] mt-2">Kelola semua pesanan EyeLit</p>
                 </div>
 
                 {/* Stats */}
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+                <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
                     <div className="rounded-xl border border-[#19140035] bg-white p-6">
                         <div className="flex items-center gap-4">
                             <div className="rounded-lg bg-[#2264c0]/10 p-3">
-                                <Package className="size-6 text-[#2264c0]" />
+                                <ShoppingBag className="size-6 text-[#2264c0]" />
                             </div>
                             <div>
-                                <p className="text-sm text-[#706f6c]">Total Produk</p>
-                                <p className="text-2xl font-bold text-[#1b1b18]">{produk?.length || 0}</p>
+                                <p className="text-sm text-[#706f6c]">Total Pesanan</p>
+                                <p className="text-2xl font-bold text-[#1b1b18]">{pesanan?.length || 0}</p>
                             </div>
                         </div>
                     </div>
                 </div>
 
-                {/* Products Table */}
-                {produk && produk.length > 0 ? (
+                {/* Orders Table */}
+                {pesanan && pesanan.length > 0 ? (
                     <div className="bg-white rounded-xl border border-[#19140035] overflow-hidden">
                         <div className="overflow-x-auto">
                             <table className="w-full">
                                 <thead className="bg-gray-50 border-b border-[#19140035]">
                                     <tr>
                                         <th className="px-6 py-3 text-left text-xs font-semibold text-[#706f6c] uppercase tracking-wider">No</th>
-                                        <th className="px-6 py-3 text-left text-xs font-semibold text-[#706f6c] uppercase tracking-wider">Gambar</th>
-                                        <th className="px-6 py-3 text-left text-xs font-semibold text-[#706f6c] uppercase tracking-wider">Nama Produk</th>
-                                        <th className="px-6 py-3 text-left text-xs font-semibold text-[#706f6c] uppercase tracking-wider">Merek</th>
-                                        <th className="px-6 py-3 text-left text-xs font-semibold text-[#706f6c] uppercase tracking-wider">Harga</th>
-                                        <th className="px-6 py-3 text-left text-xs font-semibold text-[#706f6c] uppercase tracking-wider">Stok</th>
+                                        <th className="px-6 py-3 text-left text-xs font-semibold text-[#706f6c] uppercase tracking-wider">ID Pesanan</th>
+                                        <th className="px-6 py-3 text-left text-xs font-semibold text-[#706f6c] uppercase tracking-wider">Pengguna</th>
+                                        <th className="px-6 py-3 text-left text-xs font-semibold text-[#706f6c] uppercase tracking-wider">Tanggal</th>
+                                        <th className="px-6 py-3 text-left text-xs font-semibold text-[#706f6c] uppercase tracking-wider">Total Harga</th>
                                         <th className="px-6 py-3 text-left text-xs font-semibold text-[#706f6c] uppercase tracking-wider">Status</th>
+                                        <th className="px-6 py-3 text-left text-xs font-semibold text-[#706f6c] uppercase tracking-wider">Aksi</th>
                                     </tr>
                                 </thead>
                                 <tbody className="divide-y divide-[#19140035]/20">
-                                    {produk.map((item: any, index: number) => (
+                                    {pesanan.map((item: any, index: number) => (
                                         <tr key={item.id} className="hover:bg-gray-50 transition-colors">
                                             <td className="px-6 py-4 text-sm text-[#1b1b18]">{index + 1}</td>
-                                            <td className="px-6 py-4">
-                                                <div className="w-16 h-16 rounded-lg overflow-hidden bg-gray-100">
-                                                    <img
-                                                        src={`/images/produk/${item.gambar}`}
-                                                        alt={item.nama_produk}
-                                                        className="w-full h-full object-cover"
-                                                        onError={(e) => { (e.target as HTMLImageElement).src = '/images/placeholder.png'; }}
-                                                    />
+                                            <td className="px-6 py-4 text-sm font-medium text-[#1b1b18]">#{item.id}</td>
+                                            <td className="px-6 py-4 text-sm text-[#706f6c]">{item.user?.username || 'N/A'}</td>
+                                            <td className="px-6 py-4 text-sm text-[#706f6c]">
+                                                <div className="flex items-center gap-1">
+                                                    <Clock className="size-4" />
+                                                    {new Date(item.tanggal_pemesanan).toLocaleDateString('id-ID', {
+                                                        day: '2-digit',
+                                                        month: 'short',
+                                                        year: 'numeric',
+                                                    })}
                                                 </div>
                                             </td>
-                                            <td className="px-6 py-4 text-sm font-medium text-[#1b1b18]">{item.nama_produk}</td>
-                                            <td className="px-6 py-4 text-sm text-[#706f6c]">{item.merek}</td>
-                                            <td className="px-6 py-4 text-sm font-bold text-[#2264c0]">Rp {(Number(item.harga_produk) || 0).toLocaleString('id-ID')}</td>
-                                            <td className="px-6 py-4 text-sm text-[#706f6c]">{item.stok}</td>
+                                            <td className="px-6 py-4 text-sm font-bold text-[#2264c0]">Rp {(Number(item.total_harga) || 0).toLocaleString('id-ID')}</td>
                                             <td className="px-6 py-4">
-                                                <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
-                                                    {item.status_produk}
+                                                <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getStatusColor(item.status)}`}>
+                                                    {item.status}
                                                 </span>
+                                            </td>
+                                            <td className="px-6 py-4">
+                                                <Link
+                                                    href={`/pesanan/${item.id}`}
+                                                    className="text-sm font-medium text-[#2264c0] hover:text-[#1a4f9a] transition-colors"
+                                                >
+                                                    Detail
+                                                </Link>
                                             </td>
                                         </tr>
                                     ))}
@@ -311,8 +329,8 @@ export default function DaftarProduk() {
                     </div>
                 ) : (
                     <div className="text-center py-12 bg-white rounded-xl border border-[#19140035]">
-                        <Package className="size-16 text-[#706f6c] mx-auto mb-4" />
-                        <p className="text-[#706f6c]">Belum ada produk aktif</p>
+                        <ShoppingBag className="size-16 text-[#706f6c] mx-auto mb-4" />
+                        <p className="text-[#706f6c]">Belum ada pesanan</p>
                     </div>
                 )}
             </main>

@@ -29,6 +29,11 @@ class Pesanan extends Model
         'alasan_pembatalan',
     ];
 
+    public function user()
+    {
+        return $this->belongsTo(User::class, 'pengguna_id');
+    }
+
     public function detailPesanan()
     {
         return $this->hasMany(DetailPesanan::class, 'pesanan_id');
