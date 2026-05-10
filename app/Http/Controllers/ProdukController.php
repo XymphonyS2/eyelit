@@ -23,10 +23,12 @@ class ProdukController extends Controller
     {
         $produk = Produk::findOrFail($id);
         $lensa = Lensa::where('status_lensa', true)->get();
+        $allProduk = Produk::orderBy('created_at', 'desc')->get();
 
         return Inertia::render('produk-detail', [
             'produk' => $produk,
             'lensa' => $lensa,
+            'allProduk' => $allProduk,
         ]);
     }
 }

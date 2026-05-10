@@ -34,6 +34,15 @@ export default function DaftarProduk() {
     const [errors, setErrors] = useState<Record<string, string>>({});
     const [showToast, setShowToast] = useState(false);
     const [toastMessage, setToastMessage] = useState('');
+    const [searchQuery, setSearchQuery] = useState('');
+    const [showSuggestions, setShowSuggestions] = useState(false);
+
+    // Get filtered suggestions for search
+    const searchSuggestions = searchQuery.trim()
+        ? produk.filter((item: any) =>
+            item.nama_produk?.toLowerCase().includes(searchQuery.toLowerCase())
+        ).slice(0, 5)
+        : [];
 
     const userDropdownTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
     const cartDropdownTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -251,9 +260,46 @@ export default function DaftarProduk() {
                                 type="text"
                                 autoComplete="off"
                                 placeholder="Cari produk kacamata..."
-                                className="w-full h-9 pl-4 pr-12 rounded-full border border-[#19140035] bg-white text-sm appearance-none focus:outline-none outline-none focus:border-[#2264c0] focus:border-[3px] focus:ring-2 focus:ring-[#2264c0] focus:ring-offset-0 [&::-webkit-search-decoration]:hidden [&::-webkit-search-cancel-button]:hidden [&::-webkit-search-results-button]:hidden [&::-webkit-search-results-decoration]:hidden outline-none [&:focus-visible]:outline-none [&:focus-visible]:ring-0 [&:-webkit-autofill]:!bg-white [&:-webkit-autofill]:![-webkit-box-shadow:0_0_0_100px_white_inset] [&:-webkit-autofill]:[-webkit-text-fill-color:#1b1b18]"
+                                value={searchQuery}
+                                onChange={(e) => {
+                                    setSearchQuery(e.target.value);
+                                    setShowSuggestions(true);
+                                }}
+                                onFocus={() => setShowSuggestions(true)}
+                                onBlur={() => setTimeout(() => setShowSuggestions(false), 200)}
+                                className="w-full h-9 pl-4 pr-12 rounded-full border border-[#19140035] bg-white text-sm text-[#1b1b18] appearance-none focus:outline-none outline-none focus:border-[#2264c0] focus:border-[3px] focus:ring-2 focus:ring-[#2264c0] focus:ring-offset-0 [&::-webkit-search-decoration]:hidden [&::-webkit-search-cancel-button]:hidden [&::-webkit-search-results-button]:hidden [&::-webkit-search-results-decoration]:hidden outline-none [&:focus-visible]:outline-none [&:focus-visible]:ring-0 [&:-webkit-autofill]:!bg-white [&:-webkit-autofill]:![-webkit-box-shadow:0_0_0_100px_white_inset] [&:-webkit-autofill]:[-webkit-text-fill-color:#1b1b18]"
                             />
                             <Search className="absolute right-4 top-1/2 -translate-y-1/2 size-5 text-[#706f6c]" />
+
+                            {/* Search Suggestions Dropdown */}
+                            {showSuggestions && searchSuggestions.length > 0 && (
+                                <div className="absolute top-full left-0 right-0 mt-2 bg-white rounded-xl border border-[#19140035] shadow-lg overflow-hidden z-50">
+                                    {searchSuggestions.map((item: any, idx: number) => (
+                                        <button
+                                            key={idx}
+                                            onClick={() => {
+                                                setSearchQuery(item.nama_produk);
+                                                setShowSuggestions(false);
+                                            }}
+                                            className="w-full px-4 py-3 flex items-center gap-3 hover:bg-gray-50 transition-colors text-left"
+                                        >
+                                            <img
+                                                src={`/images/produk/${item.gambar}`}
+                                                alt={item.nama_produk}
+                                                className="w-10 h-10 rounded-lg object-cover"
+                                                onError={(e) => { (e.target as HTMLImageElement).src = '/images/placeholder.png'; }}
+                                            />
+                                            <div className="flex-1 min-w-0">
+                                                <p className="text-sm font-medium text-[#1b1b18] truncate">{item.nama_produk}</p>
+                                                <p className="text-xs text-[#706f6c]">{item.merek}</p>
+                                            </div>
+                                            <span className="text-xs font-bold text-[#2264c0]">
+                                                Rp {(Number(item.harga_produk) || 0).toLocaleString('id-ID')}
+                                            </span>
+                                        </button>
+                                    ))}
+                                </div>
+                            )}
                         </div>
                     </div>
 
@@ -505,7 +551,12 @@ export default function DaftarProduk() {
                                     </tr>
                                 </thead>
                                 <tbody className="divide-y divide-[#19140035]/20">
-                                    {produk.map((item: any, index: number) => (
+                                    {produk
+                                        .filter((item: any) =>
+                                            searchQuery === '' ||
+                                            item.nama_produk?.toLowerCase().includes(searchQuery.toLowerCase())
+                                        )
+                                        .map((item: any, index: number) => (
                                         <tr key={item.id} className="hover:bg-gray-50 transition-colors">
                                             <td className="px-6 py-4 text-sm text-[#1b1b18]">{index + 1}</td>
                                             <td className="px-6 py-4">

@@ -11,6 +11,13 @@ export default function Katalog() {
     const [filterClosing, setFilterClosing] = useState(false);
     const [backdropClosing, setBackdropClosing] = useState(false);
     const [searchMerek, setSearchMerek] = useState('');
+    const [searchQuery, setSearchQuery] = useState('');
+    const [showSuggestions, setShowSuggestions] = useState(false);
+
+    // Search suggestions
+    const searchSuggestions = searchQuery.trim()
+        ? produk.filter((p: any) => p.nama_produk?.toLowerCase().includes(searchQuery.toLowerCase())).slice(0, 5)
+        : [];
 
     // Filter states
     const [selectedMerek, setSelectedMerek] = useState<string[]>([]);
@@ -340,9 +347,44 @@ export default function Katalog() {
                                         autoComplete="off"
                                         spellCheck={false}
                                         placeholder="Cari nama produk, merek, atau tipe kacamata..."
-                                        className="w-full h-9 pl-4 pr-12 rounded-full border border-[#19140035] bg-white text-sm placeholder:text-[#9CA3AF] disabled:bg-transparent appearance-none focus:outline-none focus:border-[#2264c0] focus:border-[3px] focus:ring-2 focus:ring-[#2264c0] focus:ring-offset-0"
+                                        value={searchQuery}
+                                        onChange={(e) => {
+                                            setSearchQuery(e.target.value);
+                                            setShowSuggestions(true);
+                                        }}
+                                        onFocus={() => setShowSuggestions(true)}
+                                        onBlur={() => setTimeout(() => setShowSuggestions(false), 200)}
+                                        className="w-full h-9 pl-4 pr-12 rounded-full border border-[#19140035] bg-white text-sm text-[#1b1b18] placeholder:text-[#9CA3AF] disabled:bg-transparent appearance-none focus:outline-none focus:border-[#2264c0] focus:border-[3px] focus:ring-2 focus:ring-[#2264c0] focus:ring-offset-0"
                                     />
                                     <Search className="absolute right-4 top-1/2 -translate-y-1/2 size-5 text-[#706f6c]" />
+
+                                    {/* Search Suggestions Dropdown */}
+                                    {showSuggestions && searchSuggestions.length > 0 && (
+                                        <div className="absolute top-full left-0 right-0 mt-2 bg-white rounded-xl border border-[#19140035] shadow-lg overflow-hidden z-50">
+                                            {searchSuggestions.map((item: any, idx: number) => (
+                                                <Link
+                                                    key={idx}
+                                                    href={`/produk/${item.id}`}
+                                                    onClick={() => setShowSuggestions(false)}
+                                                    className="w-full px-4 py-3 flex items-center gap-3 hover:bg-gray-50 transition-colors text-left"
+                                                >
+                                                    <img
+                                                        src={`/images/produk/${item.gambar}`}
+                                                        alt={item.nama_produk}
+                                                        className="w-10 h-10 rounded-lg object-cover"
+                                                        onError={(e) => { (e.target as HTMLImageElement).src = '/images/placeholder.png'; }}
+                                                    />
+                                                    <div className="flex-1 min-w-0">
+                                                        <p className="text-sm font-medium text-[#1b1b18] truncate">{item.nama_produk}</p>
+                                                        <p className="text-xs text-[#706f6c]">{item.merek}</p>
+                                                    </div>
+                                                    <span className="text-xs font-bold text-[#2264c0]">
+                                                        Rp {(Number(item.harga_produk) || 0).toLocaleString('id-ID')}
+                                                    </span>
+                                                </Link>
+                                            ))}
+                                        </div>
+                                    )}
                                 </div>
                             </div>
                         </div>
