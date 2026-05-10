@@ -45,6 +45,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/pesanan/{id}', [PesananController::class, 'show'])->name('pesanan.show');
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard')->middleware('admin');
     Route::get('/produk', [DaftarProdukController::class, 'index'])->name('produk')->middleware('admin');
+    Route::post('/produk', [DaftarProdukController::class, 'store'])->name('produk.store')->middleware('admin');
+    Route::put('/produk/{id}', [DaftarProdukController::class, 'update'])->name('produk.update')->middleware('admin');
+    Route::patch('/produk/{id}/status', [DaftarProdukController::class, 'updateStatus'])->name('produk.updateStatus')->middleware('admin');
     Route::get('/pengguna', [DaftarPenggunaController::class, 'index'])->name('pengguna')->middleware('admin');
     Route::get('/daftar-pesanan', [DaftarPesananController::class, 'index'])->name('daftar-pesanan')->middleware('admin');
 });

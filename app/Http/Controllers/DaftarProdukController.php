@@ -4,17 +4,105 @@ namespace App\Http\Controllers;
 
 use App\Models\Produk;
 use Inertia\Inertia;
+use Illuminate\Http\Request;
+use Illuminate\Support\Str;
 
 class DaftarProdukController extends Controller
 {
     public function index()
     {
-        $produk = Produk::where('status_produk', 'Aktif')
-            ->orderBy('created_at', 'desc')
-            ->get();
+        $produk = Produk::orderBy('created_at', 'desc')->get();
 
         return Inertia::render('daftar-produk', [
             'produk' => $produk,
         ]);
+    }
+
+    public function store(Request $request)
+    {
+        $validated = $request->validate([
+            'nama_produk' => 'nullable|string|max:255',
+            'merek' => 'required|in:Hugo,Giordano,Qina,Chopard,Illustro,Gucci,Guy Laroche,Beneton,Nike,Ted Baker,Hindar,Virtus,Puma,Bolon',
+            'tipe_produk' => 'required|string|max:255',
+            'harga_produk' => 'required|numeric|min:0',
+            'stok' => 'required|integer|min:0',
+            'jenis_kelamin' => 'required|in:Pria,Wanita,Unisex',
+            'warna' => 'required|in:Hitam,Putih,Transparan,Rose Gold,Hijau,Biru,Merah,Ungu,Tortoise,Gold,Pink,Kuning,Black',
+            'material' => 'required|in:Metal,Plastic,Titanium,Rubber,Wood',
+            'bentuk' => 'required|in:Aviator,Browline,Oval,Square,Round,Flat Top,Geometric,Cat Eye,Rectangle',
+            'bridge' => 'nullable|string|max:50',
+            'diagonal' => 'nullable|string|max:50',
+            'ukuran' => 'nullable|string|max:50',
+            'status_produk' => 'required|in:Aktif,Nonaktif',
+        ]);
+
+        // Combine merek + tipe_produk untuk nama_produk
+        $validated['nama_produk'] = $validated['merek'] . ' ' . $validated['tipe_produk'];
+
+        // Handle image uploads - only main image for 'gambar' column
+        $imageData = [];
+
+        if ($request->hasFile('gambar_0')) {
+            $file = $request->file('gambar_0');
+            $filename = Str::uuid() . '.' . $file->getClientOriginalExtension();
+            $file->move(public_path('images/produk'), $filename);
+            $imageData['gambar'] = $filename;
+        }
+
+        // Create produk
+        $produk = Produk::create(array_merge($validated, $imageData));
+
+        return redirect()->back()->with('success', 'Produk berhasil disimpan!');
+    }
+
+    public function updateStatus(Request $request, $id)
+    {
+        $validated = $request->validate([
+            'status_produk' => 'required|in:Aktif,Nonaktif',
+        ]);
+
+        $produk = Produk::findOrFail($id);
+        $produk->update(['status_produk' => $validated['status_produk']]);
+
+        return redirect()->back()->with('success', 'Status produk berhasil diperbarui!');
+    }
+
+    public function update(Request $request, $id)
+    {
+        $validated = $request->validate([
+            'merek' => 'required|in:Hugo,Giordano,Qina,Chopard,Illustro,Gucci,Guy Laroche,Beneton,Nike,Ted Baker,Hindar,Virtus,Puma,Bolon',
+            'tipe_produk' => 'required|string|max:255',
+            'harga_produk' => 'required|numeric|min:0',
+            'stok' => 'required|integer|min:0',
+            'jenis_kelamin' => 'required|in:Pria,Wanita,Unisex',
+            'warna' => 'required|in:Hitam,Putih,Transparan,Rose Gold,Hijau,Biru,Merah,Ungu,Tortoise,Gold,Pink,Kuning,Black',
+            'material' => 'required|in:Metal,Plastic,Titanium,Rubber,Wood',
+            'bentuk' => 'required|in:Aviator,Browline,Oval,Square,Round,Flat Top,Geometric,Cat Eye,Rectangle',
+            'bridge' => 'nullable|string|max:50',
+            'diagonal' => 'nullable|string|max:50',
+            'ukuran' => 'nullable|string|max:50',
+            'status_produk' => 'required|in:Aktif,Nonaktif',
+        ]);
+
+        // Combine merek + tipe_produk untuk nama_produk
+        $validated['nama_produk'] = $validated['merek'] . ' ' . $validated['tipe_produk'];
+
+        $produk = Produk::findOrFail($id);
+
+        // Handle image uploads
+        if ($request->hasFile('gambar_0')) {
+            // Delete old image if exists
+            if ($produk->gambar && file_exists(public_path('images/produk/' . $produk->gambar))) {
+                unlink(public_path('images/produk/' . $produk->gambar));
+            }
+            $file = $request->file('gambar_0');
+            $filename = Str::uuid() . '.' . $file->getClientOriginalExtension();
+            $file->move(public_path('images/produk'), $filename);
+            $validated['gambar'] = $filename;
+        }
+
+        $produk->update($validated);
+
+        return redirect()->back()->with('success', 'Produk berhasil diperbarui!');
     }
 }

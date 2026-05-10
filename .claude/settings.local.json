@@ -58,7 +58,11 @@
       "Bash(xargs grep *)",
       "Bash(php *)",
       "PowerShell(php artisan tinker --execute='use Illuminate\\\\Support\\\\Facades\\\\DB; $cols = DB::getSchemaBuilder\\(\\)->getColumnListing\\(\"keranjang\"\\); print_r\\($cols\\);' 2>&1)",
-      "PowerShell(Get-Content 'D:\\\\project\\\\eyelit\\\\keranjang_test.txt' -Raw 2>$null; if \\(-not \\(Test-Path 'D:\\\\project\\\\eyelit\\\\keranjang_test.txt'\\)\\) { Write-Host 'NO FILE' })"
+      "PowerShell(Get-Content 'D:\\\\project\\\\eyelit\\\\keranjang_test.txt' -Raw 2>$null; if \\(-not \\(Test-Path 'D:\\\\project\\\\eyelit\\\\keranjang_test.txt'\\)\\) { Write-Host 'NO FILE' })",
+      "Bash(dir \"D:\\\\project\\\\eyelit\\\\resources\\\\js\\\\pages\\\\daftar-produksi.tsx\")",
+      "Bash(dir D:\\\\project\\\\eyelit\\\\resources\\\\js\\\\pages\\\\daftar* *)",
+      "Bash(dir \"D:\\\\project\\\\eyelit\\\\resources\\\\js\\\\pages\\\\daftar*.tsx\")",
+      "Bash(findstr \"daftar\")"
     ]
   }
 }
