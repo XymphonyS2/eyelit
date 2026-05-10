@@ -2,6 +2,8 @@
 
 use App\Http\Controllers\Auth\RegisterController;
 use App\Http\Controllers\CheckoutController;
+use App\Http\Controllers\DaftarProdukController;
+use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\EmailCheckController;
 use App\Http\Controllers\KeranjangController;
 use App\Http\Controllers\OngkirController;
@@ -39,7 +41,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::post('/checkout/ongkir', [OngkirController::class, 'hitung'])->name('checkout.ongkir');
     Route::get('/pesanan', [PesananController::class, 'index'])->name('pesanan');
     Route::get('/pesanan/{id}', [PesananController::class, 'show'])->name('pesanan.show');
-    Route::inertia('dashboard', 'dashboard')->name('dashboard')->middleware('admin');
+    Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard')->middleware('admin');
+    Route::get('/produk', [DaftarProdukController::class, 'index'])->name('produk')->middleware('admin');
 });
 
 require __DIR__.'/settings.php';
