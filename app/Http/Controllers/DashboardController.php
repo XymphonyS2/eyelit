@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Pesanan;
 use App\Models\Produk;
 use App\Models\User;
 use Inertia\Inertia;
@@ -15,10 +16,12 @@ class DashboardController extends Controller
             ->get();
 
         $totalPengguna = User::where('status_akun', 'aktif')->count();
+        $totalPesanan = Pesanan::count();
 
         return Inertia::render('dashboard', [
             'produk' => $produk,
             'totalPengguna' => $totalPengguna,
+            'totalPesanan' => $totalPesanan,
         ]);
     }
 }

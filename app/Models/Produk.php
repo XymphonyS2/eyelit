@@ -26,5 +26,9 @@ class Produk extends Model
         'ukuran',
         'status_produk',
         'gambar',
+        'gambar_2',
+        'gambar_3',
+        'gambar_4',
+        'gambar_5',
     ];
 }

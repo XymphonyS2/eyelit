@@ -3,7 +3,7 @@ import { Bell, BookOpen, LogOut, Search, Settings, ShoppingBag, ShoppingCart, Us
 import { useState, useRef } from 'react';
 
 export default function Dashboard() {
-    const { auth, produk, totalPengguna } = usePage().props as any;
+    const { auth, produk, totalPengguna, totalPesanan } = usePage().props as any;
     const [showUserDropdown, setShowUserDropdown] = useState(false);
     const [showCartDropdown, setShowCartDropdown] = useState(false);
     const [showNotifDropdown, setShowNotifDropdown] = useState(false);
@@ -273,7 +273,7 @@ export default function Dashboard() {
                             </div>
                             <div>
                                 <p className="text-sm text-[#706f6c]">Total Pesanan</p>
-                                <p className="text-2xl font-bold text-[#1b1b18]">0</p>
+                                <p className="text-2xl font-bold text-[#1b1b18]">{totalPesanan || 0}</p>
                             </div>
                         </div>
                     </div>

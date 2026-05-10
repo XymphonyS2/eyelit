@@ -13,6 +13,16 @@ export default function ProdukDetail() {
     const [tipePembelian, setTipePembelian] = useState<'Frame Saja' | 'Dengan Lensa'>('Frame Saja');
     const [actionType, setActionType] = useState<'beli' | 'keranjang'>('keranjang');
 
+    // Image gallery state
+    const [selectedImage, setSelectedImage] = useState(0);
+    const allImages = [
+        produk.gambar,
+        produk.gambar_2,
+        produk.gambar_3,
+        produk.gambar_4,
+        produk.gambar_5,
+    ].filter(Boolean);
+
     // Lensa states
     const [jenisLensa, setJenisLensa] = useState<'Minus' | 'Plus' | 'Silinder'>('Minus');
     const [nilaiOd, setNilaiOd] = useState('');
@@ -593,14 +603,41 @@ export default function ProdukDetail() {
                     </Link>
 
                     <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 items-start">
-                        {/* Gambar Produk */}
-                        <div className="bg-white rounded-2xl border border-[#19140035] p-6 flex items-center justify-center sticky top-6">
-                            <img
-                                src={`/images/produk/${produk.gambar}`}
-                                alt={produk.nama_produk}
-                                className="max-h-[420px] w-full object-contain"
-                                onError={(e) => { (e.target as HTMLImageElement).src = '/images/placeholder.png'; }}
-                            />
+                        {/* Gambar Produk dengan Gallery */}
+                        <div className="bg-white rounded-2xl border border-[#19140035] p-6 flex flex-col items-center sticky top-6">
+                            {/* Main Image */}
+                            <div className="w-full aspect-square flex items-center justify-center overflow-hidden bg-gray-50 rounded-xl mb-4">
+                                <img
+                                    src={`/images/produk/${allImages[selectedImage]}`}
+                                    alt={produk.nama_produk}
+                                    className="max-h-[420px] w-full object-contain"
+                                    onError={(e) => { (e.target as HTMLImageElement).src = '/images/placeholder.png'; }}
+                                />
+                            </div>
+
+                            {/* Thumbnail Gallery */}
+                            {allImages.length > 1 && (
+                                <div className="flex gap-3 overflow-x-auto pb-2 w-full justify-center">
+                                    {allImages.map((img: string, index: number) => (
+                                        <button
+                                            key={index}
+                                            onClick={() => setSelectedImage(index)}
+                                            className={`flex-shrink-0 w-20 h-20 rounded-lg overflow-hidden border-2 transition-all ${
+                                                selectedImage === index
+                                                    ? 'border-[#2264c0] shadow-md'
+                                                    : 'border-transparent hover:border-gray-300'
+                                            }`}
+                                        >
+                                            <img
+                                                src={`/images/produk/${img}`}
+                                                alt={`${produk.nama_produk} - ${index + 1}`}
+                                                className="w-full h-full object-cover"
+                                                onError={(e) => { (e.target as HTMLImageElement).src = '/images/placeholder.png'; }}
+                                            />
+                                        </button>
+                                    ))}
+                                </div>
+                            )}
                         </div>
 
                         {/* Info Produk */}
