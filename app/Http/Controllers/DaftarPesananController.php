@@ -27,4 +27,23 @@ class DaftarPesananController extends Controller
             'pesanan' => $pesanan,
         ]);
     }
+
+    public function show($id)
+    {
+        $pesanan = Pesanan::with([
+            'detailPesanan.produk',
+            'alamat.provinsi',
+            'ekspedisi',
+            'user',
+        ])->findOrFail($id);
+
+        $subtotalProduk = $pesanan->detailPesanan->sum('subtotal');
+        $grandTotal     = $subtotalProduk + $pesanan->ongkos_kirim;
+
+        return Inertia::render('pesanan-pengguna', [
+            'pesanan'         => $pesanan,
+            'subtotal_produk' => $subtotalProduk,
+            'grand_total'     => $grandTotal,
+        ]);
+    }
 }

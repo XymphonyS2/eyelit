@@ -5,7 +5,7 @@ export default function AppHeaderOnlyLayout({
     breadcrumbs = [],
 }: AppLayoutProps) {
     return (
-        <div className="min-h-screen bg-[#FDFDFC]">
+        <div className="min-h-screen bg-[#ffffff]">
             {children}
         </div>
     );

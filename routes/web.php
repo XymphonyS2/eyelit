@@ -50,6 +50,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::patch('/produk/{id}/status', [DaftarProdukController::class, 'updateStatus'])->name('produk.updateStatus')->middleware('admin');
     Route::get('/pengguna', [DaftarPenggunaController::class, 'index'])->name('pengguna')->middleware('admin');
     Route::get('/daftar-pesanan', [DaftarPesananController::class, 'index'])->name('daftar-pesanan')->middleware('admin');
+    Route::get('/daftar-pesanan/{id}', [DaftarPesananController::class, 'show'])->name('daftar-pesanan.show')->middleware('admin');
 });
 
 require __DIR__.'/settings.php';
