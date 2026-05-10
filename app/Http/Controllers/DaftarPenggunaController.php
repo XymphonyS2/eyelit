@@ -9,9 +9,7 @@ class DaftarPenggunaController extends Controller
 {
     public function index()
     {
-        $pengguna = User::where('status_akun', 'aktif')
-            ->orderBy('created_at', 'desc')
-            ->get();
+        $pengguna = User::orderBy('created_at', 'desc')->get();
 
         return Inertia::render('daftar-pengguna', [
             'pengguna' => $pengguna,

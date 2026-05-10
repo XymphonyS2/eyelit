@@ -7,6 +7,7 @@ export default function DaftarPesanan() {
     const [showUserDropdown, setShowUserDropdown] = useState(false);
     const [showCartDropdown, setShowCartDropdown] = useState(false);
     const [showNotifDropdown, setShowNotifDropdown] = useState(false);
+    const [searchQuery, setSearchQuery] = useState('');
 
     const userDropdownTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
     const cartDropdownTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -45,8 +46,10 @@ export default function DaftarPesanan() {
                             <input
                                 type="text"
                                 autoComplete="off"
-                                placeholder="Cari produk kacamata..."
-                                className="w-full h-9 pl-4 pr-12 rounded-full border border-[#19140035] bg-white text-sm appearance-none focus:outline-none outline-none focus:border-[#2264c0] focus:border-[3px] focus:ring-2 focus:ring-[#2264c0] focus:ring-offset-0 [&::-webkit-search-decoration]:hidden [&::-webkit-search-cancel-button]:hidden [&::-webkit-search-results-button]:hidden [&::-webkit-search-results-decoration]:hidden outline-none [&:focus-visible]:outline-none [&:focus-visible]:ring-0 [&:-webkit-autofill]:!bg-white [&:-webkit-autofill]:![-webkit-box-shadow:0_0_0_100px_white_inset] [&:-webkit-autofill]:[-webkit-text-fill-color:#1b1b18]"
+                                placeholder="Cari username..."
+                                value={searchQuery}
+                                onChange={(e) => setSearchQuery(e.target.value)}
+                                className="w-full h-9 pl-4 pr-12 rounded-full border border-[#19140035] bg-white text-sm text-[#1b1b18] appearance-none focus:outline-none outline-none focus:border-[#2264c0] focus:border-[3px] focus:ring-2 focus:ring-[#2264c0] focus:ring-offset-0 [&::-webkit-search-decoration]:hidden [&::-webkit-search-cancel-button]:hidden [&::-webkit-search-results-button]:hidden [&::-webkit-search-results-decoration]:hidden outline-none [&:focus-visible]:outline-none [&:focus-visible]:ring-0 [&:-webkit-autofill]:!bg-white [&:-webkit-autofill]:![-webkit-box-shadow:0_0_0_100px_white_inset] [&:-webkit-autofill]:[-webkit-text-fill-color:#1b1b18]"
                             />
                             <Search className="absolute right-4 top-1/2 -translate-y-1/2 size-5 text-[#706f6c]" />
                         </div>
@@ -254,7 +257,7 @@ export default function DaftarPesanan() {
             </nav>
 
             {/* Page Content */}
-            <main className="mx-auto max-w-7xl px-4 py-8">
+            <main className="min-h-screen bg-[#ffffff] mx-auto max-w-7xl px-4 py-8">
                 <div className="mb-8">
                     <h1 className="text-3xl font-bold text-[#1b1b18]">Daftar Pesanan</h1>
                     <p className="text-[#706f6c] mt-2">Kelola semua pesanan EyeLit</p>
@@ -292,7 +295,12 @@ export default function DaftarPesanan() {
                                     </tr>
                                 </thead>
                                 <tbody className="divide-y divide-[#19140035]/20">
-                                    {pesanan.map((item: any, index: number) => (
+                                    {pesanan
+                                        .filter((item: any) =>
+                                            searchQuery === '' ||
+                                            item.user?.username?.toLowerCase().includes(searchQuery.toLowerCase())
+                                        )
+                                        .map((item: any, index: number) => (
                                         <tr key={item.id} className="hover:bg-gray-50 transition-colors">
                                             <td className="px-6 py-4 text-sm text-[#1b1b18]">{index + 1}</td>
                                             <td className="px-6 py-4 text-sm font-medium text-[#1b1b18]">#{item.id}</td>

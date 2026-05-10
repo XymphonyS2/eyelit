@@ -7,6 +7,7 @@ export default function DaftarPengguna() {
     const [showUserDropdown, setShowUserDropdown] = useState(false);
     const [showCartDropdown, setShowCartDropdown] = useState(false);
     const [showNotifDropdown, setShowNotifDropdown] = useState(false);
+    const [searchQuery, setSearchQuery] = useState('');
 
     const userDropdownTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
     const cartDropdownTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -20,7 +21,12 @@ export default function DaftarPengguna() {
             'admin': 'bg-purple-100 text-purple-800',
             'pengguna': 'bg-blue-100 text-blue-800',
         };
-        return colors[role] || 'bg-gray-100 text-gray-800';
+        return colors[role?.toLowerCase()] || 'bg-gray-100 text-gray-800';
+    };
+
+    const formatRole = (peran: string) => {
+        if (!peran) return '-';
+        return peran.charAt(0).toUpperCase() + peran.slice(1).toLowerCase();
     };
 
     const getStatusBadgeColor = (status: string) => {
@@ -29,7 +35,7 @@ export default function DaftarPengguna() {
             'nonaktif': 'bg-red-100 text-red-800',
             'terblokir': 'bg-gray-100 text-gray-800',
         };
-        return colors[status] || 'bg-gray-100 text-gray-800';
+        return colors[status?.toLowerCase()] || 'bg-gray-100 text-gray-800';
     };
 
     return (
@@ -51,8 +57,10 @@ export default function DaftarPengguna() {
                             <input
                                 type="text"
                                 autoComplete="off"
-                                placeholder="Cari produk kacamata..."
-                                className="w-full h-9 pl-4 pr-12 rounded-full border border-[#19140035] bg-white text-sm appearance-none focus:outline-none outline-none focus:border-[#2264c0] focus:border-[3px] focus:ring-2 focus:ring-[#2264c0] focus:ring-offset-0 [&::-webkit-search-decoration]:hidden [&::-webkit-search-cancel-button]:hidden [&::-webkit-search-results-button]:hidden [&::-webkit-search-results-decoration]:hidden outline-none [&:focus-visible]:outline-none [&:focus-visible]:ring-0 [&:-webkit-autofill]:!bg-white [&:-webkit-autofill]:![-webkit-box-shadow:0_0_0_100px_white_inset] [&:-webkit-autofill]:[-webkit-text-fill-color:#1b1b18]"
+                                placeholder="Cari username..."
+                                value={searchQuery}
+                                onChange={(e) => setSearchQuery(e.target.value)}
+                                className="w-full h-9 pl-4 pr-12 rounded-full border border-[#19140035] bg-white text-sm text-[#1b1b18] appearance-none focus:outline-none outline-none focus:border-[#2264c0] focus:border-[3px] focus:ring-2 focus:ring-[#2264c0] focus:ring-offset-0 [&::-webkit-search-decoration]:hidden [&::-webkit-search-cancel-button]:hidden [&::-webkit-search-results-button]:hidden [&::-webkit-search-results-decoration]:hidden outline-none [&:focus-visible]:outline-none [&:focus-visible]:ring-0 [&:-webkit-autofill]:!bg-white [&:-webkit-autofill]:![-webkit-box-shadow:0_0_0_100px_white_inset] [&:-webkit-autofill]:[-webkit-text-fill-color:#1b1b18]"
                             />
                             <Search className="absolute right-4 top-1/2 -translate-y-1/2 size-5 text-[#706f6c]" />
                         </div>
@@ -260,7 +268,7 @@ export default function DaftarPengguna() {
             </nav>
 
             {/* Page Content */}
-            <main className="mx-auto max-w-7xl px-4 py-8">
+            <main className="min-h-screen bg-[#ffffff] mx-auto max-w-7xl px-4 py-8">
                 <div className="mb-8">
                     <h1 className="text-3xl font-bold text-[#1b1b18]">Daftar Pengguna</h1>
                     <p className="text-[#706f6c] mt-2">Kelola semua pengguna EyeLit</p>
@@ -289,8 +297,8 @@ export default function DaftarPengguna() {
                                 <thead className="bg-gray-50 border-b border-[#19140035]">
                                     <tr>
                                         <th className="px-6 py-3 text-left text-xs font-semibold text-[#706f6c] uppercase tracking-wider">No</th>
-                                        <th className="px-6 py-3 text-left text-xs font-semibold text-[#706f6c] uppercase tracking-wider">Avatar</th>
-                                        <th className="px-6 py-3 text-left text-xs font-semibold text-[#706f6c] uppercase tracking-wider">Username</th>
+                                        <th className="px-6 py-3 text-left text-xs font-semibold text-[#706f6c] uppercase tracking-wider">Profil</th>
+                                        <th className="px-6 py-3 text-left text-xs font-semibold text-[#706f6c] uppercase tracking-wider">Nama Pengguna</th>
                                         <th className="px-6 py-3 text-left text-xs font-semibold text-[#706f6c] uppercase tracking-wider">Email</th>
                                         <th className="px-6 py-3 text-left text-xs font-semibold text-[#706f6c] uppercase tracking-wider">Role</th>
                                         <th className="px-6 py-3 text-left text-xs font-semibold text-[#706f6c] uppercase tracking-wider">Tanggal Daftar</th>
@@ -298,7 +306,12 @@ export default function DaftarPengguna() {
                                     </tr>
                                 </thead>
                                 <tbody className="divide-y divide-[#19140035]/20">
-                                    {pengguna.map((item: any, index: number) => (
+                                    {pengguna
+                                        .filter((item: any) =>
+                                            searchQuery === '' ||
+                                            item.username?.toLowerCase().includes(searchQuery.toLowerCase())
+                                        )
+                                        .map((item: any, index: number) => (
                                         <tr key={item.id} className="hover:bg-gray-50 transition-colors">
                                             <td className="px-6 py-4 text-sm text-[#1b1b18]">{index + 1}</td>
                                             <td className="px-6 py-4">
@@ -314,20 +327,26 @@ export default function DaftarPengguna() {
                                                 </div>
                                             </td>
                                             <td className="px-6 py-4">
-                                                <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getRoleBadgeColor(item.role)}`}>
-                                                    {item.role}
+                                                <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getRoleBadgeColor(item.peran)}`}>
+                                                    {formatRole(item.peran)}
                                                 </span>
                                             </td>
                                             <td className="px-6 py-4 text-sm text-[#706f6c]">
                                                 <div className="flex items-center gap-1">
                                                     <Calendar className="size-4" />
-                                                    {item.email_verified_at
-                                                        ? new Date(item.created_at).toLocaleDateString('id-ID', {
+                                                    {item.tanggal_daftar
+                                                        ? new Date(item.tanggal_daftar).toLocaleDateString('id-ID', {
                                                             day: '2-digit',
                                                             month: 'short',
                                                             year: 'numeric',
                                                         })
-                                                        : 'Belum verifikasi'}
+                                                        : item.created_at
+                                                            ? new Date(item.created_at).toLocaleDateString('id-ID', {
+                                                                day: '2-digit',
+                                                                month: 'short',
+                                                                year: 'numeric',
+                                                            })
+                                                            : '-'}
                                                 </div>
                                             </td>
                                             <td className="px-6 py-4">

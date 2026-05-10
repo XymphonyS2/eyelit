@@ -505,7 +505,7 @@ export default function DaftarProduk() {
             </nav>
 
             {/* Page Content */}
-            <main className="mx-auto max-w-7xl px-4 py-8">
+            <main className="min-h-screen bg-[#ffffff] mx-auto max-w-7xl px-4 py-8">
                 <div className="flex items-center justify-between mb-8">
                     <div>
                         <h1 className="text-3xl font-bold text-[#1b1b18]">Daftar Produk</h1>
