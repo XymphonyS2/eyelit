@@ -9,6 +9,17 @@ return new class extends Migration
 {
     public function up(): void
     {
+        // Create ekspedisi_master table first if not exists
+        if (!Schema::hasTable('ekspedisi_master')) {
+            Schema::create('ekspedisi_master', function (Blueprint $table) {
+                $table->id();
+                $table->string('nama_ekspedisi', 100);
+                $table->string('kode', 50)->unique();
+                $table->boolean('status_ekspedisi')->default(true);
+                $table->timestamps();
+            });
+        }
+
         if (!Schema::hasTable('ongkir_master')) {
             Schema::create('ongkir_master', function (Blueprint $table) {
                 $table->id();
@@ -33,62 +44,67 @@ return new class extends Migration
         }
 
         if (DB::table('ongkir_master')->count() == 0) {
+            // Get actual province IDs from database (mapping by name)
+            $provinsiMap = [];
+            $provinsis = DB::table('provinsi')->get();
+            foreach ($provinsis as $p) {
+                $provinsiMap[$p->nama_provinsi] = $p->id;
+            }
+
+            // Get ekspedisi IDs
+            $ekspedisis = DB::table('ekspedisi_master')->get()->keyBy('kode');
+
             $data = [
-                // id => [jne, jnt, sicepat, anteraja, pos, estimasi_min, estimasi_max]
-                // Pulau Jawa
-                1  => [7000,  6000,  6000,  5000,  8000,  1, 1],
-                2  => [9000,  8000,  8000,  7000,  9000,  1, 2],
-                3  => [9000,  8000,  8000,  7000,  9000,  1, 2],
-                4  => [10000, 9000,  9000,  8000,  10000, 1, 2],
-                5  => [10000, 9000,  9000,  8000,  10000, 1, 2],
-                6  => [11000, 10000, 10000, 9000,  11000, 2, 3],
-                // Pulau Sumatera
-                7  => [12000, 11000, 11000, 10000, 12000, 2, 3],
-                8  => [16000, 15000, 15000, 14000, 16000, 3, 4],
-                9  => [14000, 13000, 13000, 12000, 14000, 2, 3],
-                10 => [15000, 14000, 14000, 13000, 15000, 2, 3],
-                11 => [15000, 14000, 14000, 13000, 15000, 2, 3],
-                12 => [16000, 15000, 15000, 14000, 16000, 3, 4],
-                13 => [16000, 15000, 15000, 14000, 16000, 3, 4],
-                14 => [18000, 17000, 17000, 16000, 18000, 3, 4],
-                15 => [18000, 17000, 17000, 16000, 18000, 3, 5],
-                16 => [22000, 20000, 20000, 19000, 22000, 4, 6],
-                // Pulau Kalimantan
-                17 => [20000, 19000, 19000, 18000, 20000, 3, 4],
-                18 => [22000, 21000, 21000, 20000, 22000, 3, 5],
-                19 => [22000, 21000, 21000, 20000, 22000, 3, 5],
-                20 => [24000, 23000, 23000, 22000, 24000, 4, 6],
-                21 => [27000, 25000, 25000, 24000, 28000, 5, 7],
-                // Pulau Sulawesi
-                22 => [23000, 22000, 22000, 21000, 23000, 4, 6],
-                23 => [26000, 25000, 25000, 24000, 27000, 5, 7],
-                24 => [26000, 25000, 25000, 24000, 27000, 5, 7],
-                25 => [27000, 26000, 26000, 25000, 28000, 5, 7],
-                26 => [27000, 26000, 26000, 25000, 28000, 5, 7],
-                27 => [28000, 27000, 27000, 26000, 29000, 5, 7],
-                // Pulau Bali & Nusa Tenggara
-                28 => [14000, 13000, 13000, 12000, 14000, 2, 3],
-                29 => [18000, 17000, 17000, 16000, 19000, 3, 4],
-                30 => [22000, 21000, 21000, 20000, 24000, 4, 6],
-                // Maluku & Papua
-                31 => [32000, 30000, 30000, 29000, 35000, 6, 8],
-                32 => [33000, 31000, 31000, 30000, 36000, 6, 8],
-                33 => [38000, 36000, 36000, 35000, 42000, 7, 10],
-                34 => [38000, 36000, 36000, 35000, 42000, 7, 10],
-                35 => [44000, 42000, 42000, 41000, 49000, 8, 12],
-                36 => [45000, 43000, 43000, 42000, 50000, 8, 12],
-                37 => [44000, 42000, 42000, 41000, 49000, 8, 12],
-                38 => [40000, 38000, 38000, 37000, 45000, 7, 10],
+                // nama_provinsi => [jne, jnt, sicepat, anteraja, pos, estimasi_min, estimasi_max]
+                'DKI Jakarta'          => [7000,  6000,  6000,  5000,  8000,  1, 1],
+                'Jawa Barat'           => [9000,  8000,  8000,  7000,  9000,  1, 2],
+                'Jawa Tengah'          => [9000,  8000,  8000,  7000,  9000,  1, 2],
+                'DI Yogyakarta'        => [10000, 9000,  9000,  8000,  10000, 1, 2],
+                'Jawa Timur'           => [10000, 9000,  9000,  8000,  10000, 1, 2],
+                'Banten'              => [11000, 10000, 10000, 9000,  11000, 2, 3],
+                'Aceh'                => [12000, 11000, 11000, 10000, 12000, 2, 3],
+                'Sumatera Utara'      => [16000, 15000, 15000, 14000, 16000, 3, 4],
+                'Sumatera Barat'       => [14000, 13000, 13000, 12000, 14000, 2, 3],
+                'Riau'                => [15000, 14000, 14000, 13000, 15000, 2, 3],
+                'Jambi'               => [15000, 14000, 14000, 13000, 15000, 2, 3],
+                'Sumatera Selatan'    => [16000, 15000, 15000, 14000, 16000, 3, 4],
+                'Bengkulu'            => [16000, 15000, 15000, 14000, 16000, 3, 4],
+                'Lampung'             => [18000, 17000, 17000, 16000, 18000, 3, 4],
+                'Kepulauan Bangka Belitung' => [18000, 17000, 17000, 16000, 18000, 3, 5],
+                'Kepulauan Riau'       => [22000, 20000, 20000, 19000, 22000, 4, 6],
+                'Kalimantan Barat'     => [20000, 19000, 19000, 18000, 20000, 3, 4],
+                'Kalimantan Tengah'    => [22000, 21000, 21000, 20000, 22000, 3, 5],
+                'Kalimantan Selatan'   => [22000, 21000, 21000, 20000, 22000, 3, 5],
+                'Kalimantan Timur'    => [24000, 23000, 23000, 22000, 24000, 4, 6],
+                'Kalimantan Utara'    => [27000, 25000, 25000, 24000, 28000, 5, 7],
+                'Sulawesi Utara'      => [23000, 22000, 22000, 21000, 23000, 4, 6],
+                'Sulawesi Tengah'     => [26000, 25000, 25000, 24000, 27000, 5, 7],
+                'Sulawesi Selatan'    => [26000, 25000, 25000, 24000, 27000, 5, 7],
+                'Sulawesi Tenggara'   => [27000, 26000, 26000, 25000, 28000, 5, 7],
+                'Gorontalo'           => [27000, 26000, 26000, 25000, 28000, 5, 7],
+                'Sulawesi Barat'       => [28000, 27000, 27000, 26000, 29000, 5, 7],
+                'Bali'                => [14000, 13000, 13000, 12000, 14000, 2, 3],
+                'Nusa Tenggara Barat'  => [18000, 17000, 17000, 16000, 19000, 3, 4],
+                'Nusa Tenggara Timur' => [22000, 21000, 21000, 20000, 24000, 4, 6],
+                'Maluku'              => [32000, 30000, 30000, 29000, 35000, 6, 8],
+                'Maluku Utara'        => [33000, 31000, 31000, 30000, 36000, 6, 8],
+                'Papua'               => [38000, 36000, 36000, 35000, 42000, 7, 10],
+                'Papua Barat'         => [38000, 36000, 36000, 35000, 42000, 7, 10],
+                'Papua Tengah'        => [44000, 42000, 42000, 41000, 49000, 8, 12],
+                'Papua Pegunungan'   => [45000, 43000, 43000, 42000, 50000, 8, 12],
+                'Papua Barat Daya'    => [44000, 42000, 42000, 41000, 49000, 8, 12],
             ];
 
             $rows = [];
             $now = now();
-            foreach ($data as $provinsiId => $vals) {
-                for ($eksId = 1; $eksId <= 5; $eksId++) {
+            foreach ($data as $namaProvinsi => $vals) {
+                if (!isset($provinsiMap[$namaProvinsi])) continue;
+                $provinsiId = $provinsiMap[$namaProvinsi];
+                foreach ($ekspedisis as $eks) {
                     $rows[] = [
                         'provinsi_id'       => $provinsiId,
-                        'ekspedisi_id'      => $eksId,
-                        'harga'             => $vals[$eksId - 1],
+                        'ekspedisi_id'      => $eks->id,
+                        'harga'             => $vals[array_key_first(array_filter($ekspedisis->toArray(), fn($e) => $e->id == $eks->id))] ?? $vals[0],
                         'estimasi_hari_min' => $vals[5],
                         'estimasi_hari_max' => $vals[6],
                         'created_at'        => $now,
@@ -96,7 +112,31 @@ return new class extends Migration
                     ];
                 }
             }
-            DB::table('ongkir_master')->insert($rows);
+
+            // Use ekspedisi index (1-5) for price array
+            $rows = [];
+            $ekspedisiIds = [];
+            foreach ($ekspedisis as $eks) {
+                $ekspedisiIds[] = $eks->id;
+            }
+            foreach ($data as $namaProvinsi => $vals) {
+                if (!isset($provinsiMap[$namaProvinsi])) continue;
+                $provinsiId = $provinsiMap[$namaProvinsi];
+                for ($i = 0; $i < count($ekspedisiIds); $i++) {
+                    $rows[] = [
+                        'provinsi_id'       => $provinsiId,
+                        'ekspedisi_id'      => $ekspedisiIds[$i],
+                        'harga'             => $vals[$i],
+                        'estimasi_hari_min' => $vals[5],
+                        'estimasi_hari_max' => $vals[6],
+                        'created_at'        => $now,
+                        'updated_at'        => $now,
+                    ];
+                }
+            }
+            if (count($rows) > 0) {
+                DB::table('ongkir_master')->insert($rows);
+            }
         }
     }
 

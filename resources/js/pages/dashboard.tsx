@@ -240,6 +240,13 @@ export default function Dashboard() {
                                 <Users className="size-4" />
                                 Pengguna
                             </Link>
+                            <Link
+                                href="/carousel"
+                                className="flex items-center gap-2 py-2 text-sm font-medium text-[#706f6c] hover:text-[#2264c0] transition-colors whitespace-nowrap"
+                            >
+                                <BookOpen className="size-4" />
+                                Carousel
+                            </Link>
                         </div>
                     </div>
                 </div>

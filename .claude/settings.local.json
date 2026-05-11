@@ -62,7 +62,12 @@
       "Bash(dir \"D:\\\\project\\\\eyelit\\\\resources\\\\js\\\\pages\\\\daftar-produksi.tsx\")",
       "Bash(dir D:\\\\project\\\\eyelit\\\\resources\\\\js\\\\pages\\\\daftar* *)",
       "Bash(dir \"D:\\\\project\\\\eyelit\\\\resources\\\\js\\\\pages\\\\daftar*.tsx\")",
-      "Bash(findstr \"daftar\")"
+      "Bash(findstr \"daftar\")",
+      "Bash(curl -s http://127.0.0.1:8000/carousel)",
+      "Bash(del *)",
+      "Bash(findstr \"node\")",
+      "Bash(taskkill *)",
+      "Bash(findstr /i \"APP_DEBUG\")"
     ]
   }
 }

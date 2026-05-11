@@ -51,6 +51,11 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/pengguna', [DaftarPenggunaController::class, 'index'])->name('pengguna')->middleware('admin');
     Route::get('/daftar-pesanan', [DaftarPesananController::class, 'index'])->name('daftar-pesanan')->middleware('admin');
     Route::get('/daftar-pesanan/{id}', [DaftarPesananController::class, 'show'])->name('daftar-pesanan.show')->middleware('admin');
+    Route::get('/carousel', [\App\Http\Controllers\CarouselController::class, 'index'])->name('carousel')->middleware('admin');
+    Route::post('/carousel', [\App\Http\Controllers\CarouselController::class, 'store'])->name('carousel.store')->middleware('admin');
+    Route::put('/carousel/{id}', [\App\Http\Controllers\CarouselController::class, 'update'])->name('carousel.update')->middleware('admin');
+    Route::patch('/carousel/{id}/status', [\App\Http\Controllers\CarouselController::class, 'updateStatus'])->name('carousel.updateStatus')->middleware('admin');
+    Route::delete('/carousel/{id}', [\App\Http\Controllers\CarouselController::class, 'destroy'])->name('carousel.destroy')->middleware('admin');
 });
 
 require __DIR__.'/settings.php';

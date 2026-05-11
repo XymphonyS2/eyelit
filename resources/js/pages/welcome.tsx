@@ -3,7 +3,7 @@ import { Bell, BookOpen, LogOut, Mail, MapPin, Phone, Search, Settings, Shopping
 import { useRef, useState, useEffect } from 'react';
 
 export default function Welcome() {
-    const { auth, produk } = usePage().props as any;
+    const { auth, produk, carousels } = usePage().props as any;
     const [showUserDropdown, setShowUserDropdown] = useState(false);
     const [showCartDropdown, setShowCartDropdown] = useState(false);
     const [showNotifDropdown, setShowNotifDropdown] = useState(false);
@@ -25,24 +25,30 @@ export default function Welcome() {
     // Mock notifications - replace with actual data from backend
     const notifications: any[] = auth.user?.notifications || [];
 
-    // Carousel data - add new information slides here
+    // Carousel data dari database
     const [currentSlide, setCurrentSlide] = useState(0);
     const [imageAnimClass, setImageAnimClass] = useState('');
     const [textAnimClass, setTextAnimClass] = useState('');
     const [buttonAnimClass, setButtonAnimClass] = useState('');
 
-    const slides = [
-        {
-            image: '/images/carousel/informasi-1.png',
-            title: 'Gratis Pengiriman ke Seluruh Indonesia',
-            description: 'Nikmati bebas biaya pengiriman untuk setiap pemesanan. Kami mengirim ke lebih dari 100 kota di Indonesia dengan jaminan keamanan paket hingga tujuan.',
-        },
-        {
-            image: '/images/carousel/informasi-2.png',
-            title: 'Lensa Berkualitas Tinggi untuk Penglihatan Optimal',
-            description: 'Setiap kacamata EyeLit dilengkapi dengan lensa premium yang telah teruji ketajaman optiknya. Dirancang untuk kenyamanan seharian dengan coating anti-refleksi dan anti-gores.',
-        },
-    ];
+    const slides = carousels && carousels.length > 0
+        ? carousels.map((c: any) => ({
+            image: `/${c.url_gambar}`,
+            title: c.judul_carousel || '',
+            description: c.deskripsi || '',
+        }))
+        : [
+            {
+                image: '/images/carousel/informasi-1.png',
+                title: 'Gratis Pengiriman ke Seluruh Indonesia',
+                description: 'Nikmati bebas biaya pengiriman untuk setiap pemesanan. Kami mengirim ke lebih dari 100 kota di Indonesia dengan jaminan keamanan paket hingga tujuan.',
+            },
+            {
+                image: '/images/carousel/informasi-2.png',
+                title: 'Lensa Berkualitas Tinggi untuk Penglihatan Optimal',
+                description: 'Setiap kacamata EyeLit dilengkapi dengan lensa premium yang telah teruji ketajaman optiknya. Dirancang untuk kenyamanan seharian dengan coating anti-refleksi dan anti-gores.',
+            },
+        ];
 
     const handlePrev = () => {
         setImageAnimClass('carousel-image-out');
@@ -359,8 +365,8 @@ export default function Welcome() {
                 </nav>
 
                 {/* Carousel Section */}
-                <section className="py-8 sm:py-16 bg-white">
-                    <div className="container mx-auto px-4">
+                <section id="carousel" className="py-8 sm:py-16 bg-white">
+                    <div className="container mx-auto px-4 max-w-7xl">
                         <div className="flex flex-col lg:flex-row items-center gap-6 sm:gap-12">
                             {/* Left: Image */}
                             <div className="w-full lg:w-1/2">
