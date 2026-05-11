@@ -154,11 +154,9 @@ export default function ProdukDetail() {
                 preserveScroll: true,
             });
         } else {
-            router.post('/keranjang/tambah', payload, {
+            // Beli sekarang - langsung ke checkout
+            router.post('/checkout/langsung', payload, {
                 preserveScroll: true,
-                onSuccess: () => {
-                    router.visit('/checkout');
-                },
             });
         }
     }

@@ -8,6 +8,7 @@ use App\Models\Ekspedisi;
 use App\Models\Keranjang;
 use App\Models\Lensa;
 use App\Models\Pesanan;
+use App\Models\Produk;
 use App\Models\Provinsi;
 use App\Services\RajaOngkirService;
 use Illuminate\Http\Request;
@@ -19,6 +20,79 @@ use Inertia\Inertia;
 class CheckoutController extends Controller
 {
     public function __construct(private RajaOngkirService $rajaOngkir) {}
+
+    public function langsung(Request $request)
+    {
+        if (!auth()->check()) {
+            return redirect('/login')->with('error', 'Silakan login terlebih dahulu.');
+        }
+
+        $validated = $request->validate([
+            'produk_id'       => 'required|exists:produk,id',
+            'jumlah'         => 'required|integer|min:1',
+            'tipe_pembelian' => 'required|in:Frame Saja,Frame + Lensa',
+            'jenis_lensa_od' => 'nullable|string',
+            'nilai_lensa_od' => 'nullable|string',
+            'silinder_od'    => 'nullable|string',
+            'jenis_lensa_os' => 'nullable|string',
+            'nilai_lensa_os' => 'nullable|string',
+            'silinder_os'    => 'nullable|string',
+            'anti_radiasi'   => 'nullable|boolean',
+            'photochromic'   => 'nullable|boolean',
+        ]);
+
+        $produk = Produk::findOrFail($validated['produk_id']);
+
+        if ($produk->stok < ($validated['jumlah'] ?? 1)) {
+            return redirect()->back()->with('error', 'Stok tidak mencukupi.');
+        }
+
+        $lensaData = Lensa::where('status_lensa', true)->get();
+        $hargaLensa = 0;
+
+        if ($validated['tipe_pembelian'] === 'Frame + Lensa') {
+            $hargaLensa = $this->hitungHargaLensaLangsung($validated, $lensaData);
+        }
+
+        $jumlah = (int) ($validated['jumlah'] ?? 1);
+        $hargaProduk = (int) ($produk->harga_produk ?? 0);
+        $subtotal = ($hargaProduk + $hargaLensa) * $jumlah;
+
+        $item = [
+            'id'              => 'langsung_' . $validated['produk_id'],
+            'produk_id'       => $produk->id,
+            'nama_produk'     => $produk->nama_produk,
+            'merek'           => $produk->merek ?? 'N/A',
+            'gambar'          => $produk->gambar ?? 'placeholder.png',
+            'harga_produk'    => $hargaProduk,
+            'jumlah'          => $jumlah,
+            'tipe_pembelian'  => $validated['tipe_pembelian'],
+            'harga_lensa'     => $hargaLensa,
+            'subtotal'        => $subtotal,
+            'jenis_lensa_od'  => $validated['jenis_lensa_od'] ?? null,
+            'nilai_lensa_od'  => $validated['nilai_lensa_od'] ?? null,
+            'silinder_od'     => $validated['silinder_od'] ?? null,
+            'jenis_lensa_os'  => $validated['jenis_lensa_os'] ?? null,
+            'nilai_lensa_os'  => $validated['nilai_lensa_os'] ?? null,
+            'silinder_os'     => $validated['silinder_os'] ?? null,
+            'anti_radiasi'    => $validated['anti_radiasi'] ?? false,
+            'photochromic'    => $validated['photochromic'] ?? false,
+            'is_langsung'     => true,
+        ];
+
+        $alamat   = Alamat::with('provinsi')->where('pengguna_id', auth()->id())->get();
+        $provinsi = Provinsi::orderBy('nama_provinsi')->get();
+        $ekspedisi = Ekspedisi::where('status_ekspedisi', true)->get();
+
+        return Inertia::render('checkout', [
+            'items'     => [$item],
+            'total'     => $subtotal,
+            'alamat'    => $alamat,
+            'provinsi'  => $provinsi,
+            'ekspedisi' => $ekspedisi,
+            'back_url'  => '/produk/' . $produk->id,
+        ]);
+    }
 
     public function index(Request $request)
     {
@@ -68,6 +142,7 @@ class CheckoutController extends Controller
             'alamat'     => $alamat,
             'provinsi'   => $provinsi,
             'ekspedisi'  => $ekspedisi,
+            'back_url'   => '/keranjang',
         ]);
     }
 
@@ -122,91 +197,176 @@ class CheckoutController extends Controller
             $validated = $request->validate([
                 'alamat_id'         => 'required|exists:alamat,id',
                 'ekspedisi_id'      => 'required|exists:ekspedisi_master,id',
-                'metode_pembayaran' => 'required|in:QRIS',
+                'metode_pembayaran' => 'required|in:QRIS,BCA,BNI',
             ]);
 
             $itemIds = $request->validate([
                 'items' => 'nullable|string',
             ])['items'] ?? '';
 
-            $ids = $itemIds ? array_filter(array_map('intval', explode(',', $itemIds))) : [];
-
-            $query = Keranjang::with('produk')
-                ->where('pengguna_id', auth()->id());
-
-            if (!empty($ids)) {
-                $query->whereIn('id', $ids);
-            }
-
-            $keranjang = $query->get();
-
-            if ($keranjang->isEmpty()) {
-                throw new \Exception('Keranjang kosong.');
-            }
-
-            $alamat     = Alamat::findOrFail($request->alamat_id);
-            $beratTotal = max(250, $keranjang->sum(fn($item) => $item->jumlah * 200));
-
-            // Simpan item IDs yang di-checkout untuk dihapus nanti
-            $checkoutItemIds = $keranjang->pluck('id')->toArray();
-
-            // Hitung ongkir: pakai kode_kota jika ada, fallback ke provinsi
-            if (!empty($alamat->kode_kota)) {
-                $ongkirData = $this->rajaOngkir->hitungSatuEkspedisi(
-                    (int) $alamat->kode_kota,
-                    (int) $request->ekspedisi_id,
-                    $beratTotal
-                );
-            } else {
-                $ongkirData = $this->rajaOngkir->hitungDariProvinsi(
-                    (int) $alamat->provinsi_id,
-                    (int) $request->ekspedisi_id
-                );
-            }
-            $ongkosKirim = $ongkirData['harga'] ?? 0;
-
-            $lensaData   = Lensa::where('status_lensa', true)->get();
+            $lensaData = Lensa::where('status_lensa', true)->get();
             $totalProduk = 0;
 
-            $pesanan = Pesanan::create([
-                'no_pesanan'             => 'EYL-' . strtoupper(Str::random(8)),
-                'pengguna_id'            => auth()->id(),
-                'alamat_id'              => $request->alamat_id,
-                'ekspedisi_id'           => $request->ekspedisi_id,
-                'metode_pembayaran'      => $request->metode_pembayaran,
-                'ongkos_kirim'           => $ongkosKirim,
-                'status_pesanan'         => 'Menunggu Konfirmasi Pembayaran',
-                'tanggal_pemesanan'      => now(),
-                'batas_waktu_pembayaran' => now()->addHours(24),
-            ]);
+            // =============================================
+            // FLOW: Beli Langsung (dari produk-detail)
+            // =============================================
+            $produkId = $request->input('produk_id');
+            if ($produkId) {
+                $produk = Produk::findOrFail($produkId);
+                $jumlah = (int) ($request->input('jumlah') ?? 1);
 
-            foreach ($keranjang as $item) {
-                $hargaLensa  = $this->hitungHargaLensa($item, $lensaData);
-                $subtotal    = ($item->produk->harga_produk + $hargaLensa) * $item->jumlah;
+                if ($produk->stok < $jumlah) {
+                    throw new \Exception('Stok tidak mencukupi.');
+                }
+
+                $tipePembelian = $request->input('tipe_pembelian', 'Frame Saja');
+                $hargaLensa = 0;
+
+                if ($tipePembelian === 'Frame + Lensa') {
+                    $data = [
+                        'jenis_lensa_od' => $request->input('jenis_lensa_od'),
+                        'nilai_lensa_od' => $request->input('nilai_lensa_od'),
+                        'silinder_od'    => $request->input('silinder_od'),
+                        'jenis_lensa_os' => $request->input('jenis_lensa_os'),
+                        'nilai_lensa_os' => $request->input('nilai_lensa_os'),
+                        'silinder_os'    => $request->input('silinder_os'),
+                        'anti_radiasi'   => $request->input('anti_radiasi'),
+                        'photochromic'   => $request->input('photochromic'),
+                    ];
+                    $hargaLensa = $this->hitungHargaLensaLangsung($data, $lensaData);
+                }
+
+                $alamat     = Alamat::findOrFail($request->alamat_id);
+                $beratTotal = max(250, $jumlah * 200);
+
+                if (!empty($alamat->kode_kota)) {
+                    $ongkirData = $this->rajaOngkir->hitungSatuEkspedisi(
+                        (int) $alamat->kode_kota,
+                        (int) $request->ekspedisi_id,
+                        $beratTotal
+                    );
+                } else {
+                    $ongkirData = $this->rajaOngkir->hitungDariProvinsi(
+                        (int) $alamat->provinsi_id,
+                        (int) $request->ekspedisi_id
+                    );
+                }
+                $ongkosKirim = $ongkirData['harga'] ?? 0;
+
+                $subtotal = ((int) $produk->harga_produk + $hargaLensa) * $jumlah;
                 $totalProduk += $subtotal;
+
+                $pesanan = Pesanan::create([
+                    'no_pesanan'             => 'EYL-' . strtoupper(Str::random(8)),
+                    'pengguna_id'            => auth()->id(),
+                    'alamat_id'              => $request->alamat_id,
+                    'ekspedisi_id'           => $request->ekspedisi_id,
+                    'metode_pembayaran'      => $request->metode_pembayaran,
+                    'ongkos_kirim'           => $ongkosKirim,
+                    'status_pesanan'         => 'Menunggu Konfirmasi Pembayaran',
+                    'tanggal_pemesanan'      => now(),
+                    'batas_waktu_pembayaran' => now()->addHours(24),
+                    'total_harga'            => $totalProduk + $ongkosKirim,
+                ]);
 
                 DetailPesanan::create([
                     'pesanan_id'     => $pesanan->id,
-                    'produk_id'      => $item->produk_id,
-                    'jumlah'         => $item->jumlah,
-                    'harga_frame'    => $item->produk->harga_produk,
-                    'tipe_pembelian' => $item->tipe_pembelian,
-                    'jenis_lensa_od' => $item->jenis_lensa_od,
-                    'nilai_lensa_od' => $item->nilai_lensa_od,
-                    'silinder_od'    => $item->silinder_od,
-                    'jenis_lensa_os' => $item->jenis_lensa_os,
-                    'nilai_lensa_os' => $item->nilai_lensa_os,
-                    'silinder_os'    => $item->silinder_os,
-                    'anti_radiasi'   => $item->anti_radiasi,
-                    'photochromic'   => $item->photochromic,
-                    'subtotal_lensa' => $hargaLensa * $item->jumlah,
+                    'produk_id'      => $produk->id,
+                    'jumlah'         => $jumlah,
+                    'harga_frame'    => $produk->harga_produk,
+                    'tipe_pembelian' => $tipePembelian,
+                    'jenis_lensa_od' => $request->input('jenis_lensa_od'),
+                    'nilai_lensa_od' => $request->input('nilai_lensa_od'),
+                    'silinder_od'    => $request->input('silinder_od'),
+                    'jenis_lensa_os' => $request->input('jenis_lensa_os'),
+                    'nilai_lensa_os' => $request->input('nilai_lensa_os'),
+                    'silinder_os'    => $request->input('silinder_os'),
+                    'anti_radiasi'   => $request->input('anti_radiasi') ? 1 : 0,
+                    'photochromic'   => $request->input('photochromic') ? 1 : 0,
+                    'subtotal_lensa' => $hargaLensa * $jumlah,
                     'subtotal'       => $subtotal,
                 ]);
             }
+            // =============================================
+            // FLOW: Dari Keranjang
+            // =============================================
+            else {
+                $ids = $itemIds ? array_filter(array_map('intval', explode(',', $itemIds))) : [];
 
-            $pesanan->update(['total_harga' => $totalProduk + $ongkosKirim]);
+                $query = Keranjang::with('produk')
+                    ->where('pengguna_id', auth()->id());
 
-            Keranjang::whereIn('id', $checkoutItemIds)->delete();
+                if (!empty($ids)) {
+                    $query->whereIn('id', $ids);
+                }
+
+                $keranjang = $query->get();
+
+                if ($keranjang->isEmpty()) {
+                    throw new \Exception('Keranjang kosong.');
+                }
+
+                $alamat     = Alamat::findOrFail($request->alamat_id);
+                $beratTotal = max(250, $keranjang->sum(fn($item) => $item->jumlah * 200));
+
+                // Simpan item IDs yang di-checkout untuk dihapus nanti
+                $checkoutItemIds = $keranjang->pluck('id')->toArray();
+
+                // Hitung ongkir: pakai kode_kota jika ada, fallback ke provinsi
+                if (!empty($alamat->kode_kota)) {
+                    $ongkirData = $this->rajaOngkir->hitungSatuEkspedisi(
+                        (int) $alamat->kode_kota,
+                        (int) $request->ekspedisi_id,
+                        $beratTotal
+                    );
+                } else {
+                    $ongkirData = $this->rajaOngkir->hitungDariProvinsi(
+                        (int) $alamat->provinsi_id,
+                        (int) $request->ekspedisi_id
+                    );
+                }
+                $ongkosKirim = $ongkirData['harga'] ?? 0;
+
+                $pesanan = Pesanan::create([
+                    'no_pesanan'             => 'EYL-' . strtoupper(Str::random(8)),
+                    'pengguna_id'            => auth()->id(),
+                    'alamat_id'              => $request->alamat_id,
+                    'ekspedisi_id'           => $request->ekspedisi_id,
+                    'metode_pembayaran'      => $request->metode_pembayaran,
+                    'ongkos_kirim'           => $ongkosKirim,
+                    'status_pesanan'         => 'Menunggu Konfirmasi Pembayaran',
+                    'tanggal_pemesanan'      => now(),
+                    'batas_waktu_pembayaran' => now()->addHours(24),
+                ]);
+
+                foreach ($keranjang as $item) {
+                    $hargaLensa  = $this->hitungHargaLensa($item, $lensaData);
+                    $subtotal    = ($item->produk->harga_produk + $hargaLensa) * $item->jumlah;
+                    $totalProduk += $subtotal;
+
+                    DetailPesanan::create([
+                        'pesanan_id'     => $pesanan->id,
+                        'produk_id'      => $item->produk_id,
+                        'jumlah'         => $item->jumlah,
+                        'harga_frame'    => $item->produk->harga_produk,
+                        'tipe_pembelian' => $item->tipe_pembelian,
+                        'jenis_lensa_od' => $item->jenis_lensa_od,
+                        'nilai_lensa_od' => $item->nilai_lensa_od,
+                        'silinder_od'    => $item->silinder_od,
+                        'jenis_lensa_os' => $item->jenis_lensa_os,
+                        'nilai_lensa_os' => $item->nilai_lensa_os,
+                        'silinder_os'    => $item->silinder_os,
+                        'anti_radiasi'   => $item->anti_radiasi,
+                        'photochromic'   => $item->photochromic,
+                        'subtotal_lensa' => $hargaLensa * $item->jumlah,
+                        'subtotal'       => $subtotal,
+                    ]);
+                }
+
+                $pesanan->update(['total_harga' => $totalProduk + $ongkosKirim]);
+
+                Keranjang::whereIn('id', $checkoutItemIds)->delete();
+            }
         });
 
         return redirect()->route('pesanan.show', $pesanan->id)
@@ -275,6 +435,36 @@ class CheckoutController extends Controller
 
         if ($item->anti_radiasi) $total += $lensaData->first()?->harga_anti_radiasi ?? 0;
         if ($item->photochromic) $total += $lensaData->first()?->harga_photochromic ?? 0;
+
+        return (int) $total;
+    }
+
+    private function hitungHargaLensaLangsung(array $data, $lensaData): int
+    {
+        $total = 0;
+
+        foreach (['od', 'os'] as $mata) {
+            $jenis   = $data['jenis_lensa_'.$mata] ?? null;
+            $nilai   = $data['nilai_lensa_'.$mata] ?? null;
+            $silinder = $data['silinder_'.$mata] ?? null;
+
+            if ($jenis && $nilai !== null) {
+                $lensa = $lensaData->where('jenis_lensa', $jenis)
+                    ->filter(fn($l) => $nilai >= $l->minus_plus_batas_bawah && $nilai <= $l->minus_plus_batas_atas)
+                    ->first();
+                if ($lensa) $total += $lensa->harga_per_mata;
+            }
+
+            if ($silinder > 0) {
+                $ls = $lensaData->where('jenis_lensa', 'Silinder')
+                    ->filter(fn($l) => $silinder >= $l->minus_plus_batas_bawah && $silinder <= $l->minus_plus_batas_atas)
+                    ->first();
+                if ($ls) $total += $ls->harga_per_mata;
+            }
+        }
+
+        if (!empty($data['anti_radiasi'])) $total += $lensaData->first()?->harga_anti_radiasi ?? 0;
+        if (!empty($data['photochromic'])) $total += $lensaData->first()?->harga_photochromic ?? 0;
 
         return (int) $total;
     }

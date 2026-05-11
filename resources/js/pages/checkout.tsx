@@ -7,7 +7,7 @@ import { useEffect, useRef, useState } from 'react';
 const safe = (v: any) => (v ?? "").toString().trim();
 
 interface Item {
-    id: number;
+    id: number | string;
     produk_id: number;
     nama_produk: string;
     merek: string;
@@ -17,6 +17,7 @@ interface Item {
     tipe_pembelian: string;
     harga_lensa: number;
     subtotal: number;
+    is_langsung?: boolean;
 }
 
 interface Alamat {
@@ -44,7 +45,10 @@ interface Ekspedisi {
 }
 
 export default function Checkout() {
-    const { auth, items, total, alamat, provinsi, ekspedisi } = usePage().props as any;
+    const { auth, items, total, alamat, provinsi, ekspedisi, back_url } = usePage().props as any;
+
+    const isLangsung = back_url !== '/keranjang';
+    const backUrl = back_url || '/keranjang';
     const keranjangCount: number = auth.keranjang_count || 0;
 
     const page = usePage();
@@ -150,6 +154,30 @@ export default function Checkout() {
 
     function submitCheckout() {
         if (!selectedAlamat || !selectedEkspedisi) return;
+
+        // Jika dari beli langsung (is_langsung), kirim data produk langsung tanpa item IDs
+        if (itemList.some((item: Item) => item.is_langsung)) {
+            const item = itemList.find((i: Item) => i.is_langsung);
+            router.post('/checkout', {
+                alamat_id: selectedAlamat.id,
+                ekspedisi_id: selectedEkspedisi.id,
+                metode_pembayaran: metodePembayaran,
+                produk_id: item.produk_id,
+                jumlah: item.jumlah,
+                tipe_pembelian: item.tipe_pembelian,
+                jenis_lensa_od: item.jenis_lensa_od || null,
+                nilai_lensa_od: item.nilai_lensa_od || null,
+                silinder_od: item.silinder_od || null,
+                jenis_lensa_os: item.jenis_lensa_os || null,
+                nilai_lensa_os: item.nilai_lensa_os || null,
+                silinder_os: item.silinder_os || null,
+                anti_radiasi: item.anti_radiasi || false,
+                photochromic: item.photochromic || false,
+            });
+            return;
+        }
+
+        // Dari keranjang - kirim item IDs
         const itemIds = itemList.map((item: Item) => item.id).join(',');
         router.post('/checkout', {
             alamat_id: selectedAlamat.id,
@@ -247,16 +275,16 @@ export default function Checkout() {
                     <div className="flex items-center gap-2 text-sm text-[#5f6368]">
                         <Link href="/" className="hover:text-[#2264c0] transition-colors">Beranda</Link>
                         <span>/</span>
-                        <Link href="/keranjang" className="hover:text-[#2264c0] transition-colors">Keranjang</Link>
+                        <Link href={backUrl} className="hover:text-[#2264c0] transition-colors">{isLangsung ? 'Detail Produk' : 'Keranjang'}</Link>
                         <span>/</span>
                         <span className="text-[#1b1b18] font-medium">Checkout</span>
                     </div>
                 </div>
 
                 <main className="mx-auto max-w-7xl px-4 pb-16">
-                    <Link href="/keranjang" className="inline-flex items-center gap-2 text-sm text-[#5f6368] hover:text-[#2264c0] transition-colors mb-6">
+                    <Link href={backUrl} className="inline-flex items-center gap-2 text-sm text-[#5f6368] hover:text-[#2264c0] transition-colors mb-6">
                         <ArrowLeft className="size-4" />
-                        Kembali ke Keranjang
+                        {isLangsung ? 'Kembali ke Produk' : 'Kembali ke Keranjang'}
                     </Link>
 
                     <h1 className="text-2xl font-bold text-[#1b1b18] mb-6">Checkout</h1>
@@ -370,16 +398,75 @@ export default function Checkout() {
                                     <h2 className="text-sm font-semibold text-[#1b1b18]">Metode Pembayaran</h2>
                                 </div>
                                 <div className="divide-y divide-[#19140035]">
-                                    {['QRIS'].map((m) => (
-                                        <label key={m} className="flex items-center gap-3 px-5 py-4 cursor-pointer hover:bg-gray-50 transition-colors">
+                                    {[
+                                        {
+                                            id: 'QRIS',
+                                            label: 'QRIS',
+                                            desc: 'Scan QR dari aplikasi e-wallet & mobile banking',
+                                            icon: (
+                                                <svg viewBox="0 0 60 60" className="w-12 h-12 rounded-lg flex-shrink-0" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                                    <rect width="60" height="60" rx="12" fill="#fff"/>
+                                                    <rect x="10" y="10" width="16" height="16" rx="3" fill="#2264c0"/>
+                                                    <rect x="34" y="10" width="16" height="16" rx="3" fill="#2264c0"/>
+                                                    <rect x="10" y="34" width="16" height="16" rx="3" fill="#2264c0"/>
+                                                    <rect x="14" y="14" width="8" height="8" rx="1.5" fill="#fff"/>
+                                                    <rect x="38" y="14" width="8" height="8" rx="1.5" fill="#fff"/>
+                                                    <rect x="14" y="38" width="8" height="8" rx="1.5" fill="#fff"/>
+                                                    <rect x="34" y="34" width="4" height="4" rx="1" fill="#2264c0"/>
+                                                    <rect x="40" y="34" width="4" height="4" rx="1" fill="#2264c0"/>
+                                                    <rect x="34" y="40" width="4" height="4" rx="1" fill="#2264c0"/>
+                                                    <rect x="40" y="40" width="4" height="4" rx="1" fill="#2264c0"/>
+                                                </svg>
+                                            ),
+                                        },
+                                        {
+                                            id: 'BCA',
+                                            label: 'Bank Central Asia',
+                                            desc: 'Transfer via BCA Virtual Account',
+                                            icon: (
+                                                <svg viewBox="0 0 60 60" className="w-12 h-12 rounded-lg flex-shrink-0" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                                    <rect width="60" height="60" rx="12" fill="#fff"/>
+                                                    <circle cx="30" cy="30" r="18" fill="#fff" stroke="#1a1a6c" strokeWidth="3"/>
+                                                    <text x="30" y="25" textAnchor="middle" fontSize="9" fontWeight="bold" fill="#1a1a6c" fontFamily="Arial">BCA</text>
+                                                    <text x="30" y="36" textAnchor="middle" fontSize="6" fill="#1a1a6c" fontFamily="Arial">VIRTUAL</text>
+                                                </svg>
+                                            ),
+                                        },
+                                        {
+                                            id: 'BNI',
+                                            label: 'Bank Negara Indonesia',
+                                            desc: 'Transfer via BNI Virtual Account',
+                                            icon: (
+                                                <svg viewBox="0 0 60 60" className="w-12 h-12 rounded-lg flex-shrink-0" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                                    <rect width="60" height="60" rx="12" fill="#fff"/>
+                                                    <rect x="13" y="15" width="34" height="30" rx="4" fill="#fff" stroke="#e87722" strokeWidth="2.5"/>
+                                                    <text x="30" y="25" textAnchor="middle" fontSize="7" fontWeight="bold" fill="#e87722" fontFamily="Arial">BANK</text>
+                                                    <text x="30" y="34" textAnchor="middle" fontSize="7" fontWeight="bold" fill="#e87722" fontFamily="Arial">BNI</text>
+                                                    <rect x="13" y="15" width="34" height="8" rx="4" fill="#e87722"/>
+                                                </svg>
+                                            ),
+                                        },
+                                    ].map((m) => (
+                                        <label key={m.id} className="flex items-center gap-3 px-5 py-4 cursor-pointer hover:bg-gray-50 transition-colors">
                                             <input
                                                 type="radio"
                                                 name="pembayaran"
-                                                checked={metodePembayaran === m}
-                                                onChange={() => setMetodePembayaran(m)}
+                                                checked={metodePembayaran === m.id}
+                                                onChange={() => setMetodePembayaran(m.id)}
                                                 className="accent-[#2264c0]"
                                             />
-                                            <span className="text-sm font-medium text-[#1b1b18]">{m}</span>
+                                            {m.icon}
+                                            <div className="flex-1">
+                                                <span className="text-sm font-medium text-[#1b1b18]">{m.label}</span>
+                                                <p className="text-xs text-[#5f6368]">{m.desc}</p>
+                                            </div>
+                                            {metodePembayaran === m.id && (
+                                                <div className="w-5 h-5 rounded-full bg-[#2264c0] flex items-center justify-center flex-shrink-0">
+                                                    <svg viewBox="0 0 12 12" className="w-3 h-3" fill="none">
+                                                        <path d="M2 6l3 3 5-5" stroke="#fff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                                                    </svg>
+                                                </div>
+                                            )}
                                         </label>
                                     ))}
                                 </div>
