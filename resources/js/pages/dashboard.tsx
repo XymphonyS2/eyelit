@@ -1,9 +1,9 @@
 import { Head, Link, usePage } from '@inertiajs/react';
-import { Bell, BookOpen, LogOut, Search, Settings, ShoppingBag, ShoppingCart, User, LayoutGrid, Package, Users } from 'lucide-react';
+import { Bell, BookOpen, LogOut, Search, Settings, ShoppingBag, ShoppingCart, User, LayoutGrid, Package, Users, FileText, TrendingUp } from 'lucide-react';
 import { useState, useRef } from 'react';
 
 export default function Dashboard() {
-    const { auth, produk, totalPengguna, totalPesanan } = usePage().props as any;
+    const { auth, produk, totalPengguna, totalPesanan, jumlahPesananBulanIni, totalPenghasilanBulanIni } = usePage().props as any;
     const [showUserDropdown, setShowUserDropdown] = useState(false);
     const [showCartDropdown, setShowCartDropdown] = useState(false);
     const [showNotifDropdown, setShowNotifDropdown] = useState(false);
@@ -205,47 +205,42 @@ export default function Dashboard() {
                 {/* Navigation Links */}
                 <div className="border-t border-[#19140035]/50">
                     <div className="mx-auto max-w-7xl px-4">
-                        <div className="flex items-center gap-6 overflow-x-auto">
+                        <div className="flex items-center justify-center gap-6 overflow-x-auto">
                             <Link
                                 href="/dashboard"
-                                className="flex items-center gap-2 py-2 text-sm font-medium text-[#2264c0] whitespace-nowrap"
+                                className="py-2 text-sm font-medium text-[#2264c0] whitespace-nowrap"
                             >
-                                <LayoutGrid className="size-4" />
                                 Dashboard
                             </Link>
                             <Link
-                                href="/"
-                                className="flex items-center gap-2 py-2 text-sm font-medium text-[#706f6c] hover:text-[#1b1b18] transition-colors whitespace-nowrap"
-                            >
-                                Beranda
-                            </Link>
-                            <Link
                                 href="/produk"
-                                className="flex items-center gap-2 py-2 text-sm font-medium text-[#706f6c] hover:text-[#2264c0] transition-colors whitespace-nowrap"
+                                className="py-2 text-sm font-medium text-[#706f6c] hover:text-[#2264c0] transition-colors whitespace-nowrap"
                             >
-                                <Package className="size-4" />
                                 Produk
                             </Link>
                             <Link
                                 href="/daftar-pesanan"
-                                className="flex items-center gap-2 py-2 text-sm font-medium text-[#706f6c] hover:text-[#2264c0] transition-colors whitespace-nowrap"
+                                className="py-2 text-sm font-medium text-[#706f6c] hover:text-[#2264c0] transition-colors whitespace-nowrap"
                             >
-                                <ShoppingBag className="size-4" />
                                 Pesanan
                             </Link>
                             <Link
                                 href="/pengguna"
-                                className="flex items-center gap-2 py-2 text-sm font-medium text-[#706f6c] hover:text-[#2264c0] transition-colors whitespace-nowrap"
+                                className="py-2 text-sm font-medium text-[#706f6c] hover:text-[#2264c0] transition-colors whitespace-nowrap"
                             >
-                                <Users className="size-4" />
                                 Pengguna
                             </Link>
                             <Link
                                 href="/carousel"
-                                className="flex items-center gap-2 py-2 text-sm font-medium text-[#706f6c] hover:text-[#2264c0] transition-colors whitespace-nowrap"
+                                className="py-2 text-sm font-medium text-[#706f6c] hover:text-[#2264c0] transition-colors whitespace-nowrap"
                             >
-                                <BookOpen className="size-4" />
                                 Carousel
+                            </Link>
+                            <Link
+                                href="/"
+                                className="py-2 text-sm font-medium text-[#706f6c] hover:text-[#2264c0] transition-colors whitespace-nowrap"
+                            >
+                                Beranda
                             </Link>
                         </div>
                     </div>
@@ -261,76 +256,47 @@ export default function Dashboard() {
 
                 {/* Stats Cards */}
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
-                    <div className="rounded-xl border border-[#19140035] bg-white p-6 hover:shadow-md transition-shadow">
-                        <div className="flex items-center gap-4">
-                            <div className="rounded-lg bg-[#2264c0]/10 p-3">
-                                <Package className="size-6 text-[#2264c0]" />
-                            </div>
-                            <div>
-                                <p className="text-sm text-[#706f6c]">Total Produk</p>
-                                <p className="text-2xl font-bold text-[#1b1b18]">{produk?.length || 0}</p>
-                            </div>
-                        </div>
-                    </div>
-
+                    {/* Jumlah Pesanan Bulan Ini */}
                     <div className="rounded-xl border border-[#19140035] bg-white p-6 hover:shadow-md transition-shadow">
                         <div className="flex items-center gap-4">
                             <div className="rounded-lg bg-[#2264c0]/10 p-3">
                                 <ShoppingBag className="size-6 text-[#2264c0]" />
                             </div>
                             <div>
-                                <p className="text-sm text-[#706f6c]">Total Pesanan</p>
-                                <p className="text-2xl font-bold text-[#1b1b18]">{totalPesanan || 0}</p>
+                                <p className="text-sm text-[#706f6c]">Jumlah Pesanan Bulan Ini</p>
+                                <p className="text-2xl font-bold text-[#1b1b18]">{jumlahPesananBulanIni ?? 0}</p>
                             </div>
                         </div>
                     </div>
 
+                    {/* Total Penghasilan Bulan Ini */}
                     <div className="rounded-xl border border-[#19140035] bg-white p-6 hover:shadow-md transition-shadow">
                         <div className="flex items-center gap-4">
                             <div className="rounded-lg bg-[#2264c0]/10 p-3">
-                                <Users className="size-6 text-[#2264c0]" />
+                                <TrendingUp className="size-6 text-[#2264c0]" />
                             </div>
                             <div>
-                                <p className="text-sm text-[#706f6c]">Pengguna</p>
-                                <p className="text-2xl font-bold text-[#1b1b18]">{totalPengguna || 0}</p>
+                                <p className="text-sm text-[#706f6c]">Total Penghasilan Bulan Ini</p>
+                                <p className="text-2xl font-bold text-[#2264c0]">Rp {(totalPenghasilanBulanIni ?? 0).toLocaleString('id-ID')}</p>
                             </div>
                         </div>
                     </div>
-                </div>
 
-                {/* Products Grid */}
-                <div className="mb-6">
-                    <h2 className="text-xl font-bold text-[#1b1b18]">Daftar Produk</h2>
-                    <p className="text-sm text-[#706f6c] mt-1">Semua produk dengan status aktif</p>
-                </div>
-
-                {produk && produk.length > 0 ? (
-                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-                        {produk.map((item: any) => (
-                            <div key={item.id} className="rounded-xl border border-[#19140035] bg-white overflow-hidden hover:shadow-lg transition-all duration-200 hover:-translate-y-1">
-                                <div className="aspect-square bg-gray-100 overflow-hidden">
-                                    <img
-                                        src={`/images/produk/${item.gambar}`}
-                                        alt={item.nama_produk}
-                                        className="w-full h-full object-cover"
-                                        onError={(e) => { (e.target as HTMLImageElement).src = '/images/placeholder.png'; }}
-                                    />
-                                </div>
-                                <div className="p-4">
-                                    <h3 className="font-semibold text-[#1b1b18] truncate">{item.nama_produk}</h3>
-                                    <p className="text-lg font-bold text-[#2264c0] mt-1">Rp {item.harga?.toLocaleString('id-ID')}</p>
-                                    <p className="text-sm text-[#706f6c] mt-1">Stok: {item.stok}</p>
-                                </div>
+                    {/* Lihat Detail */}
+                    <div className="rounded-xl border border-[#19140035] bg-white p-6 hover:shadow-md transition-shadow flex items-center justify-center">
+                        <Link
+                            href="/detail-bulan-ini"
+                            className="flex flex-col items-center gap-3 text-center"
+                        >
+                            <div className="rounded-lg bg-[#2264c0] p-3">
+                                <FileText className="size-6 text-white" />
                             </div>
-                        ))}
+                            <span className="text-sm font-semibold text-[#1b1b18]">Lihat Detail Bulan Ini</span>
+                        </Link>
                     </div>
-                ) : (
-                    <div className="text-center py-12 bg-white rounded-xl border border-[#19140035]">
-                        <Package className="size-16 text-[#706f6c] mx-auto mb-4" />
-                        <p className="text-[#706f6c]">Belum ada produk aktif</p>
-                    </div>
-                )}
-            </main>
+                </div>
+
+                            </main>
         </>
     );
 }

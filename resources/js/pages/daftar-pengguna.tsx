@@ -227,47 +227,42 @@ export default function DaftarPengguna() {
                 {/* Navigation Links */}
                 <div className="border-t border-[#19140035]/50">
                     <div className="mx-auto max-w-7xl px-4">
-                        <div className="flex items-center gap-6 overflow-x-auto">
+                        <div className="flex items-center justify-center gap-6 overflow-x-auto">
                             <Link
                                 href="/dashboard"
-                                className="flex items-center gap-2 py-2 text-sm font-medium text-[#706f6c] hover:text-[#2264c0] transition-colors whitespace-nowrap"
+                                className="py-2 text-sm font-medium text-[#706f6c] hover:text-[#2264c0] transition-colors whitespace-nowrap"
                             >
-                                <LayoutGrid className="size-4" />
                                 Dashboard
                             </Link>
                             <Link
-                                href="/"
-                                className="flex items-center gap-2 py-2 text-sm font-medium text-[#706f6c] hover:text-[#1b1b18] transition-colors whitespace-nowrap"
-                            >
-                                Beranda
-                            </Link>
-                            <Link
                                 href="/produk"
-                                className="flex items-center gap-2 py-2 text-sm font-medium text-[#706f6c] hover:text-[#2264c0] transition-colors whitespace-nowrap"
+                                className="py-2 text-sm font-medium text-[#706f6c] hover:text-[#2264c0] transition-colors whitespace-nowrap"
                             >
-                                <Package className="size-4" />
                                 Produk
                             </Link>
                             <Link
                                 href="/daftar-pesanan"
-                                className="flex items-center gap-2 py-2 text-sm font-medium text-[#706f6c] hover:text-[#2264c0] transition-colors whitespace-nowrap"
+                                className="py-2 text-sm font-medium text-[#706f6c] hover:text-[#2264c0] transition-colors whitespace-nowrap"
                             >
-                                <ShoppingBag className="size-4" />
                                 Pesanan
                             </Link>
                             <Link
                                 href="/pengguna"
-                                className="flex items-center gap-2 py-2 text-sm font-medium text-[#2264c0] whitespace-nowrap"
+                                className="py-2 text-sm font-medium text-[#2264c0] whitespace-nowrap"
                             >
-                                <Users className="size-4" />
                                 Pengguna
                             </Link>
                             <Link
                                 href="/carousel"
-                                className="flex items-center gap-2 py-2 text-sm font-medium text-[#706f6c] hover:text-[#2264c0] transition-colors whitespace-nowrap"
+                                className="py-2 text-sm font-medium text-[#706f6c] hover:text-[#2264c0] transition-colors whitespace-nowrap"
                             >
-                                <BookOpen className="size-4" />
                                 Carousel
+                            </Link>
+                            <Link
+                                href="/"
+                                className="py-2 text-sm font-medium text-[#706f6c] hover:text-[#2264c0] transition-colors whitespace-nowrap"
+                            >
+                                Beranda
                             </Link>
                         </div>
                     </div>
