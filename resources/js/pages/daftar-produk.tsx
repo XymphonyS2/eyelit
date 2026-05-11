@@ -8,6 +8,7 @@ export default function DaftarProduk() {
     const [showCartDropdown, setShowCartDropdown] = useState(false);
     const [showNotifDropdown, setShowNotifDropdown] = useState(false);
     const [showAddModal, setShowAddModal] = useState(false);
+    const [isClosing, setIsClosing] = useState(false);
     const [isEditMode, setIsEditMode] = useState(false);
     const [editProductId, setEditProductId] = useState<number | null>(null);
     const fileInputRefs = useRef<(HTMLInputElement | null)[]>([]);
@@ -159,8 +160,12 @@ export default function DaftarProduk() {
     };
 
     const handleCloseModal = () => {
-        setShowAddModal(false);
-        resetForm();
+        setIsClosing(true);
+        setTimeout(() => {
+            setShowAddModal(false);
+            setIsClosing(false);
+            resetForm();
+        }, 300);
     };
 
     const handleSubmit = () => {
@@ -507,37 +512,79 @@ export default function DaftarProduk() {
             </nav>
 
             {/* Page Content */}
-            <main className="min-h-screen bg-[#ffffff] mx-auto max-w-7xl px-4 py-8">
-                <div className="flex items-center justify-between mb-8">
-                    <div>
-                        <h1 className="text-3xl font-bold text-[#1b1b18]">Daftar Produk</h1>
-                        <p className="text-[#706f6c] mt-2">Kelola semua produk EyeLit</p>
-                    </div>
-                    <button
-                        onClick={() => setShowAddModal(true)}
-                        className="flex items-center gap-2 px-4 py-2 bg-[#2264c0] text-white rounded-lg hover:bg-[#1a4f9a] transition-colors font-medium"
-                    >
-                        <Plus className="size-5" />
-                        Tambah Produk
-                    </button>
-                </div>
-
-                {/* Stats */}
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-                    <div className="rounded-xl border border-[#19140035] bg-white p-6">
-                        <div className="flex items-center gap-4">
-                            <div className="rounded-lg bg-[#2264c0]/10 p-3">
-                                <Package className="size-6 text-[#2264c0]" />
-                            </div>
+            <main className="min-h-screen bg-[#ffffff]">
+                {/* Header with Blue Background - Full Width */}
+                <div className="bg-[#2264c0] w-full py-12 px-4">
+                    <div className="max-w-7xl mx-auto">
+                        <div className="flex items-center justify-between">
                             <div>
-                                <p className="text-sm text-[#706f6c]">Total Produk</p>
-                                <p className="text-2xl font-bold text-[#1b1b18]">{produk?.length || 0}</p>
+                                <h1 className="text-3xl font-bold text-white mb-2">Daftar Produk</h1>
+                                <p className="text-white/80">Kelola semua produk EyeLit</p>
+                            </div>
+                            <button
+                                onClick={() => setShowAddModal(true)}
+                                className="flex items-center gap-2 px-5 py-2.5 bg-white text-[#2264c0] rounded-xl hover:bg-white/90 transition-colors font-semibold shadow-lg"
+                            >
+                                <Plus className="size-5" />
+                                Tambah Produk
+                            </button>
+                        </div>
+
+                        {/* Stats Cards */}
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-8">
+                            {/* Total Produk */}
+                            <div className="group relative overflow-hidden rounded-2xl bg-white/10 backdrop-blur-sm border border-white/20 p-6 transition-all duration-300 hover:bg-white/20 hover:shadow-2xl hover:shadow-white/10 hover:-translate-y-1">
+                                <div className="absolute -top-10 -right-10 w-32 h-32 bg-white/5 rounded-full blur-2xl group-hover:bg-white/10 transition-all duration-300"></div>
+                                <div className="relative flex items-center gap-4">
+                                    <div className="flex-shrink-0 rounded-xl bg-white/20 p-4 group-hover:bg-white/30 transition-colors duration-300">
+                                        <Package className="size-8 text-white" />
+                                    </div>
+                                    <div className="flex-1 min-w-0">
+                                        <p className="text-sm font-medium text-white mb-1">Total Produk</p>
+                                        <p className="text-3xl font-bold text-white truncate">{produk?.length || 0}</p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            {/* Produk Aktif */}
+                            <div className="group relative overflow-hidden rounded-2xl bg-white/10 backdrop-blur-sm border border-white/20 p-6 transition-all duration-300 hover:bg-white/20 hover:shadow-2xl hover:shadow-white/10 hover:-translate-y-1">
+                                <div className="absolute -top-10 -right-10 w-32 h-32 bg-white/5 rounded-full blur-2xl group-hover:bg-white/10 transition-all duration-300"></div>
+                                <div className="relative flex items-center gap-4">
+                                    <div className="flex-shrink-0 rounded-xl bg-white/20 p-4 group-hover:bg-white/30 transition-colors duration-300">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="size-8 text-white">
+                                            <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+                                            <polyline points="22 4 12 14.01 9 11.01"></polyline>
+                                        </svg>
+                                    </div>
+                                    <div className="flex-1 min-w-0">
+                                        <p className="text-sm font-medium text-white mb-1">Produk Aktif</p>
+                                        <p className="text-3xl font-bold text-white truncate">{produk?.filter((p: any) => p.status_produk === 'Aktif').length || 0}</p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            {/* Total Stok */}
+                            <div className="group relative overflow-hidden rounded-2xl bg-white/10 backdrop-blur-sm border border-white/20 p-6 transition-all duration-300 hover:bg-white/20 hover:shadow-2xl hover:shadow-white/10 hover:-translate-y-1">
+                                <div className="absolute -top-10 -right-10 w-32 h-32 bg-white/5 rounded-full blur-2xl group-hover:bg-white/10 transition-all duration-300"></div>
+                                <div className="relative flex items-center gap-4">
+                                    <div className="flex-shrink-0 rounded-xl bg-white/20 p-4 group-hover:bg-white/30 transition-colors duration-300">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="size-8 text-white">
+                                            <path d="M3 3v18h18"></path>
+                                            <path d="m19 9-5 5-4-4-3 3"></path>
+                                        </svg>
+                                    </div>
+                                    <div className="flex-1 min-w-0">
+                                        <p className="text-sm font-medium text-white mb-1">Total Stok</p>
+                                        <p className="text-3xl font-bold text-white truncate">{produk?.reduce((sum: number, p: any) => sum + (parseInt(p.stok) || 0), 0) || 0}</p>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>
                 </div>
 
                 {/* Products Table */}
+                <div className="max-w-7xl mx-auto px-4 py-8">
                 {produk && produk.length > 0 ? (
                     <div className="bg-white rounded-xl border border-[#19140035] overflow-hidden">
                         <div className="overflow-x-auto">
@@ -607,14 +654,22 @@ export default function DaftarProduk() {
                         <p className="text-[#706f6c]">Belum ada produk aktif</p>
                     </div>
                 )}
+                </div>
             </main>
 
-            {/* Modal Tambah Produk */}
+            {/* Sidebar Tambah/Edit Produk */}
             {showAddModal && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
-                    <div className="bg-white rounded-2xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto">
+                <>
+                    {/* Backdrop */}
+                    <div
+                        className={`fixed inset-0 bg-black/30 z-40 ${isClosing ? 'animate-backdrop-fade-out' : 'animate-backdrop-fade-in'}`}
+                        onClick={handleCloseModal}
+                    />
+
+                    {/* Sidebar */}
+                    <div className={`fixed top-0 right-0 h-full w-full md:w-[480px] bg-white z-50 shadow-xl overflow-y-auto ${isClosing ? 'filter-panel-exit' : 'filter-panel-enter'}`}>
                         {/* Header */}
-                        <div className="sticky top-0 bg-white border-b border-[#19140035] px-6 py-4 flex items-center justify-between rounded-t-2xl">
+                        <div className="sticky top-0 bg-white border-b border-[#19140035] px-6 py-4 flex items-center justify-between z-10">
                             <h2 className="text-xl font-bold text-[#1b1b18]">{isEditMode ? 'Edit Produk' : 'Tambah Produk Baru'}</h2>
                             <button
                                 onClick={handleCloseModal}
@@ -860,7 +915,7 @@ export default function DaftarProduk() {
                                                 className="hidden"
                                             />
                                             {imagePreviews[index] ? (
-                                                <div className="relative aspect-square rounded-lg overflow-hidden border border-[#19140035] group">
+                                                <div className="relative aspect-square rounded-xl overflow-hidden border-2 border-[#19140035] group">
                                                     <img
                                                         src={imagePreviews[index]!}
                                                         alt={`Preview ${index + 1}`}
@@ -875,7 +930,7 @@ export default function DaftarProduk() {
                                                     </button>
                                                 </div>
                                             ) : existingImages[index] ? (
-                                                <div className="relative aspect-square rounded-lg overflow-hidden border border-[#19140035] group">
+                                                <div className="relative aspect-square rounded-xl overflow-hidden border-2 border-[#19140035] group">
                                                     <img
                                                         src={`/images/produk/${existingImages[index]}`}
                                                         alt={`Gambar ${index + 1}`}
@@ -889,10 +944,9 @@ export default function DaftarProduk() {
                                                 <button
                                                     type="button"
                                                     onClick={() => fileInputRefs.current[index]?.click()}
-                                                    className="aspect-square rounded-lg border-2 border-dashed border-[#19140035] hover:border-[#2264c0] flex flex-col items-center justify-center gap-1 transition-colors cursor-pointer"
+                                                    className="group relative aspect-square w-full rounded-xl border-2 border-dashed border-[#19140035] hover:border-[#2264c0] flex items-center justify-center transition-all duration-300 cursor-pointer hover:bg-[#2264c0]/5"
                                                 >
-                                                    <ImagePlus className="size-5 text-[#706f6c]" />
-                                                    <span className="text-xs text-[#706f6c]">{index === 0 ? 'Utama' : index + 1}</span>
+                                                    <span className="text-sm font-semibold text-[#706f6c] group-hover:text-[#2264c0] transition-colors duration-300">{index === 0 ? 'Utama' : index + 1}</span>
                                                 </button>
                                             )}
                                         </div>
@@ -903,22 +957,22 @@ export default function DaftarProduk() {
                         </div>
 
                         {/* Footer */}
-                        <div className="sticky bottom-0 bg-white border-t border-[#19140035] px-6 py-4 flex items-center justify-end gap-3 rounded-b-2xl">
+                        <div className="sticky bottom-0 bg-white border-t border-[#19140035] px-6 py-4 flex items-center gap-3">
                             <button
                                 onClick={handleCloseModal}
-                                className="px-5 py-2 text-sm font-medium text-[#706f6c] hover:text-[#1b1b18] hover:bg-gray-100 rounded-lg transition-colors"
+                                className="flex-1 px-5 py-2.5 text-sm font-medium text-[#706f6c] hover:text-[#1b1b18] hover:bg-gray-100 rounded-lg transition-colors border border-[#19140035]"
                             >
                                 Batal
                             </button>
                             <button
                                 onClick={handleSubmit}
-                                className="px-5 py-2 text-sm font-medium bg-[#2264c0] text-white rounded-lg hover:bg-[#1a4f9a] transition-colors"
+                                className="flex-1 px-5 py-2.5 text-sm font-medium bg-[#2264c0] text-white rounded-lg hover:bg-[#1a4f9a] transition-colors"
                             >
                                 {isEditMode ? 'Perbarui Produk' : 'Simpan Produk'}
                             </button>
                         </div>
                     </div>
-                </div>
+                </>
             )}
 
             {/* Toast Notification */}
