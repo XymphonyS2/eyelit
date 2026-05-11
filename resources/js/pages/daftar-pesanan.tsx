@@ -1,5 +1,5 @@
 import { Head, Link, usePage } from '@inertiajs/react';
-import { Bell, BookOpen, Clock, LayoutGrid, LogOut, Package, Search, Settings, ShoppingBag, ShoppingCart, User, Users } from 'lucide-react';
+import { Bell, BookOpen, Clock, LayoutGrid, LogOut, Package, Search, Settings, ShoppingBag, ShoppingCart, TrendingUp, User, Users } from 'lucide-react';
 import { useRef, useState } from 'react';
 
 export default function DaftarPesanan() {
@@ -259,32 +259,65 @@ export default function DaftarPesanan() {
             </nav>
 
             {/* Page Content */}
-            <main className="min-h-screen bg-[#ffffff] mx-auto max-w-7xl px-4 py-8">
-                <div className="mb-8">
-                    <h1 className="text-3xl font-bold text-[#1b1b18]">Daftar Pesanan</h1>
-                    <p className="text-[#706f6c] mt-2">Kelola semua pesanan EyeLit</p>
-                </div>
+            <main className="min-h-screen bg-[#ffffff]">
+                {/* Header with Blue Background - Full Width */}
+                <div className="bg-[#2264c0] w-full py-12 px-4">
+                    <div className="max-w-7xl mx-auto">
+                        <h1 className="text-3xl font-bold text-white mb-2">Daftar Pesanan</h1>
+                        <p className="text-white/80">Kelola semua pesanan EyeLit</p>
 
-                {/* Stats */}
-                <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-                    <div className="rounded-xl border border-[#19140035] bg-white p-6">
-                        <div className="flex items-center gap-4">
-                            <div className="rounded-lg bg-[#2264c0]/10 p-3">
-                                <ShoppingBag className="size-6 text-[#2264c0]" />
+                        {/* Stats Cards */}
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-8">
+                            {/* Total Pesanan */}
+                            <div className="group relative overflow-hidden rounded-2xl bg-white/10 backdrop-blur-sm border border-white/20 p-6 transition-all duration-300 hover:bg-white/20 hover:shadow-2xl hover:shadow-white/10 hover:-translate-y-1">
+                                <div className="absolute -top-10 -right-10 w-32 h-32 bg-white/5 rounded-full blur-2xl group-hover:bg-white/10 transition-all duration-300"></div>
+                                <div className="relative flex items-center gap-4">
+                                    <div className="flex-shrink-0 rounded-xl bg-white/20 p-4 group-hover:bg-white/30 transition-colors duration-300">
+                                        <ShoppingBag className="size-8 text-white" />
+                                    </div>
+                                    <div className="flex-1 min-w-0">
+                                        <p className="text-sm font-medium text-white mb-1">Total Pesanan</p>
+                                        <p className="text-3xl font-bold text-white truncate">{pesanan?.length || 0}</p>
+                                    </div>
+                                </div>
                             </div>
-                            <div>
-                                <p className="text-sm text-[#706f6c]">Total Pesanan</p>
-                                <p className="text-2xl font-bold text-[#1b1b18]">{pesanan?.length || 0}</p>
+
+                            {/* Placeholder Cards for Layout Balance */}
+                            <div className="group relative overflow-hidden rounded-2xl bg-white/10 backdrop-blur-sm border border-white/20 p-6 transition-all duration-300 hover:bg-white/20 hover:shadow-2xl hover:shadow-white/10 hover:-translate-y-1">
+                                <div className="absolute -top-10 -right-10 w-32 h-32 bg-white/5 rounded-full blur-2xl group-hover:bg-white/10 transition-all duration-300"></div>
+                                <div className="relative flex items-center gap-4">
+                                    <div className="flex-shrink-0 rounded-xl bg-white/20 p-4 group-hover:bg-white/30 transition-colors duration-300">
+                                        <Clock className="size-8 text-white" />
+                                    </div>
+                                    <div className="flex-1 min-w-0">
+                                        <p className="text-sm font-medium text-white mb-1">Menunggu Pembayaran</p>
+                                        <p className="text-3xl font-bold text-white truncate">{pesanan?.filter((p: any) => p.status_pesanan === 'menunggu pembayaran').length || 0}</p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div className="group relative overflow-hidden rounded-2xl bg-white/10 backdrop-blur-sm border border-white/20 p-6 transition-all duration-300 hover:bg-white/20 hover:shadow-2xl hover:shadow-white/10 hover:-translate-y-1">
+                                <div className="absolute -top-10 -right-10 w-32 h-32 bg-white/5 rounded-full blur-2xl group-hover:bg-white/10 transition-all duration-300"></div>
+                                <div className="relative flex items-center gap-4">
+                                    <div className="flex-shrink-0 rounded-xl bg-white/20 p-4 group-hover:bg-white/30 transition-colors duration-300">
+                                        <TrendingUp className="size-8 text-white" />
+                                    </div>
+                                    <div className="flex-1 min-w-0">
+                                        <p className="text-sm font-medium text-white mb-1">Sedang Diproses</p>
+                                        <p className="text-3xl font-bold text-white truncate">{pesanan?.filter((p: any) => p.status_pesanan === 'diproses' || p.status_pesanan === 'dikirim').length || 0}</p>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>
                 </div>
 
-                {/* Orders Table */}
-                {pesanan && pesanan.length > 0 ? (
-                    <div className="bg-white rounded-xl border border-[#19140035] overflow-hidden">
-                        <div className="overflow-x-auto">
-                            <table className="w-full">
+                <div className="max-w-7xl mx-auto px-4 py-8">
+                    {/* Orders Table */}
+                    {pesanan && pesanan.length > 0 ? (
+                        <div className="bg-white rounded-xl border border-[#19140035] overflow-hidden">
+                            <div className="overflow-x-auto">
+                                <table className="w-full">
                                 <thead className="bg-gray-50 border-b border-[#19140035]">
                                     <tr>
                                         <th className="px-6 py-3 text-left text-xs font-semibold text-[#706f6c] uppercase tracking-wider">No</th>
@@ -343,6 +376,7 @@ export default function DaftarPesanan() {
                         <p className="text-[#706f6c]">Belum ada pesanan</p>
                     </div>
                 )}
+                </div>
             </main>
         </>
     );
