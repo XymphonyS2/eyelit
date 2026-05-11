@@ -365,7 +365,7 @@ export default function Welcome() {
                 </nav>
 
                 {/* Carousel Section */}
-                <section id="carousel" className="py-8 sm:py-16 bg-white">
+                <section id="carousel" className="py-8 sm:py-16 bg-[#2264c0]">
                     <div className="container mx-auto px-4 max-w-7xl">
                         <div className="flex flex-col lg:flex-row items-center gap-6 sm:gap-12">
                             {/* Left: Image */}
@@ -380,18 +380,18 @@ export default function Welcome() {
                             </div>
                             {/* Right: Text Content */}
                             <div className="w-full lg:w-1/2 text-center lg:text-left">
-                                <h2 className={`text-xl sm:text-2xl lg:text-4xl font-bold text-[#1b1b18] mb-3 sm:mb-4 leading-tight ${textAnimClass}`}>
+                                <h2 className={`text-xl sm:text-2xl lg:text-4xl font-bold text-white mb-3 sm:mb-4 leading-tight ${textAnimClass}`}>
                                     {slides[currentSlide].title}
                                 </h2>
-                                <p className={`text-[#5f6368] text-xs sm:text-sm lg:text-lg leading-relaxed mb-6 sm:mb-8 ${textAnimClass}`}>
+                                <p className={`text-white/80 text-xs sm:text-sm lg:text-lg leading-relaxed mb-6 sm:mb-8 ${textAnimClass}`}>
                                     {slides[currentSlide].description}
                                 </p>
                                 <div className="flex items-center gap-3 sm:gap-4 justify-center lg:justify-start">
                                     <button
                                         onClick={handlePrev}
-                                        className="w-10 h-10 sm:w-12 sm:h-12 bg-[#2264c0] rounded-full flex items-center justify-center hover:scale-110 transition-transform shadow-lg"
+                                        className="w-10 h-10 sm:w-12 sm:h-12 bg-white text-[#2264c0] rounded-full flex items-center justify-center hover:scale-110 transition-transform shadow-lg"
                                     >
-                                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="size-4 sm:size-6 text-white">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="size-4 sm:size-6">
                                             <path d="m15 18-6-6 6-6"/>
                                         </svg>
                                     </button>
@@ -401,17 +401,17 @@ export default function Welcome() {
                                                 key={index}
                                                 className={`w-2.5 h-2.5 sm:w-3 sm:h-3 rounded-full transition-colors ${
                                                     index === currentSlide
-                                                        ? 'bg-[#2264c0] carousel-dot-active'
-                                                        : 'bg-[#2264c0]/30'
+                                                        ? 'bg-white carousel-dot-active'
+                                                        : 'bg-white/30'
                                                 }`}
                                             />
                                         ))}
                                     </div>
                                     <button
                                         onClick={handleNext}
-                                        className="w-10 h-10 sm:w-12 sm:h-12 bg-[#2264c0] rounded-full flex items-center justify-center hover:scale-110 transition-transform shadow-lg"
+                                        className="w-10 h-10 sm:w-12 sm:h-12 bg-white text-[#2264c0] rounded-full flex items-center justify-center hover:scale-110 transition-transform shadow-lg"
                                     >
-                                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="size-4 sm:size-6 text-white">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="size-4 sm:size-6">
                                             <path d="m9 18 6-6-6-6"/>
                                         </svg>
                                     </button>
