@@ -15,11 +15,11 @@ class EkspedisiSeeder extends Seeder
         DB::statement('SET FOREIGN_KEY_CHECKS=1');
 
         $ekspedisi = [
-            ['nama_ekspedisi' => 'JNE (REG)',     'logo_ekspedisi' => null, 'status_ekspedisi' => true, 'created_at' => now(), 'updated_at' => now()],
-            ['nama_ekspedisi' => 'J&T Express',    'logo_ekspedisi' => null, 'status_ekspedisi' => true, 'created_at' => now(), 'updated_at' => now()],
-            ['nama_ekspedisi' => 'SiCepat (BEST)', 'logo_ekspedisi' => null, 'status_ekspedisi' => true, 'created_at' => now(), 'updated_at' => now()],
-            ['nama_ekspedisi' => 'AnterAja',       'logo_ekspedisi' => null, 'status_ekspedisi' => true, 'created_at' => now(), 'updated_at' => now()],
-            ['nama_ekspedisi' => 'Pos Indonesia',  'logo_ekspedisi' => null, 'status_ekspedisi' => true, 'created_at' => now(), 'updated_at' => now()],
+            ['nama_ekspedisi' => 'JNE (REG)',     'logo_ekspedisi' => 'jne.png',           'status_ekspedisi' => true, 'created_at' => now(), 'updated_at' => now()],
+            ['nama_ekspedisi' => 'J&T Express',    'logo_ekspedisi' => 'jnt.png',           'status_ekspedisi' => true, 'created_at' => now(), 'updated_at' => now()],
+            ['nama_ekspedisi' => 'SiCepat (BEST)', 'logo_ekspedisi' => 'sicepat.png',       'status_ekspedisi' => true, 'created_at' => now(), 'updated_at' => now()],
+            ['nama_ekspedisi' => 'AnterAja',       'logo_ekspedisi' => 'anteraja.png',      'status_ekspedisi' => true, 'created_at' => now(), 'updated_at' => now()],
+            ['nama_ekspedisi' => 'Pos Indonesia',  'logo_ekspedisi' => 'posindonesia.png',  'status_ekspedisi' => true, 'created_at' => now(), 'updated_at' => now()],
         ];
 
         DB::table('ekspedisi')->insert($ekspedisi);

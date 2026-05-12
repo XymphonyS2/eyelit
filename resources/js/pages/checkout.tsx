@@ -368,6 +368,17 @@ export default function Checkout() {
                                                     onChange={() => setSelectedEkspedisi(e)}
                                                     className="accent-[#2264c0]"
                                                 />
+                                                {e.logo_ekspedisi ? (
+                                                    <img
+                                                        src={`/images/ekspedisi/${e.logo_ekspedisi}`}
+                                                        alt={safe(e.nama_ekspedisi)}
+                                                        className="w-10 h-10 object-contain rounded-lg flex-shrink-0 bg-gray-50"
+                                                    />
+                                                ) : (
+                                                    <div className="w-10 h-10 rounded-lg bg-gray-100 flex items-center justify-center flex-shrink-0 text-xs font-bold text-gray-400">
+                                                        {safe(e.nama_ekspedisi).charAt(0)}
+                                                    </div>
+                                                )}
                                                 <div className="flex-1 flex items-center justify-between text-sm">
                                                     {/* 🔥 PERBAIKAN: safe() untuk nama ekspedisi */}
                                                     <span className="font-medium text-[#1b1b18]">{safe(e.nama_ekspedisi)}</span>
@@ -403,48 +414,19 @@ export default function Checkout() {
                                             id: 'QRIS',
                                             label: 'QRIS',
                                             desc: 'Scan QR dari aplikasi e-wallet & mobile banking',
-                                            icon: (
-                                                <svg viewBox="0 0 60 60" className="w-12 h-12 rounded-lg flex-shrink-0" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                                    <rect width="60" height="60" rx="12" fill="#fff"/>
-                                                    <rect x="10" y="10" width="16" height="16" rx="3" fill="#2264c0"/>
-                                                    <rect x="34" y="10" width="16" height="16" rx="3" fill="#2264c0"/>
-                                                    <rect x="10" y="34" width="16" height="16" rx="3" fill="#2264c0"/>
-                                                    <rect x="14" y="14" width="8" height="8" rx="1.5" fill="#fff"/>
-                                                    <rect x="38" y="14" width="8" height="8" rx="1.5" fill="#fff"/>
-                                                    <rect x="14" y="38" width="8" height="8" rx="1.5" fill="#fff"/>
-                                                    <rect x="34" y="34" width="4" height="4" rx="1" fill="#2264c0"/>
-                                                    <rect x="40" y="34" width="4" height="4" rx="1" fill="#2264c0"/>
-                                                    <rect x="34" y="40" width="4" height="4" rx="1" fill="#2264c0"/>
-                                                    <rect x="40" y="40" width="4" height="4" rx="1" fill="#2264c0"/>
-                                                </svg>
-                                            ),
+                                            icon: <img src="/images/metodepem/qris.png" alt="QRIS" className="w-12 h-12 object-contain rounded-lg flex-shrink-0" onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }} />,
                                         },
                                         {
                                             id: 'BCA',
                                             label: 'Bank Central Asia',
                                             desc: 'Transfer via BCA Virtual Account',
-                                            icon: (
-                                                <svg viewBox="0 0 60 60" className="w-12 h-12 rounded-lg flex-shrink-0" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                                    <rect width="60" height="60" rx="12" fill="#fff"/>
-                                                    <circle cx="30" cy="30" r="18" fill="#fff" stroke="#1a1a6c" strokeWidth="3"/>
-                                                    <text x="30" y="25" textAnchor="middle" fontSize="9" fontWeight="bold" fill="#1a1a6c" fontFamily="Arial">BCA</text>
-                                                    <text x="30" y="36" textAnchor="middle" fontSize="6" fill="#1a1a6c" fontFamily="Arial">VIRTUAL</text>
-                                                </svg>
-                                            ),
+                                            icon: <img src="/images/metodepem/bca.png" alt="BCA" className="w-12 h-12 object-contain rounded-lg flex-shrink-0" onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }} />,
                                         },
                                         {
                                             id: 'BNI',
                                             label: 'Bank Negara Indonesia',
                                             desc: 'Transfer via BNI Virtual Account',
-                                            icon: (
-                                                <svg viewBox="0 0 60 60" className="w-12 h-12 rounded-lg flex-shrink-0" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                                    <rect width="60" height="60" rx="12" fill="#fff"/>
-                                                    <rect x="13" y="15" width="34" height="30" rx="4" fill="#fff" stroke="#e87722" strokeWidth="2.5"/>
-                                                    <text x="30" y="25" textAnchor="middle" fontSize="7" fontWeight="bold" fill="#e87722" fontFamily="Arial">BANK</text>
-                                                    <text x="30" y="34" textAnchor="middle" fontSize="7" fontWeight="bold" fill="#e87722" fontFamily="Arial">BNI</text>
-                                                    <rect x="13" y="15" width="34" height="8" rx="4" fill="#e87722"/>
-                                                </svg>
-                                            ),
+                                            icon: <img src="/images/metodepem/bni.png" alt="BNI" className="w-12 h-12 object-contain rounded-lg flex-shrink-0" onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }} />,
                                         },
                                     ].map((m) => (
                                         <label key={m.id} className="flex items-center gap-3 px-5 py-4 cursor-pointer hover:bg-gray-50 transition-colors">

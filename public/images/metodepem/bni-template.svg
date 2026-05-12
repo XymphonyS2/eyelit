@@ -1,8 +1,0 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="80" height="80" viewBox="0 0 80 80">
-  <rect x="0" y="0" width="80" height="80" fill="#F3F4F6" rx="12"/>
-  <g transform="translate(12, 12)">
-    <!-- Placeholder: Ganti dengan logo asli BNI -->
-    <text x="28" y="35" font-family="Arial, sans-serif" font-size="10" font-weight="bold" fill="#e87722" text-anchor="middle">BNI</text>
-    <text x="28" y="48" font-family="Arial, sans-serif" font-size="7" fill="#e87722" text-anchor="middle">Virtual</text>
-  </g>
-</svg>
