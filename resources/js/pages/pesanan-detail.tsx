@@ -330,7 +330,7 @@ export default function PesananDetail() {
 
                                 {statusPesanan === 'Menunggu Konfirmasi Pembayaran' ? (
                                     <Link
-                                        href={`/pesanan/${pesanan.id}/bayar`}
+                                        href={`/pembayaran/${pesanan.id}`}
                                         className="mt-5 block w-full py-3 bg-[#2264c0] text-white rounded-full font-semibold text-sm hover:bg-[#1a4f9a] transition-colors text-center"
                                     >
                                         Bayar

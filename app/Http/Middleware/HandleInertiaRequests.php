@@ -51,6 +51,10 @@ class HandleInertiaRequests extends Middleware
                 'error' => fn () => $request->session()->get('error'),
             ],
             'sidebarOpen' => ! $request->hasCookie('sidebar_state') || $request->cookie('sidebar_state') === 'true',
+            'midtrans' => [
+                'client_key' => env('MIDTRANS_CLIENT_KEY'),
+                'is_production' => env('MIDTRANS_IS_PRODUCTION', false),
+            ],
         ];
     }
 }
