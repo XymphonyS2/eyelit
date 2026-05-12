@@ -56,6 +56,9 @@ class ProvinsiSeeder extends Seeder
             ['nama_provinsi' => 'Papua', 'pulau' => 'Maluku & Papua'],
         ];
 
+        DB::statement('SET FOREIGN_KEY_CHECKS=0');
+        DB::table('provinsi')->truncate();
+        DB::statement('SET FOREIGN_KEY_CHECKS=1');
         DB::table('provinsi')->insert($provinsi);
     }
 }

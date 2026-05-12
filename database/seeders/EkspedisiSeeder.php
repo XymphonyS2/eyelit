@@ -9,8 +9,10 @@ class EkspedisiSeeder extends Seeder
 {
     public function run(): void
     {
-        // Hapus data lama agar tidak duplikat saat re-seed
-        DB::table('ekspedisi')->delete();
+        // truncate auto-reset auto-increment (delete tidak cukup)
+        DB::statement('SET FOREIGN_KEY_CHECKS=0');
+        DB::table('ekspedisi')->truncate();
+        DB::statement('SET FOREIGN_KEY_CHECKS=1');
 
         $ekspedisi = [
             ['nama_ekspedisi' => 'JNE (REG)',     'logo_ekspedisi' => null, 'status_ekspedisi' => true, 'created_at' => now(), 'updated_at' => now()],

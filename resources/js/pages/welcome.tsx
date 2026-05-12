@@ -365,6 +365,7 @@ export default function Welcome() {
                 </nav>
 
                 {/* Carousel Section */}
+                {carousels && carousels.length > 0 && (
                 <section id="carousel" className="py-8 sm:py-16 bg-[#2264c0]">
                     <div className="container mx-auto px-4 max-w-7xl">
                         <div className="flex flex-col lg:flex-row items-center gap-6 sm:gap-12">
@@ -420,6 +421,7 @@ export default function Welcome() {
                         </div>
                     </div>
                 </section>
+                )}
 
                 {/* Grid Box Section */}
                 <section className="overflow-hidden">

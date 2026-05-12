@@ -41,6 +41,9 @@ export default function Carousel() {
         urutan: 1,
         status_carousel: true,
     });
+    const [imagePreview, setImagePreview] = useState<string | null>(null);
+    const [existingImage, setExistingImage] = useState<string | null>(null);
+    const imageInputRef = useRef<HTMLInputElement | null>(null);
 
     const resetForm = () => {
         setForm({
@@ -50,8 +53,24 @@ export default function Carousel() {
             urutan: 1,
             status_carousel: true,
         });
+        setImagePreview(null);
+        setExistingImage(null);
         setIsEditMode(false);
         setEditCarouselId(null);
+    };
+
+    const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0] || null;
+        if (file) {
+            setForm({ ...form, url_gambar: file });
+            setImagePreview(URL.createObjectURL(file));
+        }
+    };
+
+    const removeImage = () => {
+        setForm({ ...form, url_gambar: null });
+        setImagePreview(null);
+        if (imageInputRef.current) imageInputRef.current.value = '';
     };
 
     const handleAdd = () => {
@@ -83,10 +102,12 @@ export default function Carousel() {
         setForm({
             judul_carousel: carousel.judul_carousel || '',
             deskripsi: carousel.deskripsi || '',
-            url_gambar: carousel.url_gambar || '',
+            url_gambar: null,
             urutan: carousel.urutan || 1,
             status_carousel: carousel.status_carousel ?? true,
         });
+        setExistingImage(`/${carousel.url_gambar}`);
+        setImagePreview(null);
         setIsEditMode(true);
         setIsEditClosing(false);
         setEditCarouselId(carousel.id);
@@ -582,7 +603,7 @@ export default function Carousel() {
                                                 <td className="px-6 py-4">
                                                     <div className="w-16 h-16 rounded-lg overflow-hidden bg-gray-100">
                                                         <img
-                                                            src={item.url_gambar}
+                                                            src={`/${item.url_gambar}`}
                                                             alt={item.judul_carousel}
                                                             className="w-full h-full object-cover"
                                                             onError={(e) => { (e.target as HTMLImageElement).src = '/images/placeholder.png'; }}
@@ -626,8 +647,8 @@ export default function Carousel() {
                             </div>
                         </div>
                     ) : (
-                        <div className="text-center py-12 bg-white rounded-xl border border-[#19140035]">
-                            <BookOpen className="size-16 text-[#706f6c] mx-auto mb-4" />
+                        <div className="mt-6 text-center py-12 bg-white rounded-xl border border-[#19140035]">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-book-open size-16 text-[#706f6c] mx-auto mb-4"><path d="M12 7v14"></path><path d="M3 18a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1h5a4 4 0 0 1 4 4 4 4 0 0 1 4-4h5a1 1 0 0 1 1 1v13a1 1 0 0 1-1 1h-6a3 3 0 0 0-3 3 3 3 0 0 0-3-3z"></path></svg>
                             <p className="text-[#706f6c]">Belum ada slide carousel</p>
                         </div>
                     )}
@@ -677,10 +698,31 @@ export default function Carousel() {
                                 <input
                                     type="file"
                                     accept="image/*"
-                                    onChange={(e) => setForm({ ...form, url_gambar: e.target.files?.[0] || null })}
-                                    className="w-full px-3 py-2 border border-[#19140035] rounded-lg text-sm text-[#1b1b18] focus:outline-none focus:border-[#2264c0]"
-                                    required={!isEditMode}
+                                    ref={imageInputRef}
+                                    onChange={handleImageChange}
+                                    className="hidden"
                                 />
+                                {imagePreview ? (
+                                    <div className="relative w-full aspect-video rounded-xl overflow-hidden border-2 border-[#19140035]">
+                                        <img src={imagePreview} alt="Preview" className="w-full h-full object-cover" />
+                                        <button
+                                            type="button"
+                                            onClick={removeImage}
+                                            className="absolute top-2 right-2 bg-red-500 text-white p-1.5 rounded-full hover:bg-red-600 transition-colors"
+                                        >
+                                            <X className="size-4" />
+                                        </button>
+                                    </div>
+                                ) : (
+                                    <button
+                                        type="button"
+                                        onClick={() => imageInputRef.current?.click()}
+                                        className="w-full aspect-video rounded-xl border-2 border-dashed border-[#19140035] hover:border-[#2264c0] flex flex-col items-center justify-center gap-2 transition-all duration-300 cursor-pointer hover:bg-[#2264c0]/5"
+                                    >
+                                        <Image className="size-8 text-[#706f6c]" />
+                                        <span className="text-sm font-medium text-[#706f6c]">Klik untuk upload gambar</span>
+                                    </button>
+                                )}
                             </div>
                             <div>
                                 <label className="block text-sm font-medium text-[#1b1b18] mb-1.5">Urutan</label>
@@ -765,11 +807,48 @@ export default function Carousel() {
                                 <input
                                     type="file"
                                     accept="image/*"
-                                    onChange={(e) => setForm({ ...form, url_gambar: e.target.files?.[0] || null })}
-                                    className="w-full px-3 py-2 border border-[#19140035] rounded-lg text-sm text-[#1b1b18] focus:outline-none focus:border-[#2264c0]"
+                                    ref={imageInputRef}
+                                    onChange={handleImageChange}
+                                    className="hidden"
                                 />
-                                {form.url_gambar && typeof form.url_gambar === 'string' && (
-                                    <p className="text-xs text-[#706f6c] mt-1">Gambar saat ini: {form.url_gambar}</p>
+                                {imagePreview ? (
+                                    <div className="relative w-full aspect-video rounded-xl overflow-hidden border-2 border-[#19140035]">
+                                        <img src={imagePreview} alt="Preview" className="w-full h-full object-cover" />
+                                        <button
+                                            type="button"
+                                            onClick={removeImage}
+                                            className="absolute top-2 right-2 bg-red-500 text-white p-1.5 rounded-full hover:bg-red-600 transition-colors"
+                                        >
+                                            <X className="size-4" />
+                                        </button>
+                                    </div>
+                                ) : existingImage ? (
+                                    <div className="relative w-full aspect-video rounded-xl overflow-hidden border-2 border-[#19140035] group">
+                                        <img src={existingImage} alt="Gambar saat ini" className="w-full h-full object-cover" />
+                                        <button
+                                            type="button"
+                                            onClick={() => setExistingImage(null)}
+                                            className="absolute top-2 right-2 bg-red-500 text-white p-1.5 rounded-full hover:bg-red-600 transition-colors opacity-0 group-hover:opacity-100"
+                                        >
+                                            <X className="size-4" />
+                                        </button>
+                                        <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                                            <span className="text-white text-sm font-medium">Klik untuk ganti</span>
+                                        </div>
+                                        <div
+                                            onClick={() => imageInputRef.current?.click()}
+                                            className="absolute inset-0 cursor-pointer"
+                                        />
+                                    </div>
+                                ) : (
+                                    <button
+                                        type="button"
+                                        onClick={() => imageInputRef.current?.click()}
+                                        className="w-full aspect-video rounded-xl border-2 border-dashed border-[#19140035] hover:border-[#2264c0] flex flex-col items-center justify-center gap-2 transition-all duration-300 cursor-pointer hover:bg-[#2264c0]/5"
+                                    >
+                                        <Image className="size-8 text-[#706f6c]" />
+                                        <span className="text-sm font-medium text-[#706f6c]">Klik untuk upload gambar</span>
+                                    </button>
                                 )}
                             </div>
                             <div>

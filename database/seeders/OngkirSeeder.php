@@ -14,8 +14,10 @@ class OngkirSeeder extends Seeder
         $ekspedisis = DB::table('ekspedisi')->get()->keyBy('id');
         if ($ekspedisis->isEmpty()) return;
 
-        // Hapus data lama agar tidak duplikat saat re-seed
-        DB::table('ongkir')->delete();
+        // truncate auto-reset auto-increment (delete tidak cukup)
+        DB::statement('SET FOREIGN_KEY_CHECKS=0');
+        DB::table('ongkir')->truncate();
+        DB::statement('SET FOREIGN_KEY_CHECKS=1');
 
         // Nama provinsi HARUS persis sama dengan tabel provinsi (38 provinsi)
         $data = [
@@ -60,7 +62,9 @@ class OngkirSeeder extends Seeder
         ];
 
         $provinsiMap = [];
-        DB::table('provinsi')->get()->each(fn($p) => $provinsiMap[$p->nama_provinsi] = $p->id);
+        DB::table('provinsi')->get()->each(function ($p) use (&$provinsiMap) {
+            $provinsiMap[$p->nama_provinsi] = $p->id;
+        });
 
         $rows = [];
         $now = now();
