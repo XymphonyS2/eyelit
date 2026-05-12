@@ -39,6 +39,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::delete('/keranjang/{id}', [KeranjangController::class, 'hapus'])->name('keranjang.hapus');
     Route::get('/checkout', [CheckoutController::class, 'index'])->name('checkout');
     Route::post('/checkout/langsung', [CheckoutController::class, 'langsung'])->name('checkout.langsung');
+    Route::get('/checkout/langsung', [CheckoutController::class, 'langsungGet'])->name('checkout.langsung');
     Route::post('/checkout', [CheckoutController::class, 'proses'])->name('checkout.proses');
     Route::post('/checkout/alamat', [CheckoutController::class, 'tambahAlamat'])->name('checkout.alamat');
     Route::post('/checkout/ongkir', [OngkirController::class, 'hitung'])->name('checkout.ongkir');

@@ -13,13 +13,14 @@ class OngkirController extends Controller
     {
         $request->validate([
             'alamat_id'    => 'required|exists:alamat,id',
-            'ekspedisi_id' => 'required|exists:ekspedisi_master,id',
+            'ekspedisi_id' => 'required|exists:ekspedisi,id',
         ]);
 
         $alamat = Alamat::findOrFail($request->alamat_id);
 
-        // Gunakan ongkir_master langsung berdasarkan provinsi_id
-        $ongkir = Ongkir::where('provinsi_id', $alamat->provinsi_id)
+        // Gunakan tabel ongkir asli dengan provinsi_id + ekspedisi_id
+        $ongkir = \DB::table('ongkir')
+            ->where('provinsi_id', $alamat->provinsi_id)
             ->where('ekspedisi_id', $request->ekspedisi_id)
             ->first();
 

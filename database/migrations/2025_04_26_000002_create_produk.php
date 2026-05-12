@@ -22,6 +22,11 @@ return new class extends Migration
             $table->string('bridge', 50)->nullable();
             $table->string('diagonal', 50)->nullable();
             $table->string('ukuran', 50)->nullable();
+            $table->string('gambar')->nullable();
+            $table->string('gambar_2')->nullable();
+            $table->string('gambar_3')->nullable();
+            $table->string('gambar_4')->nullable();
+            $table->string('gambar_5')->nullable();
             $table->enum('status_produk', ['Aktif', 'Nonaktif'])->default('Aktif');
             $table->timestamps();
         });

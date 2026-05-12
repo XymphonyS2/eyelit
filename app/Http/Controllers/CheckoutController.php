@@ -58,39 +58,76 @@ class CheckoutController extends Controller
         $hargaProduk = (int) ($produk->harga_produk ?? 0);
         $subtotal = ($hargaProduk + $hargaLensa) * $jumlah;
 
+        // Simpan ke session untuk diambil oleh route GET
+        session(['checkout_langsung' => [
+            'produk_id'      => $produk->id,
+            'nama_produk'    => $produk->nama_produk,
+            'merek'          => $produk->merek ?? 'N/A',
+            'gambar'         => $produk->gambar ?? 'placeholder.png',
+            'harga_produk'   => $hargaProduk,
+            'jumlah'         => $jumlah,
+            'tipe_pembelian' => $validated['tipe_pembelian'],
+            'harga_lensa'    => $hargaLensa,
+            'subtotal'       => $subtotal,
+            'back_url'       => '/produk/' . $produk->id,
+            'jenis_lensa_od' => $validated['jenis_lensa_od'] ?? null,
+            'nilai_lensa_od' => $validated['nilai_lensa_od'] ?? null,
+            'silinder_od'    => $validated['silinder_od'] ?? null,
+            'jenis_lensa_os' => $validated['jenis_lensa_os'] ?? null,
+            'nilai_lensa_os' => $validated['nilai_lensa_os'] ?? null,
+            'silinder_os'    => $validated['silinder_os'] ?? null,
+            'anti_radiasi'   => !empty($validated['anti_radiasi']),
+            'photochromic'   => !empty($validated['photochromic']),
+        ]]);
+
+        return redirect()->route('checkout.langsung');
+    }
+
+    public function langsungGet(Request $request)
+    {
+        if (!auth()->check()) {
+            return redirect('/login')->with('error', 'Silakan login terlebih dahulu.');
+        }
+
+        $data = session('checkout_langsung');
+
+        if (!$data) {
+            return redirect('/katalog')->with('error', 'Data checkout tidak ditemukan.');
+        }
+
+        $alamat    = Alamat::with('provinsi')->where('pengguna_id', auth()->id())->get();
+        $provinsi  = Provinsi::orderBy('nama_provinsi')->get();
+        $ekspedisi = Ekspedisi::where('status_ekspedisi', true)->get();
+
         $item = [
-            'id'              => 'langsung_' . $validated['produk_id'],
-            'produk_id'       => $produk->id,
-            'nama_produk'     => $produk->nama_produk,
-            'merek'           => $produk->merek ?? 'N/A',
-            'gambar'          => $produk->gambar ?? 'placeholder.png',
-            'harga_produk'    => $hargaProduk,
-            'jumlah'          => $jumlah,
-            'tipe_pembelian'  => $validated['tipe_pembelian'],
-            'harga_lensa'     => $hargaLensa,
-            'subtotal'        => $subtotal,
-            'jenis_lensa_od'  => $validated['jenis_lensa_od'] ?? null,
-            'nilai_lensa_od'  => $validated['nilai_lensa_od'] ?? null,
-            'silinder_od'     => $validated['silinder_od'] ?? null,
-            'jenis_lensa_os'  => $validated['jenis_lensa_os'] ?? null,
-            'nilai_lensa_os'  => $validated['nilai_lensa_os'] ?? null,
-            'silinder_os'     => $validated['silinder_os'] ?? null,
-            'anti_radiasi'    => $validated['anti_radiasi'] ?? false,
-            'photochromic'    => $validated['photochromic'] ?? false,
+            'id'              => 'langsung_' . $data['produk_id'],
+            'produk_id'       => $data['produk_id'],
+            'nama_produk'     => $data['nama_produk'],
+            'merek'           => $data['merek'],
+            'gambar'          => $data['gambar'],
+            'harga_produk'    => $data['harga_produk'],
+            'jumlah'          => $data['jumlah'],
+            'tipe_pembelian'  => $data['tipe_pembelian'],
+            'harga_lensa'     => $data['harga_lensa'],
+            'subtotal'        => $data['subtotal'],
+            'jenis_lensa_od'  => $data['jenis_lensa_od'],
+            'nilai_lensa_od'  => $data['nilai_lensa_od'],
+            'silinder_od'     => $data['silinder_od'],
+            'jenis_lensa_os'  => $data['jenis_lensa_os'],
+            'nilai_lensa_os'  => $data['nilai_lensa_os'],
+            'silinder_os'     => $data['silinder_os'],
+            'anti_radiasi'    => $data['anti_radiasi'],
+            'photochromic'    => $data['photochromic'],
             'is_langsung'     => true,
         ];
 
-        $alamat   = Alamat::with('provinsi')->where('pengguna_id', auth()->id())->get();
-        $provinsi = Provinsi::orderBy('nama_provinsi')->get();
-        $ekspedisi = Ekspedisi::where('status_ekspedisi', true)->get();
-
         return Inertia::render('checkout', [
             'items'     => [$item],
-            'total'     => $subtotal,
+            'total'     => $data['subtotal'],
             'alamat'    => $alamat,
             'provinsi'  => $provinsi,
             'ekspedisi' => $ekspedisi,
-            'back_url'  => '/produk/' . $produk->id,
+            'back_url'  => $data['back_url'] ?? '/katalog',
         ]);
     }
 
@@ -196,7 +233,7 @@ class CheckoutController extends Controller
         DB::transaction(function () use ($request, &$pesanan) {
             $validated = $request->validate([
                 'alamat_id'         => 'required|exists:alamat,id',
-                'ekspedisi_id'      => 'required|exists:ekspedisi_master,id',
+                'ekspedisi_id'      => 'required|exists:ekspedisi,id',
                 'metode_pembayaran' => 'required|in:QRIS,BCA,BNI',
             ]);
 

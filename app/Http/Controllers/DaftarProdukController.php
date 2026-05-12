@@ -39,14 +39,20 @@ class DaftarProdukController extends Controller
         // Combine merek + tipe_produk untuk nama_produk
         $validated['nama_produk'] = $validated['merek'] . ' ' . $validated['tipe_produk'];
 
-        // Handle image uploads - only main image for 'gambar' column
+        // Handle image uploads - 5 slots (gambar, gambar_2 - gambar_5)
         $imageData = [];
 
-        if ($request->hasFile('gambar_0')) {
-            $file = $request->file('gambar_0');
-            $filename = Str::uuid() . '.' . $file->getClientOriginalExtension();
-            $file->move(public_path('images/produk'), $filename);
-            $imageData['gambar'] = $filename;
+        for ($i = 0; $i < 5; $i++) {
+            // index 0 → kolom 'gambar', index 1 → 'gambar_2', dst.
+            $key = $i === 0 ? 'gambar' : "gambar_" . ($i + 1);
+            $fileKey = "gambar_$i";
+
+            if ($request->hasFile($fileKey)) {
+                $file = $request->file($fileKey);
+                $filename = Str::uuid() . '.' . $file->getClientOriginalExtension();
+                $file->move(public_path('images/produk'), $filename);
+                $imageData[$key] = $filename;
+            }
         }
 
         // Create produk
@@ -89,16 +95,22 @@ class DaftarProdukController extends Controller
 
         $produk = Produk::findOrFail($id);
 
-        // Handle image uploads
-        if ($request->hasFile('gambar_0')) {
-            // Delete old image if exists
-            if ($produk->gambar && file_exists(public_path('images/produk/' . $produk->gambar))) {
-                unlink(public_path('images/produk/' . $produk->gambar));
+        // Handle image uploads - all 5 slots
+        for ($i = 0; $i < 5; $i++) {
+            // index 0 → kolom 'gambar', index 1 → 'gambar_2', dst.
+            $key = $i === 0 ? 'gambar' : "gambar_" . ($i + 1);
+            $fileKey = "gambar_$i";
+
+            if ($request->hasFile($fileKey)) {
+                // Delete old image if exists
+                if ($produk->$key && file_exists(public_path('images/produk/' . $produk->$key))) {
+                    unlink(public_path('images/produk/' . $produk->$key));
+                }
+                $file = $request->file($fileKey);
+                $filename = Str::uuid() . '.' . $file->getClientOriginalExtension();
+                $file->move(public_path('images/produk'), $filename);
+                $validated[$key] = $filename;
             }
-            $file = $request->file('gambar_0');
-            $filename = Str::uuid() . '.' . $file->getClientOriginalExtension();
-            $file->move(public_path('images/produk'), $filename);
-            $validated['gambar'] = $filename;
         }
 
         $produk->update($validated);
