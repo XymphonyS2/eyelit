@@ -1,10 +1,10 @@
 import { Head, Link, router, usePage } from '@inertiajs/react';
-import { ArrowLeft, Bell, BookOpen, Check, Glasses, LogOut, Mail, MapPin, Minus as MinusIcon, Phone, Plus, Search, Settings, ShoppingBag, ShoppingCart, User, X } from 'lucide-react';
+import { ArrowLeft, Bell, BookOpen, Check, Glasses, LogOut, Mail, MapPin, Minus as MinusIcon, Phone, Plus, Search, Settings, ShoppingBag, ShoppingCart, Star, User, X } from 'lucide-react';
 import { useEffect, useRef, useState, useMemo } from 'react';
 import { toast } from 'sonner';
 
 export default function ProdukDetail() {
-    const { auth, produk, lensa } = usePage().props as any;
+    const { auth, produk, lensa, ratingData, totalTerjual, ulasans } = usePage().props as any;
     const keranjangCount: number = auth.keranjang_count || 0;
     const [showUserDropdown, setShowUserDropdown] = useState(false);
     const [showCartDropdown, setShowCartDropdown] = useState(false);
@@ -12,8 +12,16 @@ export default function ProdukDetail() {
     const [searchQuery, setSearchQuery] = useState('');
     const [showSuggestions, setShowSuggestions] = useState(false);
     const [showOverlay, setShowOverlay] = useState(false);
+    const [selectedRating, setSelectedRating] = useState<number | null>(null);
+    const [showReviewOverlay, setShowReviewOverlay] = useState(false);
+    const [reviewRating, setReviewRating] = useState(0);
+    const [reviewComment, setReviewComment] = useState('');
 
-    // Get all products for search suggestions
+    // Filter ulasans berdasarkan rating
+    const filteredUlasans = useMemo(() => {
+        if (selectedRating === null) return ulasans || [];
+        return (ulasans || []).filter((u: any) => u.rating === selectedRating);
+    }, [ulasans, selectedRating]);
     const allProduk: any[] = (usePage().props as any).allProduk || [];
     const [tipePembelian, setTipePembelian] = useState<'Frame Saja' | 'Dengan Lensa'>('Frame Saja');
     const [actionType, setActionType] = useState<'beli' | 'keranjang'>('keranjang');
@@ -449,6 +457,87 @@ export default function ProdukDetail() {
                     </div>
                 )}
 
+                {/* Review Overlay Modal */}
+                {showReviewOverlay && (
+                    <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
+                        <div
+                            className="absolute inset-0 bg-black/50 backdrop-blur-sm"
+                            onClick={() => setShowReviewOverlay(false)}
+                        />
+                        <div className="relative bg-white rounded-2xl shadow-2xl w-full max-w-lg overflow-hidden animate-in fade-in zoom-in-95 duration-200">
+                            <div className="flex items-center justify-between px-6 py-4 border-b border-[#19140035]">
+                                <h2 className="text-lg font-bold text-[#1b1b18]">Tambah Ulasan</h2>
+                                <button
+                                    onClick={() => setShowReviewOverlay(false)}
+                                    className="p-2 rounded-full hover:bg-gray-100 transition-colors"
+                                >
+                                    <X className="size-5 text-[#5f6368]" />
+                                </button>
+                            </div>
+                            <div className="px-6 py-5">
+                                <p className="text-sm text-[#5f6368] mb-4">Berikan rating dan ulasan untuk produk ini:</p>
+
+                                {/* Rating Bintang */}
+                                <div className="flex items-center gap-2 mb-4">
+                                    <p className="text-sm font-medium text-[#1b1b18] mr-2">Rating:</p>
+                                    {[1, 2, 3, 4, 5].map((star) => (
+                                        <button key={star} onClick={() => setReviewRating(star)}>
+                                            <Star
+                                                className={`size-7 transition-colors ${
+                                                    star <= reviewRating
+                                                        ? 'text-[#FFC107] fill-[#FFC107]'
+                                                        : 'text-gray-300'
+                                                }`}
+                                            />
+                                        </button>
+                                    ))}
+                                </div>
+
+                                {/* Komentar */}
+                                <div>
+                                    <label className="text-sm font-medium text-[#1b1b18] block mb-2">Komentar (opsional)</label>
+                                    <textarea
+                                        value={reviewComment}
+                                        onChange={(e) => setReviewComment(e.target.value)}
+                                        placeholder="Tulis ulasan Anda..."
+                                        rows={4}
+                                        className="w-full px-4 py-3 rounded-xl border border-[#19140035] text-sm resize-none focus:outline-none focus:border-[#2264c0]"
+                                    />
+                                </div>
+                            </div>
+                            <div className="px-6 pb-6 flex gap-3">
+                                <button
+                                    onClick={() => setShowReviewOverlay(false)}
+                                    className="flex-1 py-3 rounded-full border border-[#19140035] text-[#1b1b18] font-semibold text-sm hover:bg-gray-50 transition-colors"
+                                >
+                                    Batal
+                                </button>
+                                <button
+                                    onClick={() => {
+                                        if (reviewRating === 0) {
+                                            toast.error('Pilih rating terlebih dahulu');
+                                            return;
+                                        }
+                                        router.post('/ulasan', {
+                                            produk_id: produk.id,
+                                            rating: reviewRating,
+                                            komentar: reviewComment,
+                                        }, {
+                                            onSuccess: () => {
+                                                setShowReviewOverlay(false);
+                                                toast.success('Ulasan berhasil ditambahkan');
+                                            },
+                                        });
+                                    }}
+                                    className="flex-1 py-3 rounded-full bg-[#2264c0] text-white font-semibold text-sm hover:bg-[#1a4f9a] transition-colors"
+                                >
+                                    Kirim Ulasan
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                )}
+
                 {/* Navbar */}
                 <nav className="relative z-50 border-b border-[#19140035] bg-white">
                     <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 gap-4">
@@ -692,9 +781,26 @@ export default function ProdukDetail() {
                                 <p className="text-4xl font-bold text-[#2264c0]">
                                     Rp {(Number(produk.harga_produk) || 0).toLocaleString('id-ID')}
                                 </p>
-                                {produk.stok > 0 && (
-                                    <p className="text-base text-[#5f6368] mt-2">{produk.stok} unit tersedia</p>
-                                )}
+                                <div className="flex items-center justify-between mt-4">
+                                    {/* Stok */}
+                                    <div className="flex items-center gap-2">
+                                        {produk.stok > 0 ? (
+                                            <span className="text-sm text-[#5f6368]">{produk.stok} unit tersedia</span>
+                                        ) : (
+                                            <span className="text-sm text-red-500 font-medium">Stok Habis</span>
+                                        )}
+                                    </div>
+                                    {/* Rating + Terjual */}
+                                    <div className="flex items-center gap-4">
+                                        <div className="flex items-center gap-1">
+                                            <Star className="size-4 text-[#FFC107] fill-[#FFC107]" />
+                                            <span className="text-sm font-medium text-[#1b1b18]">{(ratingData?.avg_rating || 0).toFixed(1)}</span>
+                                            <span className="text-sm text-[#5f6368]">({ratingData?.total_reviews || 0})</span>
+                                        </div>
+                                        <span className="text-sm text-[#5f6368]">•</span>
+                                        <span className="text-sm text-[#5f6368]">{totalTerjual || 0} Terjual</span>
+                                    </div>
+                                </div>
                             </div>
 
                             {/* Spesifikasi */}
@@ -743,6 +849,106 @@ export default function ProdukDetail() {
                                 </div>
                             </div>
                         </div>
+                    </div>
+
+                    {/* Section Ulasan */}
+                    <div className="mt-8 bg-white rounded-2xl border border-[#19140035] p-6">
+                        <div className="flex items-center justify-between mb-4">
+                            <h2 className="text-xl font-bold text-[#1b1b18]">Ulasan Produk</h2>
+                            {auth.user && (
+                                <button
+                                    onClick={() => {
+                                        if (!auth.user) {
+                                            router.visit('/login');
+                                            return;
+                                        }
+                                        setShowReviewOverlay(true);
+                                        setReviewRating(0);
+                                        setReviewComment('');
+                                    }}
+                                    className="px-4 py-2 bg-[#2264c0] text-white text-sm font-medium rounded-full hover:bg-[#1a4f9a] transition-colors"
+                                >
+                                    + Tambah Ulasan
+                                </button>
+                            )}
+                        </div>
+
+                        {/* Filter Buttons */}
+                        <div className="flex flex-wrap gap-2 mb-4">
+                            <button
+                                onClick={() => setSelectedRating(null)}
+                                className={`px-3 py-1.5 rounded-full text-xs font-medium transition-colors ${
+                                    selectedRating === null
+                                        ? 'bg-[#2264c0] text-white'
+                                        : 'bg-gray-100 text-[#5f6368] hover:bg-gray-200'
+                                }`}
+                            >
+                                Semua
+                            </button>
+                            {[5, 4, 3, 2, 1].map((star) => {
+                                const count = (ulasans || []).filter((u: any) => u.rating === star).length;
+                                return (
+                                    <button
+                                        key={star}
+                                        onClick={() => setSelectedRating(star)}
+                                        className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium transition-colors ${
+                                            selectedRating === star
+                                                ? 'bg-[#2264c0] text-white'
+                                                : 'bg-gray-100 text-[#5f6368] hover:bg-gray-200'
+                                        }`}
+                                    >
+                                        <Star className={`size-3 ${selectedRating === star ? 'fill-white text-white' : 'text-[#FFC107] fill-[#FFC107]'}`} />
+                                        {star}
+                                        <span className={selectedRating === star ? 'text-white/80' : 'text-[#9CA3AF]'}>
+                                            ({count})
+                                        </span>
+                                    </button>
+                                );
+                            })}
+                        </div>
+
+                        {filteredUlasans.length > 0 ? (
+                            <div className="flex flex-col gap-4">
+                                {filteredUlasans.map((ulasan: any) => (
+                                    <div key={ulasan.id} className="flex gap-4 p-4 border border-[#19140035]/20 rounded-xl">
+                                        {/* Avatar */}
+                                        <div className="w-10 h-10 rounded-full bg-[#2264c0] flex items-center justify-center text-white font-bold text-sm flex-shrink-0">
+                                            {ulasan.username?.charAt(0).toUpperCase()}
+                                        </div>
+                                        {/* Info */}
+                                        <div className="flex-1 min-w-0">
+                                            <div className="flex items-center justify-between gap-2">
+                                                <span className="text-sm font-semibold text-[#1b1b18]">{ulasan.username}</span>
+                                                <div className="flex items-center gap-1">
+                                                    {[1, 2, 3, 4, 5].map((star) => (
+                                                        <Star
+                                                            key={star}
+                                                            className={`size-3 ${star <= ulasan.rating ? 'text-[#FFC107] fill-[#FFC107]' : 'text-gray-300'}`}
+                                                        />
+                                                    ))}
+                                                </div>
+                                            </div>
+                                            <p className="text-xs text-[#5f6368] mt-0.5">
+                                                {ulasan.tanggal_ulasan ? new Date(ulasan.tanggal_ulasan).toLocaleDateString('id-ID', {
+                                                    day: '2-digit',
+                                                    month: 'long',
+                                                    year: 'numeric',
+                                                }) : '-'}
+                                            </p>
+                                            {ulasan.komentar && (
+                                                <p className="text-sm text-[#1b1b18] mt-2">{ulasan.komentar}</p>
+                                            )}
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                        ) : (
+                            <div className="text-center py-12 text-[#706f6c]">
+                                <Star className="size-12 mx-auto mb-3 text-gray-300" />
+                                <p className="font-medium">Belum ada ulasan</p>
+                                <p className="text-sm mt-1">Jadilah yang pertama memberikan ulasan</p>
+                            </div>
+                        )}
                     </div>
                 </main>
 

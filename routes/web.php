@@ -12,6 +12,7 @@ use App\Http\Controllers\OngkirController;
 use App\Http\Controllers\PesananController;
 use App\Http\Controllers\PembayaranController;
 use App\Http\Controllers\ProdukController;
+use App\Http\Controllers\UlasanController;
 use App\Http\Controllers\UsernameCheckController;
 use App\Http\Controllers\WelcomeController;
 use App\Models\Produk;
@@ -48,6 +49,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/pesanan/{id}', [PesananController::class, 'show'])->name('pesanan.show');
     Route::get('/pembayaran/{id}', [PembayaranController::class, 'show'])->name('pembayaran.show');
     Route::post('/pembayaran/{id}/bayar', [PembayaranController::class, 'createTransaction'])->name('pembayaran.bayar');
+    Route::post('/ulasan', [UlasanController::class, 'store'])->name('ulasan.store');
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard')->middleware('admin');
     Route::get('/produk', [DaftarProdukController::class, 'index'])->name('produk')->middleware('admin');
     Route::post('/produk', [DaftarProdukController::class, 'store'])->name('produk.store')->middleware('admin');

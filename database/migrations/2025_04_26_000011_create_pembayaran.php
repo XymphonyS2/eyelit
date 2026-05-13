@@ -11,7 +11,8 @@ return new class extends Migration
         Schema::create('pembayaran', function (Blueprint $table) {
             $table->id();
             $table->foreignId('pesanan_id')->constrained('pesanan')->cascadeOnDelete();
-            $table->enum('metode_pembayaran', ['QRIS', 'Virtual Account BCA']);
+            $table->string('order_id', 100)->nullable();
+            $table->enum('metode_pembayaran', ['QRIS', 'BCA', 'BNI']);
             $table->decimal('jumlah_dibayar', 12, 0);
             $table->string('kode_qris', 255)->nullable();
             $table->string('no_va_bca', 50)->nullable();

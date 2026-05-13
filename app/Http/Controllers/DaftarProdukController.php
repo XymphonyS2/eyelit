@@ -22,12 +22,12 @@ class DaftarProdukController extends Controller
     {
         $validated = $request->validate([
             'nama_produk' => 'nullable|string|max:255',
-            'merek' => 'required|in:Hugo,Giordano,Qina,Chopard,Illustro,Gucci,Guy Laroche,Beneton,Nike,Ted Baker,Hindar,Virtus,Puma,Bolon',
+            'merek' => 'required|in:Adidas,Adidas Originals,AllSaints,Amor,Andrea,Ania,Anna Sui,Azzaro,Bally,Benetton,Bolon,Boss,Carolina Herrera,Carrera,Cartier,Charriol,Chloe,Chopard,Cole Haan,Columbia,Converse,Cyrano,David Beckham,Dior,DKNY,Doraemon,Dunhill,Escada,Etro,Fendi,Ferragamo,Fossil,Giordano,Givenchy,Gucci,Guess,Guy Laroche,Hang Ten,Helen Keller,Hindar Reading,Hugo,Illustro,Jimmy Choo,Kate Spade,Lacoste,Lanvin,Laura Ashley,Leonardo,Levi\'s,Lindberg,Love Moschino,Maje,Mango,Marc Jacobs,Marni,Maui Jim,Max&Co.,Max Mara,MCM,MCQ,Moleskine,Molison,Montblanc,Moschino,Nautica,Nike,Nine West,Paul Smith,Polar,Polaroid,Pomona,Porsche Design,Prairie,Prive Revaux,Pull & Bear,Puma,Qina,Rodenstock,Saint Laurent,Sandy,Silhouette,Skechers,Swarovski,Ted Baker,Timberland,Tommy Hilfiger,Under Armour,Valentino,Vertis,Victoria Beckham,Vintage,Vivienne Westwood,Virtus,Zegna',
             'tipe_produk' => 'required|string|max:255',
             'harga_produk' => 'required|numeric|min:0',
             'stok' => 'required|integer|min:0',
             'jenis_kelamin' => 'required|in:Pria,Wanita,Unisex',
-            'warna' => 'required|in:Hitam,Putih,Transparan,Rose Gold,Hijau,Biru,Merah,Ungu,Tortoise,Gold,Pink,Kuning,Black',
+            'warna' => 'required|in:Hitam,Biru,Bronze,Coklat,Transparan,Gold,Hijau,Abu-Abu,Orange,Pink,Ungu,Merah,Rose Gold,Silver,Tortoise,Putih,Kuning',
             'material' => 'required|in:Metal,Plastic,Titanium,Rubber,Wood',
             'bentuk' => 'required|in:Aviator,Browline,Oval,Square,Round,Flat Top,Geometric,Cat Eye,Rectangle',
             'bridge' => 'nullable|string|max:50',
@@ -85,12 +85,12 @@ class DaftarProdukController extends Controller
     public function update(Request $request, $id)
     {
         $validated = $request->validate([
-            'merek' => 'required|in:Hugo,Giordano,Qina,Chopard,Illustro,Gucci,Guy Laroche,Beneton,Nike,Ted Baker,Hindar,Virtus,Puma,Bolon',
+            'merek' => 'required|in:Adidas,Adidas Originals,AllSaints,Amor,Andrea,Ania,Anna Sui,Azzaro,Bally,Benetton,Bolon,Boss,Carolina Herrera,Carrera,Cartier,Charriol,Chloe,Chopard,Cole Haan,Columbia,Converse,Cyrano,David Beckham,Dior,DKNY,Doraemon,Dunhill,Escada,Etro,Fendi,Ferragamo,Fossil,Giordano,Givenchy,Gucci,Guess,Guy Laroche,Hang Ten,Helen Keller,Hindar Reading,Hugo,Illustro,Jimmy Choo,Kate Spade,Lacoste,Lanvin,Laura Ashley,Leonardo,Levi\'s,Lindberg,Love Moschino,Maje,Mango,Marc Jacobs,Marni,Maui Jim,Max&Co.,Max Mara,MCM,MCQ,Moleskine,Molison,Montblanc,Moschino,Nautica,Nike,Nine West,Paul Smith,Polar,Polaroid,Pomona,Porsche Design,Prairie,Prive Revaux,Pull & Bear,Puma,Qina,Rodenstock,Saint Laurent,Sandy,Silhouette,Skechers,Swarovski,Ted Baker,Timberland,Tommy Hilfiger,Under Armour,Valentino,Vertis,Victoria Beckham,Vintage,Vivienne Westwood,Virtus,Zegna',
             'tipe_produk' => 'required|string|max:255',
             'harga_produk' => 'required|numeric|min:0',
             'stok' => 'required|integer|min:0',
             'jenis_kelamin' => 'required|in:Pria,Wanita,Unisex',
-            'warna' => 'required|in:Hitam,Putih,Transparan,Rose Gold,Hijau,Biru,Merah,Ungu,Tortoise,Gold,Pink,Kuning,Black',
+            'warna' => 'required|in:Hitam,Biru,Bronze,Coklat,Transparan,Gold,Hijau,Abu-Abu,Orange,Pink,Ungu,Merah,Rose Gold,Silver,Tortoise,Putih,Kuning',
             'material' => 'required|in:Metal,Plastic,Titanium,Rubber,Wood',
             'bentuk' => 'required|in:Aviator,Browline,Oval,Square,Round,Flat Top,Geometric,Cat Eye,Rectangle',
             'bridge' => 'nullable|string|max:50',
