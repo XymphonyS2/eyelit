@@ -1,6 +1,7 @@
 import { Head, Link, router, usePage } from '@inertiajs/react';
 import { Bell, BookOpen, ImagePlus, LayoutGrid, LogOut, Package, Plus, Search, Settings, ShoppingBag, ShoppingCart, Trash2, User, Users, X } from 'lucide-react';
 import { useRef, useState } from 'react';
+import WaveBackground from '@/components/WaveBackground';
 
 export default function DaftarProduk() {
     const { auth, produk } = usePage().props as any;
@@ -514,7 +515,8 @@ export default function DaftarProduk() {
             {/* Page Content */}
             <main className="min-h-screen bg-[#ffffff]">
                 {/* Header with Blue Background - Full Width */}
-                <div className="bg-[#2264c0] w-full py-12 px-4">
+                <WaveBackground>
+                <div className="w-full py-12 px-4">
                     <div className="max-w-7xl mx-auto">
                         <div className="flex items-center justify-between">
                             <div>
@@ -582,6 +584,7 @@ export default function DaftarProduk() {
                         </div>
                     </div>
                 </div>
+                </WaveBackground>
 
                 {/* Products Table */}
                 <div className="max-w-7xl mx-auto px-4 py-8">

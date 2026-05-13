@@ -1,6 +1,7 @@
 import { Head, Link, usePage } from '@inertiajs/react';
 import { Bell, BookOpen, LogOut, Search, Settings, ShoppingBag, ShoppingCart, User, LayoutGrid, Package, Users, FileText, TrendingUp } from 'lucide-react';
 import { useState, useRef } from 'react';
+import WaveBackground from '@/components/WaveBackground';
 
 export default function Dashboard() {
     const { auth, produk, totalPengguna, totalPesanan, jumlahPesananBulanIni, totalPenghasilanBulanIni } = usePage().props as any;
@@ -249,7 +250,8 @@ export default function Dashboard() {
 
             {/* Dashboard Content */}
             {/* Header with Blue Background - Full Width */}
-            <div className="bg-[#2264c0] w-full py-12 px-4">
+            <WaveBackground>
+            <div className="w-full py-12 px-4">
                 <div className="max-w-7xl mx-auto">
                     <h1 className="text-3xl font-bold text-white mb-2">Dashboard</h1>
                     <p className="text-white/80">Selamat datang, {auth.user?.username}!</p>
@@ -297,6 +299,7 @@ export default function Dashboard() {
                     </div>
                 </div>
             </div>
+            </WaveBackground>
 
             <main className="mx-auto max-w-7xl px-4 py-8">
             </main>

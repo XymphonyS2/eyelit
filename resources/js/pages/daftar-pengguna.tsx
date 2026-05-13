@@ -1,6 +1,7 @@
 import { Head, Link, usePage } from '@inertiajs/react';
 import { Bell, BookOpen, Calendar, LayoutGrid, LogOut, Mail, Package, Phone, Search, Settings, ShoppingBag, ShoppingCart, User, Users } from 'lucide-react';
 import { useRef, useState } from 'react';
+import WaveBackground from '@/components/WaveBackground';
 
 export default function DaftarPengguna() {
     const { auth, pengguna } = usePage().props as any;
@@ -272,7 +273,8 @@ export default function DaftarPengguna() {
             {/* Page Content */}
             <main className="min-h-screen bg-[#ffffff]">
                 {/* Header with Blue Background - Full Width */}
-                <div className="bg-[#2264c0] w-full py-12 px-4">
+                <WaveBackground>
+                <div className="w-full py-12 px-4">
                     <div className="max-w-7xl mx-auto">
                         <h1 className="text-3xl font-bold text-white mb-2">Daftar Pengguna</h1>
                         <p className="text-white/80">Kelola semua pengguna EyeLit</p>
@@ -323,6 +325,7 @@ export default function DaftarPengguna() {
                         </div>
                     </div>
                 </div>
+                </WaveBackground>
 
                 <div className="max-w-7xl mx-auto px-4 py-8">
                     {/* Users Table */}

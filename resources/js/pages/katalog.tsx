@@ -1,6 +1,7 @@
 import { Head, Link, usePage } from '@inertiajs/react';
 import { Bell, BookOpen, LogOut, Mail, MapPin, Phone, Search, Settings, ShoppingBag, ShoppingCart, User, X } from 'lucide-react';
 import { useRef, useState, useMemo } from 'react';
+import WaveBackground from '@/components/WaveBackground';
 
 export default function Katalog() {
     const { auth, produk } = usePage().props as any;
@@ -334,11 +335,12 @@ export default function Katalog() {
                 </nav>
 
                 {/* Search Section */}
-                <section className="bg-white border-b border-[#19140035]">
+                <WaveBackground waveCount={4} yRatioMin={0.40} yRatioMax={0.55}>
+                <section className="border-b border-[#19140035]">
                     <div className="mx-auto max-w-7xl px-4 py-4 sm:py-6">
                         <div className="flex flex-col gap-3 sm:gap-4">
-                            <h2 className="text-xl sm:text-2xl font-bold text-[#1b1b18] text-center">Temukan Kacamata Impianmu</h2>
-                            <p className="text-center text-[#5f6368] text-xs sm:text-sm">Jelajahi berbagai koleksi kacamata terbaru dari berbagai merek ternama</p>
+                            <h2 className="text-xl sm:text-2xl font-bold text-white text-center">Temukan Kacamata Impianmu</h2>
+                            <p className="text-center text-white/80 text-xs sm:text-sm">Jelajahi berbagai koleksi kacamata terbaru dari berbagai merek ternama</p>
                             {/* Main Search Bar */}
                             <div className="w-full max-w-2xl mx-auto">
                                 <div className="relative">
@@ -390,6 +392,7 @@ export default function Katalog() {
                         </div>
                     </div>
                 </section>
+                </WaveBackground>
 
                 {/* Product Info & Filter Section */}
                 <section className="bg-white">

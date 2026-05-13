@@ -1,6 +1,7 @@
 import { Head, Link, usePage } from '@inertiajs/react';
 import { Bell, BookOpen, LogOut, Mail, MapPin, Phone, Search, Settings, ShoppingBag, ShoppingCart, User } from 'lucide-react';
 import { useRef, useState, useEffect } from 'react';
+import WaveBackground from '@/components/WaveBackground';
 
 export default function Welcome() {
     const { auth, produk, carousels } = usePage().props as any;
@@ -366,7 +367,8 @@ export default function Welcome() {
 
                 {/* Carousel Section */}
                 {carousels && carousels.length > 0 && (
-                <section id="carousel" className="py-8 sm:py-16 bg-[#2264c0]">
+                <WaveBackground>
+                <section id="carousel" className="py-8 sm:py-16">
                     <div className="container mx-auto px-4 max-w-7xl">
                         <div className="flex flex-col lg:flex-row items-center gap-6 sm:gap-12">
                             {/* Left: Image */}
@@ -421,6 +423,7 @@ export default function Welcome() {
                         </div>
                     </div>
                 </section>
+                </WaveBackground>
                 )}
 
                 {/* Grid Box Section */}

@@ -1,6 +1,7 @@
 import { Head, Link, usePage } from '@inertiajs/react';
 import { Bell, BookOpen, Clock, Edit, Image, LayoutGrid, LogOut, Package, Plus, Search, Settings, ShoppingBag, ShoppingCart, Trash2, User, Users, X } from 'lucide-react';
 import { useRef, useState } from 'react';
+import WaveBackground from '@/components/WaveBackground';
 
 const safe = (v: any) => (v ?? "").toString().trim();
 
@@ -459,7 +460,8 @@ export default function Carousel() {
             {/* Page Content */}
             <main className="min-h-screen bg-[#ffffff]">
                 {/* Header with Blue Background - Full Width */}
-                <div className="bg-[#2264c0] w-full py-12 px-4">
+                <WaveBackground>
+                <div className="w-full py-12 px-4">
                     <div className="max-w-7xl mx-auto">
                         <div className="flex items-center justify-between">
                             <div>
@@ -521,6 +523,7 @@ export default function Carousel() {
                         </div>
                     </div>
                 </div>
+                </WaveBackground>
 
                 {/* Carousel Preview Section - Full Width Background */}
                 {carousels && carousels.length > 0 && (
