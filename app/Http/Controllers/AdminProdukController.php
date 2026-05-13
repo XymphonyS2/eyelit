@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Produk;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
 use Inertia\Inertia;
 
 class AdminProdukController extends Controller
@@ -50,24 +51,31 @@ class AdminProdukController extends Controller
 
         $data = $request->except(['gambar', 'gambar_2', 'gambar_3', 'gambar_4', 'gambar_5']);
 
-        // Handle image uploads
+        // Buat produk dulu untuk dapat ID
+        $produk = Produk::create($data);
+        $produkId = $produk->id;
+
+        // Nama dasar: "kacamata-rayban-5" (slug dari nama + ID produk)
+        $namaBersih = Str::slug($data['nama_produk'] . '-' . $produkId);
+
+        // Upload gambar utama (gambar_1)
         if ($request->hasFile('gambar')) {
-            $data['gambar'] = $request->file('gambar')->store('produk', 'public');
-        }
-        if ($request->hasFile('gambar_2')) {
-            $data['gambar_2'] = $request->file('gambar_2')->store('produk', 'public');
-        }
-        if ($request->hasFile('gambar_3')) {
-            $data['gambar_3'] = $request->file('gambar_3')->store('produk', 'public');
-        }
-        if ($request->hasFile('gambar_4')) {
-            $data['gambar_4'] = $request->file('gambar_4')->store('produk', 'public');
-        }
-        if ($request->hasFile('gambar_5')) {
-            $data['gambar_5'] = $request->file('gambar_5')->store('produk', 'public');
+            $extension = $request->file('gambar')->getClientOriginalExtension();
+            $filename = $namaBersih . '-1.' . $extension;
+            $request->file('gambar')->move(public_path('images/produk'), $filename);
+            $produk->update(['gambar' => $filename]);
         }
 
-        Produk::create($data);
+        // Upload gambar tambahan (gambar_2 - gambar_5)
+        $gambarFields = ['gambar_2', 'gambar_3', 'gambar_4', 'gambar_5'];
+        foreach ($gambarFields as $index => $field) {
+            if ($request->hasFile($field)) {
+                $extension = $request->file($field)->getClientOriginalExtension();
+                $filename = $namaBersih . '-' . ($index + 2) . '.' . $extension;
+                $request->file($field)->move(public_path('images/produk'), $filename);
+                $produk->update([$field => $filename]);
+            }
+        }
 
         return redirect()->route('admin.produk.index')->with('success', 'Produk berhasil ditambahkan');
     }

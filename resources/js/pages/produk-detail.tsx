@@ -44,6 +44,13 @@ export default function ProdukDetail() {
     const cartItems: any[] = auth.cartItems || [];
     const notifications: any[] = auth.user?.notifications || [];
 
+    // Detect previous page for back navigation
+    const previousPage = typeof window !== 'undefined'
+        ? sessionStorage.getItem('previousPage') || '/katalog'
+        : '/katalog';
+    const backLabel = previousPage === '/keranjang' ? 'Keranjang' : 'Katalog';
+    const backHref = previousPage;
+
     // Search suggestions
     const searchSuggestions = searchQuery.trim()
         ? allProduk.filter((p: any) => p.nama_produk?.toLowerCase().includes(searchQuery.toLowerCase())).slice(0, 5)
@@ -618,7 +625,7 @@ export default function ProdukDetail() {
                     <div className="flex items-center gap-2 text-sm text-[#5f6368]">
                         <Link href="/" className="hover:text-[#2264c0] transition-colors">Beranda</Link>
                         <span>/</span>
-                        <Link href="/katalog" className="hover:text-[#2264c0] transition-colors">Katalog</Link>
+                        <Link href={backHref} className="hover:text-[#2264c0] transition-colors">{backLabel}</Link>
                         <span>/</span>
                         <span className="text-[#1b1b18] font-medium">{produk.nama_produk}</span>
                     </div>
@@ -626,9 +633,9 @@ export default function ProdukDetail() {
 
                 {/* Detail Produk */}
                 <main className="mx-auto max-w-7xl px-4 pb-16">
-                    <Link href="/katalog" className="inline-flex items-center gap-2 text-sm text-[#5f6368] hover:text-[#2264c0] transition-colors mb-6">
+                    <Link href={backHref} className="inline-flex items-center gap-2 text-sm text-[#5f6368] hover:text-[#2264c0] transition-colors mb-6">
                         <ArrowLeft className="size-4" />
-                        Kembali ke Katalog
+                        Kembali ke {backLabel}
                     </Link>
 
                     <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 items-start">

@@ -39,6 +39,13 @@ class DaftarProdukController extends Controller
         // Combine merek + tipe_produk untuk nama_produk
         $validated['nama_produk'] = $validated['merek'] . ' ' . $validated['tipe_produk'];
 
+        // Create produk dulu agar dapat ID
+        $produk = Produk::create($validated);
+        $produkId = $produk->id;
+
+        // Nama dasar: "Hugo-Square-5"
+        $namaBersih = Str::slug($produk->nama_produk . '-' . $produkId);
+
         // Handle image uploads - 5 slots (gambar, gambar_2 - gambar_5)
         $imageData = [];
 
@@ -49,14 +56,16 @@ class DaftarProdukController extends Controller
 
             if ($request->hasFile($fileKey)) {
                 $file = $request->file($fileKey);
-                $filename = Str::uuid() . '.' . $file->getClientOriginalExtension();
+                $extension = $file->getClientOriginalExtension();
+                // Pattern: "Hugo-Square-5-1.png"
+                $filename = $namaBersih . '-' . ($i + 1) . '.' . $extension;
                 $file->move(public_path('images/produk'), $filename);
                 $imageData[$key] = $filename;
             }
         }
 
-        // Create produk
-        $produk = Produk::create(array_merge($validated, $imageData));
+        // Update produk dengan data gambar
+        $produk->update($imageData);
 
         return redirect()->back()->with('success', 'Produk berhasil disimpan!');
     }
@@ -95,6 +104,9 @@ class DaftarProdukController extends Controller
 
         $produk = Produk::findOrFail($id);
 
+        // Nama dasar: "Hugo-Square-5"
+        $namaBersih = Str::slug($validated['nama_produk'] . '-' . $produk->id);
+
         // Handle image uploads - all 5 slots
         for ($i = 0; $i < 5; $i++) {
             // index 0 → kolom 'gambar', index 1 → 'gambar_2', dst.
@@ -107,7 +119,9 @@ class DaftarProdukController extends Controller
                     unlink(public_path('images/produk/' . $produk->$key));
                 }
                 $file = $request->file($fileKey);
-                $filename = Str::uuid() . '.' . $file->getClientOriginalExtension();
+                $extension = $file->getClientOriginalExtension();
+                // Pattern: "Hugo-Square-5-1.png"
+                $filename = $namaBersih . '-' . ($i + 1) . '.' . $extension;
                 $file->move(public_path('images/produk'), $filename);
                 $validated[$key] = $filename;
             }

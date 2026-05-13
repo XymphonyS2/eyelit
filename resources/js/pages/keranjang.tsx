@@ -1,6 +1,6 @@
 import { Head, Link, router, usePage } from '@inertiajs/react';
 import { Bell, BookOpen, Check, LogOut, Minus, Plus, Settings, ShoppingBag, ShoppingCart, Trash2, User } from 'lucide-react';
-import { useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 
 interface KeranjangItem {
     id: number;
@@ -36,6 +36,10 @@ export default function Keranjang() {
     const notifDropdownTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
     const notifications: any[] = auth.user?.notifications || [];
+
+    useEffect(() => {
+        sessionStorage.setItem('previousPage', '/keranjang');
+    }, []);
 
     const toggleItem = (id: number) => {
         setSelectedItems((prev) =>

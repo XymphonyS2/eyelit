@@ -1,6 +1,6 @@
 import { Head, Link, usePage } from '@inertiajs/react';
 import { Bell, BookOpen, LogOut, Mail, MapPin, Phone, Search, Settings, ShoppingBag, ShoppingCart, User, X } from 'lucide-react';
-import { useRef, useState, useMemo } from 'react';
+import { useEffect, useRef, useState, useMemo } from 'react';
 import WaveBackground from '@/components/WaveBackground';
 
 export default function Katalog() {
@@ -38,6 +38,10 @@ export default function Katalog() {
 
     const cartItems: any[] = auth.cartItems || [];
     const notifications: any[] = auth.user?.notifications || [];
+
+    useEffect(() => {
+        sessionStorage.setItem('previousPage', '/katalog');
+    }, []);
 
     // Filter options from actual produk data (unique values)
     const mereks = useMemo(() => [...new Set(produk?.map((p: any) => p.merek) || [])].sort(), [produk]);
