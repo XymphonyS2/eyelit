@@ -16,6 +16,13 @@ export default function ProdukDetail() {
     const [showReviewOverlay, setShowReviewOverlay] = useState(false);
     const [reviewRating, setReviewRating] = useState(0);
     const [reviewComment, setReviewComment] = useState('');
+    const [editingReview, setEditingReview] = useState<any>(null);
+
+    // Cek apakah user sudah memberikan ulasan untuk produk ini
+    const userReview = useMemo(() => {
+        if (!auth.user || !ulasans) return null;
+        return ulasans.find((u: any) => u.user_id === auth.user.id || u.user_id === auth.user?.id);
+    }, [ulasans, auth.user]);
 
     // Filter ulasans berdasarkan rating
     const filteredUlasans = useMemo(() => {
@@ -466,7 +473,7 @@ export default function ProdukDetail() {
                         />
                         <div className="relative bg-white rounded-2xl shadow-2xl w-full max-w-lg overflow-hidden animate-in fade-in zoom-in-95 duration-200">
                             <div className="flex items-center justify-between px-6 py-4 border-b border-[#19140035]">
-                                <h2 className="text-lg font-bold text-[#1b1b18]">Tambah Ulasan</h2>
+                                <h2 className="text-lg font-bold text-[#1b1b18]">{editingReview ? 'Edit Ulasan' : 'Tambah Ulasan'}</h2>
                                 <button
                                     onClick={() => setShowReviewOverlay(false)}
                                     className="p-2 rounded-full hover:bg-gray-100 transition-colors"
@@ -518,20 +525,35 @@ export default function ProdukDetail() {
                                             toast.error('Pilih rating terlebih dahulu');
                                             return;
                                         }
-                                        router.post('/ulasan', {
-                                            produk_id: produk.id,
-                                            rating: reviewRating,
-                                            komentar: reviewComment,
-                                        }, {
-                                            onSuccess: () => {
-                                                setShowReviewOverlay(false);
-                                                toast.success('Ulasan berhasil ditambahkan');
-                                            },
-                                        });
+                                        if (editingReview) {
+                                            // Mode edit: update ulasan yang sudah ada
+                                            router.put(`/ulasan/${editingReview.id}`, {
+                                                rating: reviewRating,
+                                                komentar: reviewComment,
+                                            }, {
+                                                onSuccess: () => {
+                                                    setShowReviewOverlay(false);
+                                                    toast.success('Ulasan berhasil diperbarui');
+                                                    setEditingReview(null);
+                                                },
+                                            });
+                                        } else {
+                                            // Mode tambah: buat ulasan baru
+                                            router.post('/ulasan', {
+                                                produk_id: produk.id,
+                                                rating: reviewRating,
+                                                komentar: reviewComment,
+                                            }, {
+                                                onSuccess: () => {
+                                                    setShowReviewOverlay(false);
+                                                    toast.success('Ulasan berhasil ditambahkan');
+                                                },
+                                            });
+                                        }
                                     }}
                                     className="flex-1 py-3 rounded-full bg-[#2264c0] text-white font-semibold text-sm hover:bg-[#1a4f9a] transition-colors"
                                 >
-                                    Kirim Ulasan
+                                    {editingReview ? 'Simpan Perubahan' : 'Kirim Ulasan'}
                                 </button>
                             </div>
                         </div>
@@ -862,13 +884,22 @@ export default function ProdukDetail() {
                                             router.visit('/login');
                                             return;
                                         }
+                                        if (userReview) {
+                                            // Mode edit: isi data review yang sudah ada
+                                            setEditingReview(userReview);
+                                            setReviewRating(userReview.rating);
+                                            setReviewComment(userReview.komentar || '');
+                                        } else {
+                                            // Mode tambah: reset form
+                                            setEditingReview(null);
+                                            setReviewRating(0);
+                                            setReviewComment('');
+                                        }
                                         setShowReviewOverlay(true);
-                                        setReviewRating(0);
-                                        setReviewComment('');
                                     }}
                                     className="px-4 py-2 bg-[#2264c0] text-white text-sm font-medium rounded-full hover:bg-[#1a4f9a] transition-colors"
                                 >
-                                    + Tambah Ulasan
+                                    {userReview ? 'Edit Ulasan' : '+ Tambah Ulasan'}
                                 </button>
                             )}
                         </div>

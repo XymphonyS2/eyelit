@@ -50,6 +50,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/pembayaran/{id}', [PembayaranController::class, 'show'])->name('pembayaran.show');
     Route::post('/pembayaran/{id}/bayar', [PembayaranController::class, 'createTransaction'])->name('pembayaran.bayar');
     Route::post('/ulasan', [UlasanController::class, 'store'])->name('ulasan.store');
+    Route::put('/ulasan/{id}', [UlasanController::class, 'update'])->name('ulasan.update');
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard')->middleware('admin');
     Route::get('/produk', [DaftarProdukController::class, 'index'])->name('produk')->middleware('admin');
     Route::post('/produk', [DaftarProdukController::class, 'store'])->name('produk.store')->middleware('admin');

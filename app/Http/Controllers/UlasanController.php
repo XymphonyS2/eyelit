@@ -61,4 +61,31 @@ class UlasanController extends Controller
 
         return redirect()->back()->with('success', 'Ulasan berhasil ditambahkan');
     }
+
+    public function update(Request $request, $id)
+    {
+        $request->validate([
+            'rating' => 'required|integer|min:1|max:5',
+            'komentar' => 'nullable|string|max:1000',
+        ]);
+
+        $userId = Auth::id();
+
+        // Cari ulasan milik user
+        $ulasan = Ulasan::where('id', $id)
+            ->where('pengguna_id', $userId)
+            ->first();
+
+        if (!$ulasan) {
+            return redirect()->back()->with('error', 'Ulasan tidak ditemukan.');
+        }
+
+        // Update ulasan
+        $ulasan->update([
+            'rating' => $request->rating,
+            'komentar' => $request->komentar,
+        ]);
+
+        return redirect()->back()->with('success', 'Ulasan berhasil diperbarui');
+    }
 }

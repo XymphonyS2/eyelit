@@ -48,6 +48,7 @@ class ProdukController extends Controller
             ->map(function ($ulasan) {
                 return [
                     'id' => $ulasan->id,
+                    'user_id' => $ulasan->pengguna_id,
                     'username' => $ulasan->user->username ?? 'Pengguna',
                     'rating' => $ulasan->rating,
                     'komentar' => $ulasan->komentar,
