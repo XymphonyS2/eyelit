@@ -1,6 +1,7 @@
-import { Head, Link, usePage } from '@inertiajs/react';
-import { Bell, BookOpen, LogOut, MapPin, Package, Settings, ShoppingBag, ShoppingCart, Truck, User } from 'lucide-react';
+import { Head, Link, router, usePage } from '@inertiajs/react';
+import { Bell, BookOpen, LogOut, MapPin, Package, Settings, ShoppingBag, ShoppingCart, Truck, User, X } from 'lucide-react';
 import { useRef, useState, useEffect } from 'react';
+import { toast } from 'sonner';
 
 // 🔥 safe helper — aman untuk nilai null/undefined
 const safe = (v: any) => (v ?? "").toString().trim();
@@ -22,6 +23,13 @@ const STATUS_COLOR: Record<string, string> = {
     'Dibatalkan':                     'bg-red-100 text-red-600',
 };
 
+const ALASAN_PEMBATALAN = [
+    'Salah mengisi detail produk',
+    'Salah mengisi alamat',
+    'Ingin mengganti produk',
+    'Berubah pikiran',
+];
+
 export default function PesananDetail() {
     const { auth, pesanan, subtotal_produk, grand_total } = usePage().props as any;
     const keranjangCount: number = auth.keranjang_count || 0;
@@ -29,6 +37,7 @@ export default function PesananDetail() {
     const [showUserDropdown, setShowUserDropdown] = useState(false);
     const [showNotifDropdown, setShowNotifDropdown] = useState(false);
     const [countdown, setCountdown] = useState<string | null>(null);
+    const [showBatalOverlay, setShowBatalOverlay] = useState(false);
     const userDropdownTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
     const notifDropdownTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
     const notifications: any[] = auth.user?.notifications || [];
@@ -329,12 +338,20 @@ export default function PesananDetail() {
                                 </div>
 
                                 {statusPesanan === 'Menunggu Konfirmasi Pembayaran' ? (
-                                    <Link
-                                        href={`/pembayaran/${pesanan.id}`}
-                                        className="mt-5 block w-full py-3 bg-[#2264c0] text-white rounded-full font-semibold text-sm hover:bg-[#1a4f9a] transition-colors text-center"
-                                    >
-                                        Bayar
-                                    </Link>
+                                    <>
+                                        <Link
+                                            href={`/pembayaran/${pesanan.id}`}
+                                            className="mt-5 block w-full py-3 bg-[#2264c0] text-white rounded-full font-semibold text-sm hover:bg-[#1a4f9a] transition-colors text-center"
+                                        >
+                                            Bayar
+                                        </Link>
+                                        <button
+                                            onClick={() => setShowBatalOverlay(true)}
+                                            className="mt-3 block w-full py-3 bg-red-50 text-red-500 border border-red-200 rounded-full font-semibold text-sm hover:bg-red-100 transition-colors text-center"
+                                        >
+                                            Batalkan Pesanan
+                                        </button>
+                                    </>
                                 ) : (
                                     <Link
                                         href="/katalog"
@@ -347,6 +364,53 @@ export default function PesananDetail() {
                         </div>
                     </div>
                 </main>
+
+                {/* Overlay Batalkan Pesanan */}
+                {showBatalOverlay && (
+                    <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
+                        <div
+                            className="absolute inset-0 bg-black/50 backdrop-blur-sm"
+                            onClick={() => setShowBatalOverlay(false)}
+                        />
+                        <div className="relative bg-white rounded-2xl shadow-2xl w-full max-w-md overflow-hidden animate-in fade-in zoom-in-95 duration-200">
+                            <div className="flex items-center justify-between px-6 py-4 border-b border-[#19140035]">
+                                <h2 className="text-lg font-bold text-[#1b1b18]">Batalkan Pesanan</h2>
+                                <button
+                                    onClick={() => setShowBatalOverlay(false)}
+                                    className="p-2 rounded-full hover:bg-gray-100 transition-colors"
+                                >
+                                    <X className="size-5 text-[#5f6368]" />
+                                </button>
+                            </div>
+                            <div className="px-6 py-5">
+                                <p className="text-sm text-[#5f6368] mb-4">Pilih alasan pembatalan pesanan:</p>
+                                <div className="space-y-2">
+                                    {ALASAN_PEMBATALAN.map((alasan) => (
+                                        <button
+                                            key={alasan}
+                                            onClick={() => {
+                                                router.post(`/pesanan/${pesanan.id}/batal?_method=DELETE`, {
+                                                    alasan_pembatalan: alasan,
+                                                }, {
+                                                    onSuccess: () => {
+                                                        setShowBatalOverlay(false);
+                                                        toast.success('Pesanan berhasil dibatalkan');
+                                                    },
+                                                    onError: () => {
+                                                        toast.error('Gagal membatalkan pesanan');
+                                                    },
+                                                });
+                                            }}
+                                            className="w-full text-left px-4 py-3 rounded-xl border border-[#19140035] text-sm font-medium text-[#1b1b18] hover:bg-gray-50 hover:border-[#2264c0] transition-colors"
+                                        >
+                                            {alasan}
+                                        </button>
+                                    ))}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                )}
             </div>
         </>
     );

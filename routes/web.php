@@ -47,6 +47,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::post('/checkout/ongkir', [OngkirController::class, 'hitung'])->name('checkout.ongkir');
     Route::get('/pesanan', [PesananController::class, 'index'])->name('pesanan');
     Route::get('/pesanan/{id}', [PesananController::class, 'show'])->name('pesanan.show');
+    Route::delete('/pesanan/{id}/batal', [PesananController::class, 'batal'])->name('pesanan.batal');
     Route::get('/pembayaran/{id}', [PembayaranController::class, 'show'])->name('pembayaran.show');
     Route::post('/pembayaran/{id}/bayar', [PembayaranController::class, 'createTransaction'])->name('pembayaran.bayar');
     Route::post('/ulasan', [UlasanController::class, 'store'])->name('ulasan.store');

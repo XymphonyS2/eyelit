@@ -323,6 +323,8 @@ class CheckoutController extends Controller
                     'subtotal_lensa' => $hargaLensa * $jumlah,
                     'subtotal'       => $subtotal,
                 ]);
+
+                $produk->decrement('stok', $jumlah);
             }
             // =============================================
             // FLOW: Dari Keranjang
@@ -398,6 +400,9 @@ class CheckoutController extends Controller
                         'subtotal_lensa' => $hargaLensa * $item->jumlah,
                         'subtotal'       => $subtotal,
                     ]);
+
+                    // Kurangi stok produk
+                    $item->produk->decrement('stok', $item->jumlah);
                 }
 
                 $pesanan->update(['total_harga' => $totalProduk + $ongkosKirim]);

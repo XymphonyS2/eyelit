@@ -3,6 +3,10 @@
 namespace App\Http\Controllers;
 
 use App\Models\Pesanan;
+use App\Models\DetailPesanan;
+use App\Models\Produk;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Inertia\Inertia;
 
 class PesananController extends Controller
@@ -47,5 +51,35 @@ class PesananController extends Controller
             'subtotal_produk' => $subtotalProduk,
             'grand_total'     => $grandTotal,
         ]);
+    }
+
+    public function batal(Request $request, $id)
+    {
+        $validated = $request->validate([
+            'alasan_pembatalan' => 'required|string|in:Salah mengisi detail produk,Salah mengisi alamat,Ingin mengganti produk,Berubah pikiran',
+        ]);
+
+        $pesanan = Pesanan::with('detailPesanan')
+            ->where('pengguna_id', auth()->id())
+            ->where('status_pesanan', 'Menunggu Konfirmasi Pembayaran')
+            ->findOrFail($id);
+
+        DB::transaction(function () use ($pesanan, $validated) {
+            // Kembalikan stok produk
+            foreach ($pesanan->detailPesanan as $detail) {
+                Produk::where('id', $detail->produk_id)
+                    ->increment('stok', $detail->jumlah);
+            }
+
+            // Update status pesanan menjadi Dibatalkan
+            $pesanan->update([
+                'status_pesanan' => 'Dibatalkan',
+                'alasan_pembatalan' => $validated['alasan_pembatalan'],
+                'tanggal_pembatalan' => now(),
+            ]);
+        });
+
+        return redirect()->route('pesanan.show', $id)
+            ->with('success', 'Pesanan berhasil dibatalkan dan stok telah dikembalikan.');
     }
 }
