@@ -70,13 +70,14 @@ export default function Checkout() {
     const provinsiList: Provinsi[] = Array.isArray(provinsi) ? provinsi : [];
     const totalHarga: number     = Number(total ?? 0);
 
+    const notifications: any[] = Array.isArray(auth?.notifications) ? auth.notifications : [];
+
     const [showUserDropdown, setShowUserDropdown] = useState(false);
     const [showNotifDropdown, setShowNotifDropdown] = useState(false);
     const [showTambahAlamat, setShowTambahAlamat] = useState(false);
 
     const userDropdownTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
     const notifDropdownTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
-    const notifications: any[] = auth.user?.notifications || [];
 
     // 🔥 PERBAIKAN: guard find/[0] dengan fallback null
     const [selectedAlamat, setSelectedAlamat] = useState<Alamat | null>(
@@ -213,12 +214,38 @@ export default function Checkout() {
                                             {notifications.length > 0 && <span className="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full" />}
                                         </button>
                                         {showNotifDropdown && (
-                                            <div className="dropdown-menu show" style={{ top: '64px', right: '24px' }}
-                                                onMouseEnter={() => { if (notifDropdownTimer.current) clearTimeout(notifDropdownTimer.current); }}
-                                                onMouseLeave={() => { notifDropdownTimer.current = setTimeout(() => setShowNotifDropdown(false), 100); }}
-                                            >
-                                                <div className="dropdown-header"><span className="text-sm font-semibold">Notifikasi</span></div>
-                                                <div className="dropdown-notif-empty"><Bell className="size-10" /><p>Tidak ada notifikasi</p></div>
+                                            <div className="dropdown-menu show" style={{ top: '64px', right: '90px' }}>
+                                                <div className="dropdown-header">
+                                                    <span className="text-sm font-semibold text-[#202124]">Notifikasi</span>
+                                                </div>
+                                                {notifications.length === 0 ? (
+                                                    <div className="dropdown-notif-empty">
+                                                        <Bell className="size-10" />
+                                                        <p>Tidak ada notifikasi</p>
+                                                    </div>
+                                                ) : (
+                                                    <div className="max-h-80 overflow-y-auto">
+                                                        {notifications.map((notif: any, index: number) => (
+                                                            <div key={index} className="dropdown-notif-item">
+                                                                <div className="dropdown-notif-icon">
+                                                                    <Bell className="size-5" />
+                                                                </div>
+                                                                <div className="dropdown-notif-content">
+                                                                    <p className="dropdown-notif-title">{notif.title || 'Notifikasi'}</p>
+                                                                    <p className="dropdown-notif-message">{notif.message}</p>
+                                                                    <p className="dropdown-notif-time">
+                                                                        {notif.created_at ? new Date(notif.created_at).toLocaleString('id-ID', { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' }) : 'Baru saja'}
+                                                                    </p>
+                                                                </div>
+                                                            </div>
+                                                        ))}
+                                                    </div>
+                                                )}
+                                                {notifications.length > 0 && (
+                                                    <div className="dropdown-notif-footer">
+                                                        <Link href="/notifikasi">Lihat Notifikasi</Link>
+                                                    </div>
+                                                )}
                                             </div>
                                         )}
                                     </div>

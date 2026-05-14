@@ -37,7 +37,7 @@ export default function Katalog() {
     const notifDropdownTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
     const cartItems: any[] = auth.cartItems || [];
-    const notifications: any[] = auth.user?.notifications || [];
+    const notifications: any[] = Array.isArray(auth?.notifications) ? auth.notifications : [];
 
     useEffect(() => {
         sessionStorage.setItem('previousPage', '/katalog');
@@ -170,22 +170,24 @@ export default function Katalog() {
                                             ) : (
                                                 <div className="max-h-80 overflow-y-auto">
                                                     {notifications.map((notif: any, index: number) => (
-                                                        <Link key={index} href={notif.link || '#'} className="dropdown-notif-item">
+                                                        <div key={index} className="dropdown-notif-item">
                                                             <div className="dropdown-notif-icon">
                                                                 <Bell className="size-5" />
                                                             </div>
                                                             <div className="dropdown-notif-content">
-                                                                <p className="dropdown-notif-title">{notif.title}</p>
+                                                                <p className="dropdown-notif-title">{notif.title || 'Notifikasi'}</p>
                                                                 <p className="dropdown-notif-message">{notif.message}</p>
-                                                                <p className="dropdown-notif-time">{notif.time || 'Baru saja'}</p>
+                                                                <p className="dropdown-notif-time">
+                                                                    {notif.created_at ? new Date(notif.created_at).toLocaleString('id-ID', { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' }) : 'Baru saja'}
+                                                                </p>
                                                             </div>
-                                                        </Link>
+                                                        </div>
                                                     ))}
                                                 </div>
                                             )}
                                             {notifications.length > 0 && (
                                                 <div className="dropdown-notif-footer">
-                                                    <Link href="/notifications">Lihat Semua</Link>
+                                                    <Link href="/notifikasi">Lihat Notifikasi</Link>
                                                 </div>
                                             )}
                                         </div>

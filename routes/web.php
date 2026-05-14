@@ -8,6 +8,7 @@ use App\Http\Controllers\DaftarProdukController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\EmailCheckController;
 use App\Http\Controllers\KeranjangController;
+use App\Http\Controllers\NotifikasiController;
 use App\Http\Controllers\OngkirController;
 use App\Http\Controllers\PesananController;
 use App\Http\Controllers\PembayaranController;
@@ -52,6 +53,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::post('/pembayaran/{id}/bayar', [PembayaranController::class, 'createTransaction'])->name('pembayaran.bayar');
     Route::post('/ulasan', [UlasanController::class, 'store'])->name('ulasan.store');
     Route::put('/ulasan/{id}', [UlasanController::class, 'update'])->name('ulasan.update');
+    Route::get('/notifikasi', [NotifikasiController::class, 'index'])->name('notifikasi');
+    Route::post('/notifikasi/{id}/baca', [NotifikasiController::class, 'markAsRead'])->name('notifikasi.markAsRead');
+    Route::post('/notifikasi/baca-semua', [NotifikasiController::class, 'markAllAsRead'])->name('notifikasi.markAllAsRead');
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard')->middleware('admin');
     Route::get('/produk', [DaftarProdukController::class, 'index'])->name('produk')->middleware('admin');
     Route::post('/produk', [DaftarProdukController::class, 'store'])->name('produk.store')->middleware('admin');

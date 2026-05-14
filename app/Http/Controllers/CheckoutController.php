@@ -7,9 +7,11 @@ use App\Models\DetailPesanan;
 use App\Models\Ekspedisi;
 use App\Models\Keranjang;
 use App\Models\Lensa;
+use App\Models\Notifikasi;
 use App\Models\Pesanan;
 use App\Models\Produk;
 use App\Models\Provinsi;
+use App\Models\User;
 use App\Services\RajaOngkirService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -410,6 +412,30 @@ class CheckoutController extends Controller
                 Keranjang::whereIn('id', $checkoutItemIds)->delete();
             }
         });
+
+        // Reload pesanan dengan detailPesanan
+        $pesanan->load('detailPesanan.produk');
+
+        // Kirim notifikasi ke user
+        $userId = auth()->id();
+        if ($userId) {
+            $produkNames = $pesanan->detailPesanan->pluck('produk.nama_produk')->filter()->toArray();
+            $produkNama = !empty($produkNames) ? implode(', ', $produkNames) : 'Produk EyeLit';
+
+            $batasWaktu = $pesanan->batas_waktu_pembayaran
+                ? \Carbon\Carbon::parse($pesanan->batas_waktu_pembayaran)->format('d M Y, H:i')
+                : '24 jam';
+
+            Notifikasi::create([
+                'pengguna_id' => $userId,
+                'judul_notifikasi' => 'Pesanan Baru - Bayar Sekarang!',
+                'isi_notifikasi' => "Pesanan #{$pesanan->no_pesanan} ({$produkNama}) menunggu pembayaran. Selesaikan pembayaran sebelum {$batasWaktu} agar pesanan tidak dibatalkan.",
+                'jenis_notifikasi' => 'Pesanan Baru',
+                'pesanan_id' => $pesanan->id,
+                'dibaca' => false,
+                'tanggal_notifikasi' => now(),
+            ]);
+        }
 
         return redirect()->route('pesanan.show', $pesanan->id)
             ->with('success', 'Pesanan berhasil dibuat!');
