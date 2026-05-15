@@ -3,6 +3,9 @@
 namespace App\Http\Controllers;
 
 use App\Models\Pesanan;
+use App\Notifications\PesananDikemas;
+use App\Notifications\PesananDikirim;
+use App\Notifications\PesananTiba;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 
@@ -40,8 +43,26 @@ class DemoController extends Controller
             'tanggal_selesai' => 'nullable|string',
         ]);
 
-        $pesanan = Pesanan::findOrFail($id);
+        $pesanan = Pesanan::with(['user', 'ekspedisi', 'detailPesanan.produk'])->findOrFail($id);
+        $oldStatus = $pesanan->status_pesanan;
+        $newStatus = $validated['status_pesanan'];
+
         $pesanan->update($validated);
+
+        // Kirim notifikasi berdasarkan perubahan status
+        $user = $pesanan->user;
+
+        if ($newStatus === 'Dikemas' && $oldStatus !== 'Dikemas') {
+            (new \App\Notifications\PesananDikemas($pesanan))->saveNotification($user);
+        }
+
+        if ($newStatus === 'Dikirim' && $oldStatus !== 'Dikirim') {
+            (new \App\Notifications\PesananDikirim($pesanan))->saveNotification($user);
+        }
+
+        if ($newStatus === 'Pesanan Tiba di Tujuan' && $oldStatus !== 'Pesanan Tiba di Tujuan') {
+            (new \App\Notifications\PesananTiba($pesanan))->saveNotification($user);
+        }
 
         return Inertia::render('demo', [
             'pesanan' => Pesanan::with(['user', 'detailPesanan.produk', 'ekspedisi'])

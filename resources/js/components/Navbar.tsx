@@ -100,8 +100,13 @@ export default function Navbar({ activePage = 'beranda', showAdminNav = false }:
                                         <div className="max-h-80 overflow-y-auto">
                                             {notifications.map((notif: any, index: number) => (
                                                 <Link key={index} href={notif.link || '#'} className="dropdown-notif-item">
-                                                    <div className="dropdown-notif-icon">
-                                                        <Bell className="size-5" />
+                                                    <div style={{ width: '48px', height: '48px', borderRadius: '8px', overflow: 'hidden', backgroundColor: '#f3f4f6', flexShrink: 0 }}>
+                                                        <img
+                                                            src={notif.produk_gambar ? `/images/produk/${notif.produk_gambar}` : '/images/placeholder.png'}
+                                                            alt={notif.title}
+                                                            style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                                                            onError={(e) => { (e.target as HTMLImageElement).src = '/images/placeholder.png'; }}
+                                                        />
                                                     </div>
                                                     <div className="dropdown-notif-content">
                                                         <p className="dropdown-notif-title">{notif.title}</p>

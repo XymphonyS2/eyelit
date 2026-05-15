@@ -14,6 +14,7 @@ class Notifikasi extends Model
         'isi_notifikasi',
         'jenis_notifikasi',
         'pesanan_id',
+        'produk_id',
         'dibaca',
         'tanggal_notifikasi',
     ];
@@ -31,5 +32,10 @@ class Notifikasi extends Model
     public function pesanan()
     {
         return $this->belongsTo(Pesanan::class, 'pesanan_id');
+    }
+
+    public function produk()
+    {
+        return $this->belongsTo(Produk::class, 'produk_id');
     }
 }

@@ -42,6 +42,7 @@ class HandleInertiaRequests extends Middleware
             })->toArray();
 
             $notifications = Notifikasi::where('pengguna_id', $userId)
+                ->with('produk')
                 ->orderByDesc('tanggal_notifikasi')
                 ->take(10)
                 ->get()
@@ -52,6 +53,8 @@ class HandleInertiaRequests extends Middleware
                         'message' => $notif->isi_notifikasi,
                         'type' => $notif->jenis_notifikasi,
                         'pesanan_id' => $notif->pesanan_id,
+                        'produk_id' => $notif->produk_id,
+                        'produk_gambar' => $notif->produk?->gambar ?? null,
                         'created_at' => $notif->tanggal_notifikasi?->toIso8601String(),
                         'read_at' => $notif->dibaca ? $notif->tanggal_notifikasi?->toIso8601String() : null,
                     ];

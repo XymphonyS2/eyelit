@@ -21,6 +21,7 @@ return new class extends Migration
                 'Pembatalan'
             ]);
             $table->foreignId('pesanan_id')->nullable()->constrained('pesanan')->nullOnDelete();
+            $table->foreignId('produk_id')->nullable()->constrained('produk')->nullOnDelete();
             $table->boolean('dibaca')->default(false);
             $table->timestamp('tanggal_notifikasi')->nullable();
             $table->timestamps();

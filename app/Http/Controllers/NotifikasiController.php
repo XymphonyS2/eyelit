@@ -10,6 +10,7 @@ class NotifikasiController extends Controller
     public function index()
     {
         $notifikasi = Notifikasi::where('pengguna_id', auth()->id())
+            ->with('produk')
             ->orderByDesc('tanggal_notifikasi')
             ->get();
 

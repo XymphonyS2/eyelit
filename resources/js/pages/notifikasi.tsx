@@ -293,11 +293,20 @@ export default function Notifikasi() {
                                             : 'border-[#19140035]'
                                     }`}
                                 >
-                                    {/* Icon */}
-                                    <div className={`w-10 h-10 sm:w-12 sm:h-12 rounded-full flex items-center justify-center flex-shrink-0 ${
-                                        !notif.dibaca ? 'bg-[#2264c0]/10 text-[#2264c0]' : 'bg-gray-100 text-gray-500'
-                                    }`}>
-                                        <Bell className="size-5" />
+                                    {/* Gambar Produk */}
+                                    <div className="w-16 h-16 sm:w-24 sm:h-24 rounded-lg flex-shrink-0 overflow-hidden bg-gray-50">
+                                        {notif.produk?.gambar ? (
+                                            <img
+                                                alt={notif.produk?.gambar}
+                                                className="w-full h-full object-contain"
+                                                src={`/images/produk/${notif.produk?.gambar}`}
+                                                onError={(e) => { (e.target as HTMLImageElement).src = '/images/placeholder.png'; }}
+                                            />
+                                        ) : (
+                                            <div className="w-full h-full flex items-center justify-center">
+                                                <Bell className="size-8 text-gray-300" />
+                                            </div>
+                                        )}
                                     </div>
 
                                     {/* Content */}
