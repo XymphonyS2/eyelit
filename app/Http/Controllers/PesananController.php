@@ -53,6 +53,20 @@ class PesananController extends Controller
         ]);
     }
 
+    public function detailPengiriman($id)
+    {
+        $pesanan = Pesanan::with([
+            'alamat.provinsi',
+            'ekspedisi',
+        ])
+            ->where('pengguna_id', auth()->id())
+            ->findOrFail($id);
+
+        return Inertia::render('detail-pengiriman', [
+            'pesanan' => $pesanan,
+        ]);
+    }
+
     public function batal(Request $request, $id)
     {
         $validated = $request->validate([
@@ -81,5 +95,20 @@ class PesananController extends Controller
 
         return redirect()->route('pesanan.show', $id)
             ->with('success', 'Pesanan berhasil dibatalkan dan stok telah dikembalikan.');
+    }
+
+    public function selesai($id)
+    {
+        $pesanan = Pesanan::where('pengguna_id', auth()->id())
+            ->where('status_pesanan', 'Pesanan Tiba di Tujuan')
+            ->findOrFail($id);
+
+        $pesanan->update([
+            'status_pesanan' => 'Selesai',
+            'tanggal_selesai' => now(),
+        ]);
+
+        return redirect()->route('pesanan.show', $id)
+            ->with('success', 'Pesanan berhasil dikonfirmasi selesai.');
     }
 }

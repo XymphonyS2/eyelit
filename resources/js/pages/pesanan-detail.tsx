@@ -38,6 +38,7 @@ export default function PesananDetail() {
     const [showNotifDropdown, setShowNotifDropdown] = useState(false);
     const [countdown, setCountdown] = useState<string | null>(null);
     const [showBatalOverlay, setShowBatalOverlay] = useState(false);
+    const [showSelesaiOverlay, setShowSelesaiOverlay] = useState(false);
     const userDropdownTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
     const notifDropdownTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
     const notifications: any[] = Array.isArray(auth?.notifications) ? auth.notifications : [];
@@ -239,12 +240,37 @@ export default function PesananDetail() {
                                                     }`}>
                                                         {isCompleted ? '✓' : i + 1}
                                                     </div>
-                                                    <p className={`text-[8px] sm:text-[10px] mt-1 text-center max-w-[60px] sm:max-w-[70px] leading-tight ${
-                                                        isCompleted || isCurrent ? 'text-[#2264c0] font-medium' : 'text-gray-400'
-                                                    }`}>
-                                                        <span className="hidden lg:inline">{step.label}</span>
-                                                        <span className="hidden sm:inline lg:hidden">{step.short}</span>
-                                                        <span className="sm:hidden">{step.short}</span>
+                                                    <p className={`text-[8px] sm:text-[10px] mt-1 text-center max-w-[60px] sm:max-w-[70px] leading-tight ${isCompleted || isCurrent ? 'text-[#2264c0] font-medium' : 'text-gray-400'}`}>
+                                                        <span className="hidden lg:inline">
+                                                            {step.label === 'Menunggu Konfirmasi Pembayaran' && pesanan.tanggal_konfirmasi_pembayaran ? 'Pembayaran' : step.label}
+                                                        </span>
+                                                        <span className="hidden sm:inline lg:hidden">
+                                                            {step.label === 'Menunggu Konfirmasi Pembayaran' && pesanan.tanggal_konfirmasi_pembayaran ? 'Bayar' : step.short}
+                                                        </span>
+                                                        <span className="sm:hidden">
+                                                            {step.label === 'Menunggu Konfirmasi Pembayaran' && pesanan.tanggal_konfirmasi_pembayaran ? 'Bayar' : step.short}
+                                                        </span>
+                                                        {(isCompleted || isCurrent) && step.label === 'Menunggu Konfirmasi Pembayaran' && pesanan.tanggal_konfirmasi_pembayaran ? (
+                                                            <span className="block text-[7px] sm:text-[9px] mt-0.5 text-[#5f6368]">
+                                                                {new Date(pesanan.tanggal_konfirmasi_pembayaran).toLocaleDateString('id-ID', { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' })}
+                                                            </span>
+                                                        ) : (isCompleted || isCurrent) && step.label === 'Dikemas' && pesanan.tanggal_konfirmasi_pembayaran ? (
+                                                            <span className="block text-[7px] sm:text-[9px] mt-0.5 text-[#5f6368]">
+                                                                {new Date(pesanan.tanggal_konfirmasi_pembayaran).toLocaleDateString('id-ID', { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' })}
+                                                            </span>
+                                                        ) : (isCompleted || isCurrent) && step.label === 'Dikirim' && pesanan.tanggal_pengiriman ? (
+                                                            <span className="block text-[7px] sm:text-[9px] mt-0.5 text-[#5f6368]">
+                                                                {new Date(pesanan.tanggal_pengiriman).toLocaleDateString('id-ID', { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' })}
+                                                            </span>
+                                                        ) : (isCompleted || isCurrent) && step.label === 'Pesanan Tiba di Tujuan' && pesanan.tanggal_tiba ? (
+                                                            <span className="block text-[7px] sm:text-[9px] mt-0.5 text-[#5f6368]">
+                                                                {new Date(pesanan.tanggal_tiba).toLocaleDateString('id-ID', { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' })}
+                                                            </span>
+                                                        ) : (isCompleted || isCurrent) && step.label === 'Selesai' && pesanan.tanggal_selesai ? (
+                                                            <span className="block text-[7px] sm:text-[9px] mt-0.5 text-[#5f6368]">
+                                                                {new Date(pesanan.tanggal_selesai).toLocaleDateString('id-ID', { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' })}
+                                                            </span>
+                                                        ) : null}
                                                     </p>
                                                 </div>
                                                 {i < STATUS_STEPS.length - 1 && (
@@ -378,14 +404,21 @@ export default function PesananDetail() {
                                             Batalkan Pesanan
                                         </button>
                                     </>
-                                ) : (
+                                ) : statusPesanan === 'Pesanan Tiba di Tujuan' ? (
+                                    <button
+                                        onClick={() => setShowSelesaiOverlay(true)}
+                                        className="mt-5 block w-full py-3 bg-[#2264c0] text-white rounded-full font-semibold text-sm hover:bg-[#1a4f9a] transition-colors text-center"
+                                    >
+                                        Pesanan Diterima
+                                    </button>
+                                ) : statusPesanan !== 'Dikemas' && statusPesanan !== 'Dikirim' ? (
                                     <Link
                                         href="/katalog"
                                         className="mt-5 block w-full py-3 bg-[#2264c0] text-white rounded-full font-semibold text-sm hover:bg-[#1a4f9a] transition-colors text-center"
                                     >
                                         Lanjut Belanja
                                     </Link>
-                                )}
+                                ) : null}
                             </div>
                         </div>
                     </div>
@@ -432,6 +465,65 @@ export default function PesananDetail() {
                                             {alasan}
                                         </button>
                                     ))}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                )}
+
+                {/* Overlay Pesanan Diterima */}
+                {showSelesaiOverlay && (
+                    <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
+                        <div
+                            className="absolute inset-0 bg-black/50 backdrop-blur-sm"
+                            onClick={() => setShowSelesaiOverlay(false)}
+                        />
+                        <div className="relative bg-white rounded-2xl shadow-2xl w-full max-w-md overflow-hidden animate-in fade-in zoom-in-95 duration-200">
+                            <div className="flex items-center justify-between px-6 py-4 border-b border-[#19140035]">
+                                <h2 className="text-lg font-bold text-[#1b1b18]">Pesanan Diterima</h2>
+                                <button
+                                    onClick={() => setShowSelesaiOverlay(false)}
+                                    className="p-2 rounded-full hover:bg-gray-100 transition-colors"
+                                >
+                                    <X className="size-5 text-[#5f6368]" />
+                                </button>
+                            </div>
+                            <div className="px-6 py-5">
+                                <div className="flex items-center gap-3 mb-4">
+                                    <div className="bg-green-100 rounded-full p-3">
+                                        <Package className="size-6 text-green-600" />
+                                    </div>
+                                    <div>
+                                        <p className="text-sm font-semibold text-[#1b1b18]">Konfirmasi Pesanan</p>
+                                        <p className="text-xs text-[#5f6368]">#{safe(pesanan.no_pesanan)}</p>
+                                    </div>
+                                </div>
+                                <p className="text-sm text-[#5f6368] mb-5">
+                                    Dengan menekan <span className="font-semibold text-[#1b1b18]">"Ya, Pesanan Diterima"</span>, kamu mengkonfirmasi bahwa barang pesanan telah diterima dengan baik dan sesuai.
+                                </p>
+                                <div className="flex gap-3">
+                                    <button
+                                        onClick={() => setShowSelesaiOverlay(false)}
+                                        className="flex-1 px-4 py-2.5 text-sm font-medium text-[#5f6368] bg-gray-100 rounded-full hover:bg-gray-200 transition-colors"
+                                    >
+                                        Batal
+                                    </button>
+                                    <button
+                                        onClick={() => {
+                                            router.post(`/pesanan/${pesanan.id}/selesai`, {}, {
+                                                onSuccess: () => {
+                                                    setShowSelesaiOverlay(false);
+                                                    toast.success('Pesanan berhasil dikonfirmasi selesai');
+                                                },
+                                                onError: () => {
+                                                    toast.error('Gagal mengkonfirmasi pesanan');
+                                                },
+                                            });
+                                        }}
+                                        className="flex-1 px-4 py-2.5 text-sm font-medium text-white bg-[#2264c0] rounded-full hover:bg-[#1a4f9a] transition-colors"
+                                    >
+                                        Ya, Pesanan Diterima
+                                    </button>
                                 </div>
                             </div>
                         </div>

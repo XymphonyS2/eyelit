@@ -8,6 +8,7 @@ use App\Http\Controllers\DaftarProdukController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\EmailCheckController;
 use App\Http\Controllers\KeranjangController;
+use App\Http\Controllers\DemoController;
 use App\Http\Controllers\NotifikasiController;
 use App\Http\Controllers\OngkirController;
 use App\Http\Controllers\PesananController;
@@ -48,7 +49,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::post('/checkout/ongkir', [OngkirController::class, 'hitung'])->name('checkout.ongkir');
     Route::get('/pesanan', [PesananController::class, 'index'])->name('pesanan');
     Route::get('/pesanan/{id}', [PesananController::class, 'show'])->name('pesanan.show');
+    Route::get('/pesanan/{id}/pengiriman', [PesananController::class, 'detailPengiriman'])->name('pesanan.pengiriman');
     Route::delete('/pesanan/{id}/batal', [PesananController::class, 'batal'])->name('pesanan.batal');
+    Route::post('/pesanan/{id}/selesai', [PesananController::class, 'selesai'])->name('pesanan.selesai');
     Route::get('/pembayaran/{id}', [PembayaranController::class, 'show'])->name('pembayaran.show');
     Route::post('/pembayaran/{id}/bayar', [PembayaranController::class, 'createTransaction'])->name('pembayaran.bayar');
     Route::post('/ulasan', [UlasanController::class, 'store'])->name('ulasan.store');
@@ -69,6 +72,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::put('/carousel/{id}', [\App\Http\Controllers\CarouselController::class, 'update'])->name('carousel.update')->middleware('admin');
     Route::patch('/carousel/{id}/status', [\App\Http\Controllers\CarouselController::class, 'updateStatus'])->name('carousel.updateStatus')->middleware('admin');
     Route::delete('/carousel/{id}', [\App\Http\Controllers\CarouselController::class, 'destroy'])->name('carousel.destroy')->middleware('admin');
+    Route::get('/demo', [DemoController::class, 'index'])->name('demo')->middleware('admin');
+    Route::put('/demo/{id}', [DemoController::class, 'update'])->name('demo.update')->middleware('admin');
+    Route::get('/demo/{id}', [DemoController::class, 'index'])->name('demo.show')->middleware('admin');
 });
 
 require __DIR__.'/settings.php';
