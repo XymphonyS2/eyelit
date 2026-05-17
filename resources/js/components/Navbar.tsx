@@ -4,7 +4,7 @@ import { useRef, useState } from 'react';
 import AdminNavLinks from './AdminNavLinks';
 
 interface NavbarProps {
-    activePage?: 'dashboard' | 'produk' | 'pesanan' | 'pengguna' | 'carousel' | 'demo' | 'beranda';
+    activePage?: 'dashboard' | 'produk' | 'pesanan' | 'pengguna' | 'carousel' | 'demo';
     showAdminNav?: boolean;
 }
 

@@ -1,7 +1,7 @@
 import { Link } from '@inertiajs/react';
 
 interface AdminNavLinksProps {
-    activePage: 'dashboard' | 'produk' | 'pesanan' | 'pengguna' | 'carousel' | 'demo';
+    activePage: 'dashboard' | 'produk' | 'pesanan' | 'pengguna' | 'laporan' | 'carousel' | 'demo';
 }
 
 export default function AdminNavLinks({ activePage }: AdminNavLinksProps) {
@@ -10,9 +10,9 @@ export default function AdminNavLinks({ activePage }: AdminNavLinksProps) {
         { href: '/produk', label: 'Produk', key: 'produk' as const },
         { href: '/daftar-pesanan', label: 'Pesanan', key: 'pesanan' as const },
         { href: '/pengguna', label: 'Pengguna', key: 'pengguna' as const },
+        { href: '/laporan', label: 'Laporan', key: 'laporan' as const },
         { href: '/carousel', label: 'Carousel', key: 'carousel' as const },
         { href: '/demo', label: 'Demo', key: 'demo' as const },
-        { href: '/', label: 'Beranda', key: 'beranda' as const },
     ];
 
     return (

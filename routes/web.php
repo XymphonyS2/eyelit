@@ -8,6 +8,7 @@ use App\Http\Controllers\DaftarProdukController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\EmailCheckController;
 use App\Http\Controllers\KeranjangController;
+use App\Http\Controllers\LaporanController;
 use App\Http\Controllers\DemoController;
 use App\Http\Controllers\NotifikasiController;
 use App\Http\Controllers\OngkirController;
@@ -75,6 +76,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/demo', [DemoController::class, 'index'])->name('demo')->middleware('admin');
     Route::put('/demo/{id}', [DemoController::class, 'update'])->name('demo.update')->middleware('admin');
     Route::get('/demo/{id}', [DemoController::class, 'index'])->name('demo.show')->middleware('admin');
+    Route::get('/laporan', [LaporanController::class, 'index'])->name('laporan')->middleware('admin');
 });
 
 require __DIR__.'/settings.php';

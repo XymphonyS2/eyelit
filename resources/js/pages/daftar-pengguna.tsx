@@ -71,7 +71,7 @@ export default function DaftarPengguna() {
                                     </div>
                                     <div className="flex-1 min-w-0">
                                         <p className="text-sm font-medium text-white mb-1">Admin</p>
-                                        <p className="text-3xl font-bold text-white truncate">{pengguna?.filter((p: any) => p.peran === 'admin').length || 0}</p>
+                                        <p className="text-3xl font-bold text-white truncate">{pengguna?.filter((p: any) => p.peran === 'Admin').length || 0}</p>
                                     </div>
                                 </div>
                             </div>
@@ -85,7 +85,7 @@ export default function DaftarPengguna() {
                                     </div>
                                     <div className="flex-1 min-w-0">
                                         <p className="text-sm font-medium text-white mb-1">Pengguna Biasa</p>
-                                        <p className="text-3xl font-bold text-white truncate">{pengguna?.filter((p: any) => p.peran === 'pengguna').length || 0}</p>
+                                        <p className="text-3xl font-bold text-white truncate">{pengguna?.filter((p: any) => p.peran === 'Pengguna').length || 0}</p>
                                     </div>
                                 </div>
                             </div>
