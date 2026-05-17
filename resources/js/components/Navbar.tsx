@@ -239,7 +239,7 @@ export default function Navbar({ activePage = 'beranda', showAdminNav = false }:
                                                 <ShoppingBag className="size-5" />
                                                 Pesanan
                                             </Link>
-                                            <Link href="/user/profile" className="dropdown-item">
+                                            <Link href="/pengaturan" className="dropdown-item">
                                                 <Settings className="size-5" />
                                                 Pengaturan
                                             </Link>
