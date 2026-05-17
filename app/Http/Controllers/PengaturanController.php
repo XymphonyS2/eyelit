@@ -4,8 +4,8 @@ namespace App\Http\Controllers;
 
 use App\Models\User;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Session;
+use Inertia\Inertia;
 
 class PengaturanController extends Controller
 {
@@ -13,20 +13,20 @@ class PengaturanController extends Controller
     {
         $user = User::find(auth()->id());
 
-        return inertia('pengaturan', [
+        return Inertia::render('pengaturan', [
             'user' => $user,
         ]);
     }
 
     public function update(Request $request)
     {
-        $request->validate([
+        $validated = $request->validate([
             'username' => 'required|string|max:50|unique:users,username,' . auth()->id(),
             'foto_profil' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
         ], [
-            'username.required' => 'Username wajib diisi',
-            'username.unique' => 'Username sudah digunakan',
-            'username.max' => 'Username maksimal 50 karakter',
+            'username.required' => 'Nama pengguna wajib diisi',
+            'username.unique' => 'Nama pengguna sudah digunakan oleh orang lain',
+            'username.max' => 'Nama pengguna maksimal 50 karakter',
             'foto_profil.image' => 'Foto profil harus berupa gambar',
             'foto_profil.mimes' => 'Foto profil harus format jpeg, png, jpg, gif, atau svg',
             'foto_profil.max' => 'Ukuran foto profil maksimal 2MB',
@@ -35,7 +35,7 @@ class PengaturanController extends Controller
         $user = User::find(auth()->id());
 
         // Update username
-        $user->username = $request->username;
+        $user->username = $validated['username'];
 
         // Update foto profil
         if ($request->hasFile('foto_profil')) {

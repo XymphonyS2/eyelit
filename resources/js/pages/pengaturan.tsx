@@ -1,51 +1,92 @@
-import { Head, Link, usePage } from '@inertiajs/react';
-import { useState } from 'react';
+import { Head, Link, usePage, useForm } from '@inertiajs/react';
+import { useState, useCallback, useRef } from 'react';
 import { Camera, LogOut, Save, User, X } from 'lucide-react';
 import Navbar from '@/components/Navbar';
 
+type FormErrors = {
+    username?: string;
+    foto_profil?: string;
+};
+
 export default function Pengaturan() {
     const { auth, user } = usePage().props as any;
-    const [username, setUsername] = useState(user?.username || '');
+    const { data, setData, post, processing, errors } = useForm({
+        username: user?.username || '',
+        foto_profil: null as File | null,
+    });
+
+    const [localErrors, setLocalErrors] = useState<FormErrors>({});
     const [previewFoto, setPreviewFoto] = useState(user?.foto_profil ? `/images/profil/${user.foto_profil}` : null);
-    const [selectedFile, setSelectedFile] = useState<File | null>(null);
     const [showLogoutModal, setShowLogoutModal] = useState(false);
-    const [isSubmitting, setIsSubmitting] = useState(false);
+
+    const validateUsername = (username: string): string | undefined => {
+        if (!username.trim()) return 'Nama pengguna wajib diisi.';
+        if (!/^[a-zA-Z0-9]+$/.test(username)) return 'Nama pengguna hanya boleh huruf dan angka.';
+        if (username.trim().length < 6) return 'Nama pengguna minimal 6 karakter.';
+        return undefined;
+    };
+
+    const checkUsername = useCallback(async (username: string) => {
+        if (!username.trim() || !/^[a-zA-Z0-9]+$/.test(username) || username.length < 6) {
+            return;
+        }
+
+        try {
+            const response = await fetch(`/username-check?username=${encodeURIComponent(username)}&exclude_id=${user?.id}`);
+            const result = await response.json();
+
+            if (!result.available) {
+                setLocalErrors((prev) => ({
+                    ...prev,
+                    username: 'Nama pengguna sudah digunakan.',
+                }));
+            }
+        } catch {
+            // ignore
+        }
+    }, [user?.id]);
+
+    const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+    const handleUsernameChange = (value: string) => {
+        setData('username', value);
+
+        if (debounceRef.current) clearTimeout(debounceRef.current);
+
+        if (localErrors.username === 'Nama pengguna sudah digunakan.') {
+            setLocalErrors((prev) => ({ ...prev, username: undefined }));
+        }
+
+        debounceRef.current = setTimeout(() => {
+            checkUsername(value);
+        }, 500);
+    };
 
     const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
         if (file) {
-            setSelectedFile(file);
+            setData('foto_profil', file);
             setPreviewFoto(URL.createObjectURL(file));
         }
     };
 
-    const handleSubmit = async (e: React.FormEvent) => {
+    const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
-        setIsSubmitting(true);
 
-        const formData = new FormData();
-        formData.append('username', username);
-        if (selectedFile) {
-            formData.append('foto_profil', selectedFile);
+        const usernameError = validateUsername(data.username);
+
+        if (usernameError) {
+            setLocalErrors({ username: usernameError });
+            return;
         }
 
-        try {
-            const response = await fetch('/pengaturan', {
-                method: 'POST',
-                headers: {
-                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '',
-                },
-                body: formData,
-            });
-
-            if (response.ok) {
-                window.location.reload();
-            }
-        } catch (error) {
-            console.error('Error:', error);
-        } finally {
-            setIsSubmitting(false);
-        }
+        setLocalErrors({});
+        post('/pengaturan', {
+            forceFormData: true,
+            onError: (serverErrors) => {
+                setLocalErrors(serverErrors);
+            },
+        });
     };
 
     const handleLogout = () => {
@@ -95,7 +136,7 @@ export default function Pengaturan() {
                                         />
                                     ) : (
                                         <div className="w-24 h-24 rounded-full bg-[#2264c0] flex items-center justify-center text-white text-2xl font-bold border-2 border-[#19140035]">
-                                            {username.charAt(0).toUpperCase()}
+                                            {data.username.charAt(0).toUpperCase()}
                                         </div>
                                     )}
                                     <label className="absolute -bottom-1 -right-1 w-8 h-8 bg-[#2264c0] rounded-full flex items-center justify-center cursor-pointer hover:bg-[#1a4f9a] transition-colors">
@@ -115,19 +156,28 @@ export default function Pengaturan() {
                             </div>
                         </div>
 
-                        {/* Username */}
+                        {/* Nama Pengguna */}
                         <div className="bg-white rounded-xl border border-[#19140035] p-6 mb-6">
-                            <h2 className="text-lg font-semibold text-[#1b1b18] mb-4">Username</h2>
+                            <h2 className="text-lg font-semibold text-[#1b1b18] mb-4">Nama Pengguna</h2>
                             <div className="flex items-center gap-4">
                                 <User className="size-5 text-[#706f6c]" />
                                 <input
                                     type="text"
-                                    value={username}
-                                    onChange={(e) => setUsername(e.target.value)}
-                                    className="flex-1 px-4 py-2 rounded-lg border border-[#19140035] text-sm focus:outline-none focus:border-[#2264c0] focus:ring-2 focus:ring-[#2264c0]/20"
-                                    placeholder="Masukkan username"
+                                    value={data.username}
+                                    onChange={(e) => handleUsernameChange(e.target.value)}
+                                    onBlur={(e) => {
+                                        const error = validateUsername(e.target.value);
+                                        if (error) {
+                                            setLocalErrors((prev) => ({ ...prev, username: error }));
+                                        }
+                                    }}
+                                    className={`flex-1 px-4 py-2 rounded-lg border text-sm focus:outline-none focus:ring-2 focus:ring-[#2264c0]/20 ${localErrors.username ? 'border-red-500 focus:border-red-500' : 'border-[#19140035] focus:border-[#2264c0]'}`}
+                                    placeholder="Masukkan nama pengguna"
                                 />
                             </div>
+                            {localErrors.username && (
+                                <p className="text-red-500 text-sm mt-2 ml-9">{localErrors.username}</p>
+                            )}
                         </div>
 
                         {/* Email (readonly) */}
@@ -149,11 +199,11 @@ export default function Pengaturan() {
                         {/* Tombol Simpan */}
                         <button
                             type="submit"
-                            disabled={isSubmitting}
+                            disabled={processing}
                             className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-[#2264c0] text-white rounded-lg hover:bg-[#1a4f9a] transition-colors font-medium disabled:opacity-50 disabled:cursor-not-allowed mb-6"
                         >
                             <Save className="size-5" />
-                            {isSubmitting ? 'Menyimpan...' : 'Simpan Perubahan'}
+                            {processing ? 'Menyimpan...' : 'Simpan Perubahan'}
                         </button>
                     </form>
 
