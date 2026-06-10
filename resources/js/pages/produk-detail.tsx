@@ -4,7 +4,7 @@ import { useEffect, useRef, useState, useMemo } from 'react';
 import { toast } from 'sonner';
 
 export default function ProdukDetail() {
-    const { auth, produk, lensa, ratingData, totalTerjual, ulasans } = usePage().props as any;
+    const { auth, produk, lensa, ratingData, totalTerjual, ulasans, userCanReview, userAlreadyReviewed } = usePage().props as any;
     const keranjangCount: number = auth.keranjang_count || 0;
     const [showUserDropdown, setShowUserDropdown] = useState(false);
     const [showCartDropdown, setShowCartDropdown] = useState(false);
@@ -17,12 +17,6 @@ export default function ProdukDetail() {
     const [reviewRating, setReviewRating] = useState(0);
     const [reviewComment, setReviewComment] = useState('');
     const [editingReview, setEditingReview] = useState<any>(null);
-
-    // Cek apakah user sudah memberikan ulasan untuk produk ini
-    const userReview = useMemo(() => {
-        if (!auth.user || !ulasans) return null;
-        return ulasans.find((u: any) => u.user_id === auth.user.id || u.user_id === auth.user?.id);
-    }, [ulasans, auth.user]);
 
     // Filter ulasans berdasarkan rating
     const filteredUlasans = useMemo(() => {
@@ -901,30 +895,39 @@ export default function ProdukDetail() {
                     <div className="mt-8 bg-white rounded-2xl border border-[#19140035] p-6">
                         <div className="flex items-center justify-between mb-4">
                             <h2 className="text-xl font-bold text-[#1b1b18]">Ulasan Produk</h2>
-                            {auth.user && (
+                            {auth.user && userCanReview && !userAlreadyReviewed && (
                                 <button
                                     onClick={() => {
-                                        if (!auth.user) {
-                                            router.visit('/login');
-                                            return;
-                                        }
-                                        if (userReview) {
-                                            // Mode edit: isi data review yang sudah ada
-                                            setEditingReview(userReview);
-                                            setReviewRating(userReview.rating);
-                                            setReviewComment(userReview.komentar || '');
-                                        } else {
-                                            // Mode tambah: reset form
-                                            setEditingReview(null);
-                                            setReviewRating(0);
-                                            setReviewComment('');
+                                        setEditingReview(null);
+                                        setReviewRating(0);
+                                        setReviewComment('');
+                                        setShowReviewOverlay(true);
+                                    }}
+                                    className="px-4 py-2 bg-[#2264c0] text-white text-sm font-medium rounded-full hover:bg-[#1a4f9a] transition-colors"
+                                >
+                                    + Tambah Ulasan
+                                </button>
+                            )}
+                            {auth.user && userAlreadyReviewed && (
+                                <button
+                                    onClick={() => {
+                                        const myReview = (ulasans || []).find((u: any) => u.user_id === auth.user.id);
+                                        if (myReview) {
+                                            setEditingReview(myReview);
+                                            setReviewRating(myReview.rating);
+                                            setReviewComment(myReview.komentar || '');
                                         }
                                         setShowReviewOverlay(true);
                                     }}
                                     className="px-4 py-2 bg-[#2264c0] text-white text-sm font-medium rounded-full hover:bg-[#1a4f9a] transition-colors"
                                 >
-                                    {userReview ? 'Edit Ulasan' : '+ Tambah Ulasan'}
+                                    Edit Ulasan
                                 </button>
+                            )}
+                            {auth.user && !userCanReview && !userAlreadyReviewed && (
+                                <span className="text-xs text-[#5f6368] bg-gray-100 px-3 py-1.5 rounded-full">
+                                    Beli produk ini untuk memberikan ulasan
+                                </span>
                             )}
                         </div>
 

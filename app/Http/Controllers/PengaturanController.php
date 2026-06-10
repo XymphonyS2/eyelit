@@ -56,4 +56,28 @@ class PengaturanController extends Controller
         Session::flush();
         return redirect('/');
     }
+
+    public function updatePassword(Request $request)
+    {
+        $validated = $request->validate([
+            'current_password' => 'required|string',
+            'password' => 'required|string|min:8|confirmed',
+        ], [
+            'current_password.required' => 'Kata sandi saat ini wajib diisi',
+            'password.required' => 'Kata sandi baru wajib diisi',
+            'password.min' => 'Kata sandi baru minimal 8 karakter',
+            'password.confirmed' => 'Konfirmasi kata sandi tidak cocok',
+        ]);
+
+        $user = User::find(auth()->id());
+
+        if (!\Hash::check($validated['current_password'], $user->password)) {
+            return redirect()->back()->withErrors(['current_password' => 'Kata sandi saat ini salah']);
+        }
+
+        $user->password = \Hash::make($validated['password']);
+        $user->save();
+
+        return redirect()->back()->with('success', 'Kata sandi berhasil diubah');
+    }
 }

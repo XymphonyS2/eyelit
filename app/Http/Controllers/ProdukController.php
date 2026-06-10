@@ -6,9 +6,11 @@ use App\Models\Produk;
 use App\Models\Lensa;
 use App\Models\Ulasan;
 use App\Models\DetailPesanan;
+use App\Models\Pesanan;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Auth;
 
 class ProdukController extends Controller
 {
@@ -56,6 +58,31 @@ class ProdukController extends Controller
                 ];
             });
 
+        // Cek apakah user sudah eligible untuk memberikan ulasan
+        // Eligible jika: sudah membeli produk ini DAN pesanan sudah selesai DAN belum memberikan ulasan
+        $userCanReview = false;
+        $userAlreadyReviewed = false;
+
+        if (Auth::check()) {
+            $userId = Auth::id();
+
+            // Cek apakah user sudah memberikan ulasan
+            $userExistingReview = $ulasans->firstWhere('user_id', $userId);
+            $userAlreadyReviewed = $userExistingReview !== null;
+
+            if (!$userAlreadyReviewed) {
+                // Cek apakah user sudah membeli produk ini dan pesanan sudah selesai
+                $hasPurchased = Pesanan::where('pengguna_id', $userId)
+                    ->where('status_pesanan', 'Selesai')
+                    ->whereHas('detailPesanan', function ($query) use ($id) {
+                        $query->where('produk_id', $id);
+                    })
+                    ->exists();
+
+                $userCanReview = $hasPurchased;
+            }
+        }
+
         return Inertia::render('produk-detail', [
             'produk' => $produk,
             'lensa' => $lensa,
@@ -66,6 +93,8 @@ class ProdukController extends Controller
             ],
             'totalTerjual' => $totalTerjual,
             'ulasans' => $ulasans,
+            'userCanReview' => $userCanReview,
+            'userAlreadyReviewed' => $userAlreadyReviewed,
         ]);
     }
 }

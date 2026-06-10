@@ -24,6 +24,29 @@ html {
     background-color: oklch(1 0 0);
 }
 
+/* Floating Particles */
+#particles-bg {
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: 0;
+    overflow: hidden;
+}
+
+.particle {
+    position: absolute;
+    bottom: -10px;
+    border-radius: 50%;
+    background-color: #2264c0;
+    animation: float-up linear infinite;
+}
+
+@keyframes float-up {
+    0%   { transform: translateY(0) scale(1); opacity: 0; }
+    10%  { opacity: 0.25; }
+    90%  { opacity: 0.25; }
+    100% { transform: translateY(-110vh) scale(0.6); opacity: 0; }
+}
 
 @theme {
     --font-sans:

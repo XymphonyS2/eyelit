@@ -10,9 +10,19 @@ class NotifikasiController extends Controller
     public function index()
     {
         $notifikasi = Notifikasi::where('pengguna_id', auth()->id())
-            ->with('produk')
+            ->with(['produk', 'pesanan.detailPesanan.produk'])
             ->orderByDesc('tanggal_notifikasi')
-            ->get();
+            ->get()
+            ->map(function ($notif) {
+                // Jika tidak ada produk langsung, coba ambil dari pesanan
+                if (!$notif->produk && $notif->pesanan) {
+                    $firstProduk = $notif->pesanan->detailPesanan->first()?->produk;
+                    if ($firstProduk) {
+                        $notif->setAttribute('produk_from_pesanan', $firstProduk);
+                    }
+                }
+                return $notif;
+            });
 
         return Inertia::render('notifikasi', [
             'notifikasi' => $notifikasi,

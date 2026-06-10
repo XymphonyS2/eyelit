@@ -33,6 +33,33 @@ export default function Notifikasi() {
         setNotifications(items);
     }, [items]);
 
+    useEffect(() => {
+        const container = document.getElementById('particles-bg');
+        if (!container) return;
+
+        const count = 18;
+
+        for (let i = 0; i < count; i++) {
+            const el = document.createElement('div');
+            el.classList.add('particle');
+
+            const size = Math.random() * 5 + 3;
+            const left = Math.random() * 100;
+            const duration = Math.random() * 8 + 6;
+            const delay = Math.random() * 10;
+            const opacity = Math.random() * 0.25 + 0.1;
+
+            el.style.width = `${size}px`;
+            el.style.height = `${size}px`;
+            el.style.left = `${left}%`;
+            el.style.opacity = opacity;
+            el.style.animationDuration = `${duration}s`;
+            el.style.animationDelay = `-${delay}s`;
+
+            container.appendChild(el);
+        }
+    }, []);
+
     const unreadCount = notifications.filter(n => !n.dibaca).length;
 
     const formatDate = (dateStr: string | null) => {
@@ -72,6 +99,7 @@ export default function Notifikasi() {
     return (
         <>
             <Head title="Notifikasi - EyeLit" />
+            <div id="particles-bg" className="particle" style={{ display: 'none' }} />
             <div className="min-h-screen bg-white">
                 {/* Navbar */}
                 <nav className="relative z-50 border-b border-[#19140035] bg-white">
